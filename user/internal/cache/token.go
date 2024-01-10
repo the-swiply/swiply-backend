@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/redis/go-redis/v9"
-	"github.com/the-swiply/swiply-backend/user/internal/service"
+	"github.com/the-swiply/swiply-backend/user/internal/domain"
 )
 
 type RedisTokenCache struct {
@@ -38,7 +38,7 @@ func (r *RedisTokenCache) StoreFingerprint(ctx context.Context, token string, fi
 func (r *RedisTokenCache) GetFingerprint(ctx context.Context, token string) (string, error) {
 	fingerprint, err := r.client.Get(ctx, token).Result()
 	if errors.Is(err, redis.Nil) {
-		return "", service.ErrEntityIsNotExists
+		return "", domain.ErrEntityIsNotExists
 	}
 
 	return fingerprint, err

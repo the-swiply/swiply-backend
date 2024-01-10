@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/hibiken/asynq"
-	"github.com/the-swiply/swiply-backend/user/internal/entity"
+	"github.com/the-swiply/swiply-backend/user/internal/domain"
 	"github.com/the-swiply/swiply-backend/user/internal/service"
 	"time"
 )
@@ -77,7 +77,7 @@ func (m *MailerQueue) Stop(ctx context.Context) error {
 	return m.client.Close()
 }
 
-func (m *MailerQueue) ScheduleEmailSend(ctx context.Context, info entity.SendAuthCodeInfo) error {
+func (m *MailerQueue) ScheduleEmailSend(ctx context.Context, info domain.SendAuthCodeInfo) error {
 	payload, err := json.Marshal(info)
 	if err != nil {
 		return fmt.Errorf("can't marshal payload: %w", err)
@@ -102,7 +102,7 @@ type emailSendHandler struct {
 }
 
 func (e *emailSendHandler) ProcessTask(ctx context.Context, t *asynq.Task) error {
-	var info entity.SendAuthCodeInfo
+	var info domain.SendAuthCodeInfo
 	if err := json.Unmarshal(t.Payload(), &info); err != nil {
 		return fmt.Errorf("can't unmarshal payload: %v: %w", err, asynq.SkipRetry)
 	}

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/the-swiply/swiply-backend/pkg/auf"
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
-	"github.com/the-swiply/swiply-backend/user/internal/entity"
+	"github.com/the-swiply/swiply-backend/user/internal/domain"
 	"math/rand"
 	"time"
 )
@@ -30,7 +30,7 @@ type TokenStorage interface {
 }
 
 type TaskScheduler interface {
-	ScheduleEmailSend(ctx context.Context, info entity.SendAuthCodeInfo) error
+	ScheduleEmailSend(ctx context.Context, info domain.SendAuthCodeInfo) error
 }
 
 type UserService struct {
@@ -58,7 +58,7 @@ func (u *UserService) SendAuthorizationCode(ctx context.Context, to string) erro
 	}
 
 	if ttl > 0 && ttl > u.cfg.MaxAuthCodeTTLForResend {
-		return ErrResendIsNotAllowed
+		return domain.ErrResendIsNotAllowed
 	}
 
 	err = u.codeCache.StoreAuthCode(ctx, to, code)
@@ -66,7 +66,7 @@ func (u *UserService) SendAuthorizationCode(ctx context.Context, to string) erro
 		return fmt.Errorf("can't store auth code: %w", err)
 	}
 
-	err = u.taskScheduler.ScheduleEmailSend(ctx, entity.SendAuthCodeInfo{
+	err = u.taskScheduler.ScheduleEmailSend(ctx, domain.SendAuthCodeInfo{
 		To:      []string{to},
 		Subject: authSubject,
 		Code:    code,
@@ -82,54 +82,54 @@ func (u *UserService) SendAuthorizationCode(ctx context.Context, to string) erro
 	return nil
 }
 
-func (u *UserService) Login(ctx context.Context, email, code, fingerprint string) (entity.TokenPair, error) {
+func (u *UserService) Login(ctx context.Context, email, code, fingerprint string) (domain.TokenPair, error) {
 	storedCode, err := u.codeCache.GetAuthCode(ctx, email)
-	if errors.Is(err, ErrEntityIsNotExists) {
-		return entity.TokenPair{}, ErrCodeIsIncorrect
+	if errors.Is(err, domain.ErrEntityIsNotExists) {
+		return domain.TokenPair{}, domain.ErrCodeIsIncorrect
 	}
 	if err != nil {
-		return entity.TokenPair{}, fmt.Errorf("can't get auth code: %w", err)
+		return domain.TokenPair{}, fmt.Errorf("can't get auth code: %w", err)
 	}
 
 	if storedCode != code {
-		return entity.TokenPair{}, ErrCodeIsIncorrect
+		return domain.TokenPair{}, domain.ErrCodeIsIncorrect
 	}
 
 	err = u.codeCache.DeleteAuthCode(ctx, email)
 	if err != nil {
-		return entity.TokenPair{}, fmt.Errorf("can't delete auth code: %w", err)
+		return domain.TokenPair{}, fmt.Errorf("can't delete auth code: %w", err)
 	}
 
 	tokenPair, err := u.generateTokenPair(email, fingerprint)
 	if err != nil {
-		return entity.TokenPair{}, err
+		return domain.TokenPair{}, err
 	}
 
 	err = u.tokenStorage.StoreFingerprint(ctx, tokenPair.RefreshToken, fingerprint+email)
 	if err != nil {
-		return entity.TokenPair{}, fmt.Errorf("can't store fingerprint: %w", err)
+		return domain.TokenPair{}, fmt.Errorf("can't store fingerprint: %w", err)
 	}
 
 	return tokenPair, nil
 }
 
-func (u *UserService) RefreshTokens(ctx context.Context, refreshToken string, fingerprint string) (entity.TokenPair, error) {
+func (u *UserService) RefreshTokens(ctx context.Context, refreshToken string, fingerprint string) (domain.TokenPair, error) {
 	claims, err := auf.ValidateJWTAndExtractClaims(refreshToken, []byte(u.cfg.TokenSecret))
 	if err != nil {
-		return entity.TokenPair{}, fmt.Errorf("%w: %w", ErrValidateToken, err)
+		return domain.TokenPair{}, fmt.Errorf("%w: %w", domain.ErrValidateToken, err)
 	}
 
 	storedFingerprint, err := u.tokenStorage.GetFingerprint(ctx, refreshToken)
-	if errors.Is(err, ErrEntityIsNotExists) {
-		return entity.TokenPair{}, ErrValidateToken
+	if errors.Is(err, domain.ErrEntityIsNotExists) {
+		return domain.TokenPair{}, domain.ErrValidateToken
 	}
 	if err != nil {
-		return entity.TokenPair{}, fmt.Errorf("can't get fingerprint from storage: %w", err)
+		return domain.TokenPair{}, fmt.Errorf("can't get fingerprint from storage: %w", err)
 	}
 
 	email, ok := claims["user"].(string)
 	if !ok {
-		return entity.TokenPair{}, fmt.Errorf("%w: no email presented", ErrValidateToken)
+		return domain.TokenPair{}, fmt.Errorf("%w: no email presented", domain.ErrValidateToken)
 	}
 
 	if storedFingerprint != fingerprint+email {
@@ -137,28 +137,28 @@ func (u *UserService) RefreshTokens(ctx context.Context, refreshToken string, fi
 			loggy.Errorln("can't delete fingerprint from storage:", err)
 		}
 
-		return entity.TokenPair{}, ErrValidateToken
+		return domain.TokenPair{}, domain.ErrValidateToken
 	}
 
 	tokenPair, err := u.generateTokenPair(email, fingerprint)
 	if err != nil {
-		return entity.TokenPair{}, err
+		return domain.TokenPair{}, err
 	}
 
 	err = u.tokenStorage.StoreFingerprint(ctx, tokenPair.RefreshToken, fingerprint+email)
 	if err != nil {
-		return entity.TokenPair{}, fmt.Errorf("can't store fingerprint: %w", err)
+		return domain.TokenPair{}, fmt.Errorf("can't store fingerprint: %w", err)
 	}
 
 	err = u.tokenStorage.DeleteFingerprint(ctx, refreshToken)
 	if err != nil {
-		return entity.TokenPair{}, fmt.Errorf("can't delete fingerprint from storage: %w", err)
+		return domain.TokenPair{}, fmt.Errorf("can't delete fingerprint from storage: %w", err)
 	}
 
 	return tokenPair, nil
 }
 
-func (u *UserService) generateTokenPair(email string, fingerprint string) (entity.TokenPair, error) {
+func (u *UserService) generateTokenPair(email string, fingerprint string) (domain.TokenPair, error) {
 	accessToken, err := auf.GenerateAccessJWT(auf.JWTAccessProperties{
 		User:        email,
 		TTL:         u.cfg.AccessTokenTTL,
@@ -166,7 +166,7 @@ func (u *UserService) generateTokenPair(email string, fingerprint string) (entit
 		Fingerprint: fingerprint,
 	})
 	if err != nil {
-		return entity.TokenPair{}, fmt.Errorf("can't generate access token: %w", err)
+		return domain.TokenPair{}, fmt.Errorf("can't generate access token: %w", err)
 	}
 
 	refreshToken, err := auf.GenerateRefreshJWT(auf.JWTRefreshProperties{
@@ -175,10 +175,10 @@ func (u *UserService) generateTokenPair(email string, fingerprint string) (entit
 		Secret: []byte(u.cfg.TokenSecret),
 	})
 	if err != nil {
-		return entity.TokenPair{}, fmt.Errorf("can't generate refresh token: %w", err)
+		return domain.TokenPair{}, fmt.Errorf("can't generate refresh token: %w", err)
 	}
 
-	return entity.TokenPair{
+	return domain.TokenPair{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
