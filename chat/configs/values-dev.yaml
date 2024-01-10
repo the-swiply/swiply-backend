@@ -1,0 +1,9 @@
+app:
+  name: "chat"
+  graceful_shutdown_timeout_seconds: 10
+
+jaeger:
+  addr: "jaeger:4317"
+
+http:
+  addr: ":80"

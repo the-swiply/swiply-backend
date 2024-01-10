@@ -16,6 +16,7 @@ services:
     ports:
       - 8481:84
       - 18081:80
+
   user-redis:
     image: redis:7.2
     container_name: user-redis
@@ -27,6 +28,22 @@ services:
     command: /bin/sh -c "redis-server --requirepass $$REDIS_PASSWORD"
     volumes:
       - user_redis_data:/data
+
+  chat:
+    container_name: chat-service
+    build:
+      context: .
+      dockerfile: chat/Dockerfile
+    restart: on-failure
+    env_file:
+      - chat/dev.env
+    depends_on:
+      - jaeger
+      - otel-collector
+      - prometheus
+      - vault
+    ports:
+      - 18082:80
 
   vault:
     image: vault:1.13.0
