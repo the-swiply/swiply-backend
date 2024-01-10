@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+option go_package = "github.com/the-swiply/user/pkg/api/user";
+
+import "google/api/annotations.proto";
+
+package swiply.user;
+
+service User {
+  rpc SendAuthorizationCode(SendAuthorizationCodeRequest) returns (SendAuthorizationCodeResponse){
+    option (google.api.http) = {
+      post: "/v1/send-authorization-code"
+      body: "*"
+    };
+  }
+
+  rpc Login(LoginRequest) returns (LoginResponse){
+    option (google.api.http) = {
+      post: "/v1/login"
+      body: "*"
+    };
+  }
+
+  rpc Refresh(RefreshRequest) returns (RefreshResponse){
+    option (google.api.http) = {
+      post: "/v1/refresh"
+      body: "*"
+    };
+  }
+}
+
+message SendAuthorizationCodeRequest {
+  string email = 1;
+}
+
+message SendAuthorizationCodeResponse {}
+
+message LoginRequest {
+  string email = 1;
+  string code = 2;
+}
+
+message LoginResponse {
+  string accessToken = 1;
+  string refreshToken = 2;
+}
+
+message RefreshRequest {
+  string refreshToken = 1;
+}
+
+message RefreshResponse {
+  string accessToken = 1;
+  string refreshToken = 2;
+}
