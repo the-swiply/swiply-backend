@@ -1,0 +1,100 @@
+services:
+  user:
+    container_name: user-service
+    build:
+      context: .
+      dockerfile: user/Dockerfile
+    restart: on-failure
+    env_file:
+      - user/dev.env
+    depends_on:
+      - jaeger
+      - otel-collector
+      - prometheus
+      - vault
+      - user-redis
+    ports:
+      - 8481:84
+      - 18081:80
+  user-redis:
+    image: redis:7.2
+    container_name: user-redis
+    restart: on-failure
+    env_file:
+      - user-infra/redis/dev.env
+    ports:
+      - 6379:6379
+    command: /bin/sh -c "redis-server --requirepass $$REDIS_PASSWORD"
+    volumes:
+      - user_redis_data:/data
+
+  vault:
+    image: vault:1.13.0
+    container_name: vault
+    restart: on-failure
+    volumes:
+      - ./vault/config:/vault/config
+      - ./vault/policies:/vault/policies
+      - ./vault/data:/vault/data
+    ports:
+      - 8200:8200
+    environment:
+      - VAULT_ADDR=http://0.0.0.0:8200
+      - VAULT_API_ADDR=http://0.0.0.0:8200
+      - VAULT_ADDRESS=http://0.0.0.0:8200
+    cap_add:
+      - IPC_LOCK
+    command: vault server -config=/vault/config/vault.json
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.52.0
+    container_name: jaeger
+    restart: on-failure
+    ports:
+      - 8082:16686
+      - 14268
+      - 14250
+
+  otel-collector:
+    image: otel/opentelemetry-collector:0.90.1
+    container_name: otel-collector
+    restart: on-failure
+    command: [ "--config=/etc/otel-collector-config.yaml" ]
+    volumes:
+      - ./otel/config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - 1888:1888   # pprof extension
+      - 8888:8888   # Prometheus prometrics exposed by the collector
+      - 8889:8889   # Prometheus exporter prometrics
+      - 13133:13133 # health_check extension
+      - 4317:4317   # OTLP gRPC receiver
+      - 55679:55679 # zpages extension
+    depends_on:
+      - jaeger
+
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    restart: on-failure
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: grafana
+    restart: on-failure
+    env_file:
+      - grafana/conf.env
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+
+volumes:
+  user_redis_data:
+  user_postgres_data:
+
+  prometheus_data:
