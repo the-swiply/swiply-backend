@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/the-swiply/swiply-backend/pkg/auf"
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"github.com/the-swiply/swiply-backend/user/internal/domain"
@@ -100,12 +101,14 @@ func (u *UserService) Login(ctx context.Context, email, code, fingerprint string
 		return domain.TokenPair{}, fmt.Errorf("can't delete auth code: %w", err)
 	}
 
-	tokenPair, err := u.generateTokenPair(email, fingerprint)
+	id := u.generateUUIDByEmail(email)
+
+	tokenPair, err := u.generateTokenPair(id.String(), fingerprint)
 	if err != nil {
 		return domain.TokenPair{}, err
 	}
 
-	err = u.tokenStorage.StoreFingerprint(ctx, tokenPair.RefreshToken, fingerprint+email)
+	err = u.tokenStorage.StoreFingerprint(ctx, tokenPair.RefreshToken, fingerprint)
 	if err != nil {
 		return domain.TokenPair{}, fmt.Errorf("can't store fingerprint: %w", err)
 	}
@@ -127,12 +130,12 @@ func (u *UserService) RefreshTokens(ctx context.Context, refreshToken string, fi
 		return domain.TokenPair{}, fmt.Errorf("can't get fingerprint from storage: %w", err)
 	}
 
-	email, ok := claims["user"].(string)
+	id, ok := claims["id"].(string)
 	if !ok {
 		return domain.TokenPair{}, fmt.Errorf("%w: no email presented", domain.ErrValidateToken)
 	}
 
-	if storedFingerprint != fingerprint+email {
+	if storedFingerprint != fingerprint {
 		if err := u.tokenStorage.DeleteFingerprint(ctx, refreshToken); err != nil {
 			loggy.Errorln("can't delete fingerprint from storage:", err)
 		}
@@ -140,12 +143,12 @@ func (u *UserService) RefreshTokens(ctx context.Context, refreshToken string, fi
 		return domain.TokenPair{}, domain.ErrValidateToken
 	}
 
-	tokenPair, err := u.generateTokenPair(email, fingerprint)
+	tokenPair, err := u.generateTokenPair(id, fingerprint)
 	if err != nil {
 		return domain.TokenPair{}, err
 	}
 
-	err = u.tokenStorage.StoreFingerprint(ctx, tokenPair.RefreshToken, fingerprint+email)
+	err = u.tokenStorage.StoreFingerprint(ctx, tokenPair.RefreshToken, fingerprint)
 	if err != nil {
 		return domain.TokenPair{}, fmt.Errorf("can't store fingerprint: %w", err)
 	}
@@ -158,9 +161,9 @@ func (u *UserService) RefreshTokens(ctx context.Context, refreshToken string, fi
 	return tokenPair, nil
 }
 
-func (u *UserService) generateTokenPair(email string, fingerprint string) (domain.TokenPair, error) {
+func (u *UserService) generateTokenPair(id string, fingerprint string) (domain.TokenPair, error) {
 	accessToken, err := auf.GenerateAccessJWT(auf.JWTAccessProperties{
-		User:        email,
+		ID:          id,
 		TTL:         u.cfg.AccessTokenTTL,
 		Secret:      []byte(u.cfg.TokenSecret),
 		Fingerprint: fingerprint,
@@ -170,7 +173,7 @@ func (u *UserService) generateTokenPair(email string, fingerprint string) (domai
 	}
 
 	refreshToken, err := auf.GenerateRefreshJWT(auf.JWTRefreshProperties{
-		User:   email,
+		ID:     id,
 		TTL:    u.cfg.AccessTokenTTL,
 		Secret: []byte(u.cfg.TokenSecret),
 	})
@@ -182,4 +185,8 @@ func (u *UserService) generateTokenPair(email string, fingerprint string) (domai
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
+}
+
+func (u *UserService) generateUUIDByEmail(email string) uuid.UUID {
+	return uuid.NewSHA1(u.cfg.UUIDNamespace, []byte(email))
 }

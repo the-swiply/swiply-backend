@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/hibiken/asynq"
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"github.com/the-swiply/swiply-backend/pkg/houston/runner"
@@ -105,6 +106,7 @@ func (a *App) Run(ctx context.Context) error {
 		AccessTokenTTL:          time.Duration(a.cfg.App.AccessTokenTTLMinutes) * time.Minute,
 		RefreshTokenTTL:         time.Duration(a.cfg.App.RefreshTokenTTLHours) * time.Hour,
 		TokenSecret:             os.Getenv("JWT_SECRET"),
+		UUIDNamespace:           uuid.MustParse(a.cfg.App.UUIDNamespace),
 	}, a.redisCodeCache, a.redisTokenCache, a.mailerQueue)
 
 	errCh := make(chan error, 3)

@@ -8,21 +8,21 @@ import (
 )
 
 type JWTAccessProperties struct {
-	User        string
+	ID          string
 	TTL         time.Duration
 	Secret      []byte
 	Fingerprint string
 }
 
 type JWTRefreshProperties struct {
-	User   string
+	ID     string
 	TTL    time.Duration
 	Secret []byte
 }
 
 func GenerateAccessJWT(props JWTAccessProperties) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user":        props.User,
+		"id":          props.ID,
 		"fingerprint": props.Fingerprint,
 		"exp":         time.Now().Add(props.TTL).Unix(),
 	})
@@ -32,8 +32,8 @@ func GenerateAccessJWT(props JWTAccessProperties) (string, error) {
 
 func GenerateRefreshJWT(props JWTRefreshProperties) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user": props.User,
-		"exp":  time.Now().Add(props.TTL).Unix(),
+		"id":  props.ID,
+		"exp": time.Now().Add(props.TTL).Unix(),
 	})
 
 	return token.SignedString(props.Secret)

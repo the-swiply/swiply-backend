@@ -10,11 +10,12 @@ type Config struct {
 }
 
 type Application struct {
-	AuthCodeTTLMinutes                 int64 `yaml:"auth_code_ttl_minutes"`
-	AuthCodeSendingMinRetryTimeMinutes int64 `yaml:"auth_code_sending_min_retry_time_minutes"`
-	AccessTokenTTLMinutes              int64 `yaml:"access_token_ttl_minutes"`
-	RefreshTokenTTLHours               int64 `yaml:"refresh_token_ttl_hours"`
-	JobTimeoutSeconds                  int64 `yaml:"job_timeout_seconds"`
+	AuthCodeTTLMinutes                 int64  `yaml:"auth_code_ttl_minutes"`
+	AuthCodeSendingMinRetryTimeMinutes int64  `yaml:"auth_code_sending_min_retry_time_minutes"`
+	AccessTokenTTLMinutes              int64  `yaml:"access_token_ttl_minutes"`
+	RefreshTokenTTLHours               int64  `yaml:"refresh_token_ttl_hours"`
+	JobTimeoutSeconds                  int64  `yaml:"job_timeout_seconds"`
+	UUIDNamespace                      string `yaml:"uuid_namespace"`
 }
 
 type GRPC struct {
