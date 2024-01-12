@@ -7,6 +7,7 @@ import (
 
 type UserConfig struct {
 	MaxAuthCodeTTLForResend time.Duration
+	MaxInvalidCodeAttempts  int64
 	AccessTokenTTL          time.Duration
 	RefreshTokenTTL         time.Duration
 	TokenSecret             string
