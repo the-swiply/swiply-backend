@@ -91,7 +91,7 @@ func (g *GRPCServer) Login(ctx context.Context, req *user.LoginRequest) (*user.L
 
 	fingerprint := createFingerprintFromMeta(md)
 	tokens, err := g.userService.Login(ctx, req.GetEmail(), req.GetCode(), fingerprint)
-	if errors.Is(err, domain.ErrCodeIsIncorrect) {
+	if errors.Is(err, domain.ErrCodeIsIncorrect) || errors.Is(err, domain.ErrTooMuchAttempts) {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
 	if err != nil {

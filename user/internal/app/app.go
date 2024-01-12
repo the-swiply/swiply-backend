@@ -103,6 +103,7 @@ func (a *App) Run(ctx context.Context) error {
 
 	userSvc := service.NewUserService(service.UserConfig{
 		MaxAuthCodeTTLForResend: a.calculateMaxAuthCodeTTLForResend(),
+		MaxInvalidCodeAttempts:  a.cfg.App.MaxInvalidCodeAttempts,
 		AccessTokenTTL:          time.Duration(a.cfg.App.AccessTokenTTLMinutes) * time.Minute,
 		RefreshTokenTTL:         time.Duration(a.cfg.App.RefreshTokenTTLHours) * time.Hour,
 		TokenSecret:             os.Getenv("JWT_SECRET"),

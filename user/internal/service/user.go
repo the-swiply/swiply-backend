@@ -39,20 +39,21 @@ type UserService struct {
 	codeCache     AuthCodeCache
 	tokenStorage  TokenStorage
 	taskScheduler TaskScheduler
+
+	invalidCodeAttempts *AttemptsRecorder
 }
 
 func NewUserService(cfg UserConfig, codeCache AuthCodeCache, tokenStorage TokenStorage, taskScheduler TaskScheduler) *UserService {
 	return &UserService{
-		cfg:           cfg,
-		codeCache:     codeCache,
-		tokenStorage:  tokenStorage,
-		taskScheduler: taskScheduler,
+		cfg:                 cfg,
+		codeCache:           codeCache,
+		tokenStorage:        tokenStorage,
+		taskScheduler:       taskScheduler,
+		invalidCodeAttempts: newAttemptsRecorder(cfg.MaxInvalidCodeAttempts),
 	}
 }
 
 func (u *UserService) SendAuthorizationCode(ctx context.Context, to string) error {
-	code := int(rand.Int63n(9000) + 1000)
-
 	ttl, err := u.codeCache.GetAuthCodeTTL(ctx, to)
 	if err != nil {
 		return fmt.Errorf("can't get auth code ttl: %w", err)
@@ -62,10 +63,14 @@ func (u *UserService) SendAuthorizationCode(ctx context.Context, to string) erro
 		return domain.ErrResendIsNotAllowed
 	}
 
+	code := int(rand.Int63n(9000) + 1000)
+
 	err = u.codeCache.StoreAuthCode(ctx, to, code)
 	if err != nil {
 		return fmt.Errorf("can't store auth code: %w", err)
 	}
+
+	u.invalidCodeAttempts.clearAttempts(to)
 
 	err = u.taskScheduler.ScheduleEmailSend(ctx, domain.SendAuthCodeInfo{
 		To:      []string{to},
@@ -93,8 +98,19 @@ func (u *UserService) Login(ctx context.Context, email, code, fingerprint string
 	}
 
 	if storedCode != code {
+		if ok := u.invalidCodeAttempts.addAttempt(email); !ok {
+			err = u.codeCache.DeleteAuthCode(ctx, email)
+			if err != nil {
+				loggy.Errorln("can't delete auth code after too much attempts")
+			}
+
+			return domain.TokenPair{}, domain.ErrTooMuchAttempts
+		}
+
 		return domain.TokenPair{}, domain.ErrCodeIsIncorrect
 	}
+
+	u.invalidCodeAttempts.clearAttempts(email)
 
 	err = u.codeCache.DeleteAuthCode(ctx, email)
 	if err != nil {
