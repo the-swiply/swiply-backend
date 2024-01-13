@@ -3,13 +3,12 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
+	"github.com/the-swiply/swiply-backend/pkg/houston/grut"
 	"github.com/the-swiply/swiply-backend/user/internal/domain"
 	"github.com/the-swiply/swiply-backend/user/internal/service"
 	"github.com/the-swiply/swiply-backend/user/pkg/api/user"
@@ -75,9 +74,7 @@ func (g *GRPCServer) SendAuthorizationCode(ctx context.Context, req *user.SendAu
 		return nil, status.Error(codes.Unavailable, err.Error())
 	}
 	if err != nil {
-		errMsg := fmt.Sprintf("can't send auth code: %v", err.Error())
-		loggy.Errorln(errMsg)
-		return nil, status.Error(codes.Internal, errMsg)
+		return nil, grut.InternalError("can't send auth code", err)
 	}
 
 	return &user.SendAuthorizationCodeResponse{}, err
@@ -95,9 +92,7 @@ func (g *GRPCServer) Login(ctx context.Context, req *user.LoginRequest) (*user.L
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
 	if err != nil {
-		errMsg := fmt.Sprintf("can't login user: %v", err.Error())
-		loggy.Errorln(errMsg)
-		return nil, status.Error(codes.Internal, errMsg)
+		return nil, grut.InternalError("can't send auth code", err)
 	}
 
 	return &user.LoginResponse{
@@ -118,9 +113,7 @@ func (g *GRPCServer) Refresh(ctx context.Context, req *user.RefreshRequest) (*us
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
 	if err != nil {
-		errMsg := fmt.Sprintf("can't refresh tokens: %v", err.Error())
-		loggy.Errorln(errMsg)
-		return nil, status.Error(codes.Internal, errMsg)
+		return nil, grut.InternalError("can't refresh tokens", err)
 	}
 
 	return &user.RefreshResponse{
