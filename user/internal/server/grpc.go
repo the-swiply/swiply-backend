@@ -3,12 +3,13 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
+	"github.com/the-swiply/swiply-backend/pkg/houston/grut"
+	"github.com/the-swiply/swiply-backend/user/internal/domain"
 	"github.com/the-swiply/swiply-backend/user/internal/service"
 	"github.com/the-swiply/swiply-backend/user/pkg/api/user"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -37,7 +38,7 @@ func NewGRPCServer(userService *service.UserService) *GRPCServer {
 			grpc_ctxtags.UnaryServerInterceptor(),
 			grpc_opentracing.UnaryServerInterceptor(),
 			grpc_prometheus.UnaryServerInterceptor,
-			//grpc_recovery.UnaryServerInterceptor(withLogAndRecover()),
+			grpc_recovery.UnaryServerInterceptor(withLogAndRecover()),
 		)),
 	}
 	srv.Server = grpc.NewServer(opts...)
@@ -69,13 +70,11 @@ func (g *GRPCServer) SendAuthorizationCode(ctx context.Context, req *user.SendAu
 	}
 
 	err = g.userService.SendAuthorizationCode(ctx, req.GetEmail())
-	if errors.Is(err, service.ErrResendIsNotAllowed) {
+	if errors.Is(err, domain.ErrResendIsNotAllowed) {
 		return nil, status.Error(codes.Unavailable, err.Error())
 	}
 	if err != nil {
-		errMsg := fmt.Sprintf("can't send auth code: %v", err.Error())
-		loggy.Errorln(errMsg)
-		return nil, status.Error(codes.Internal, errMsg)
+		return nil, grut.InternalError("can't send auth code", err)
 	}
 
 	return &user.SendAuthorizationCodeResponse{}, err
@@ -89,13 +88,11 @@ func (g *GRPCServer) Login(ctx context.Context, req *user.LoginRequest) (*user.L
 
 	fingerprint := createFingerprintFromMeta(md)
 	tokens, err := g.userService.Login(ctx, req.GetEmail(), req.GetCode(), fingerprint)
-	if errors.Is(err, service.ErrCodeIsIncorrect) {
+	if errors.Is(err, domain.ErrCodeIsIncorrect) || errors.Is(err, domain.ErrTooMuchAttempts) {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
 	if err != nil {
-		errMsg := fmt.Sprintf("can't login user: %v", err.Error())
-		loggy.Errorln(errMsg)
-		return nil, status.Error(codes.Internal, errMsg)
+		return nil, grut.InternalError("can't send auth code", err)
 	}
 
 	return &user.LoginResponse{
@@ -112,13 +109,11 @@ func (g *GRPCServer) Refresh(ctx context.Context, req *user.RefreshRequest) (*us
 
 	fingerprint := createFingerprintFromMeta(md)
 	tokens, err := g.userService.RefreshTokens(ctx, req.GetRefreshToken(), fingerprint)
-	if errors.Is(err, service.ErrValidateToken) {
+	if errors.Is(err, domain.ErrValidateToken) {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
 	if err != nil {
-		errMsg := fmt.Sprintf("can't refresh tokens: %v", err.Error())
-		loggy.Errorln(errMsg)
-		return nil, status.Error(codes.Internal, errMsg)
+		return nil, grut.InternalError("can't refresh tokens", err)
 	}
 
 	return &user.RefreshResponse{

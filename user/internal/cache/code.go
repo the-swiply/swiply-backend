@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/redis/go-redis/v9"
-	"github.com/the-swiply/swiply-backend/user/internal/service"
+	"github.com/the-swiply/swiply-backend/user/internal/domain"
 	"strconv"
 	"time"
 )
@@ -40,7 +40,7 @@ func (r *RedisCodeCache) StoreAuthCode(ctx context.Context, email string, code i
 func (r *RedisCodeCache) GetAuthCode(ctx context.Context, email string) (string, error) {
 	code, err := r.client.Get(ctx, email).Result()
 	if errors.Is(err, redis.Nil) {
-		return "", service.ErrEntityIsNotExists
+		return "", domain.ErrEntityIsNotExists
 	}
 
 	return code, err
