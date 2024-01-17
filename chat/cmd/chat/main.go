@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
+	"github.com/the-swiply/swiply-backend/chat/internal/app"
 	"github.com/the-swiply/swiply-backend/pkg/houston/config"
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"github.com/the-swiply/swiply-backend/pkg/houston/runner"
-	"github.com/the-swiply/swiply-backend/user/internal/app"
 )
 
 const (

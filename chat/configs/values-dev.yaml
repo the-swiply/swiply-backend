@@ -5,5 +5,14 @@ app:
 jaeger:
   addr: "jaeger:4317"
 
+grpc:
+  addr: ":84"
+
 http:
   addr: ":80"
+
+swagger:
+  path: "third_party/swagger"
+
+redis:
+  addr: "chat-redis:6379"
