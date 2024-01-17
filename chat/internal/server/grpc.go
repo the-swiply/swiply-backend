@@ -3,11 +3,13 @@ package server
 import (
 	"context"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/the-swiply/swiply-backend/chat/internal/service"
 	"github.com/the-swiply/swiply-backend/chat/pkg/api/chat"
+	"github.com/the-swiply/swiply-backend/pkg/houston/grut"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -32,8 +34,7 @@ func NewGRPCServer(chatService *service.ChatService) *GRPCServer {
 			grpc_ctxtags.UnaryServerInterceptor(),
 			grpc_opentracing.UnaryServerInterceptor(),
 			grpc_prometheus.UnaryServerInterceptor,
-			// TODO: add from grut.
-			//grpc_recovery.UnaryServerInterceptor(withLogAndRecover()),
+			grpc_recovery.UnaryServerInterceptor(grut.WithLogAndRecover()),
 		)),
 	}
 	srv.Server = grpc.NewServer(opts...)
