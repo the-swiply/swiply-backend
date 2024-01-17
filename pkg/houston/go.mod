@@ -3,6 +3,7 @@ module github.com/the-swiply/swiply-backend/pkg/houston
 go 1.21.4
 
 require (
+	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/prometheus/client_golang v1.17.0
 	github.com/spf13/viper v1.18.1
 	go.opentelemetry.io/otel v1.21.0
@@ -12,6 +13,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.21.0
 	go.uber.org/zap v1.26.0
 	google.golang.org/grpc v1.59.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -49,5 +51,4 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231120223509-83a465c0220f // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
