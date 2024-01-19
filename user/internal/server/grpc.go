@@ -38,7 +38,7 @@ func NewGRPCServer(userService *service.UserService) *GRPCServer {
 			grpc_ctxtags.UnaryServerInterceptor(),
 			grpc_opentracing.UnaryServerInterceptor(),
 			grpc_prometheus.UnaryServerInterceptor,
-			grpc_recovery.UnaryServerInterceptor(withLogAndRecover()),
+			grpc_recovery.UnaryServerInterceptor(grut.WithLogAndRecover()),
 		)),
 	}
 	srv.Server = grpc.NewServer(opts...)
