@@ -44,6 +44,8 @@ type UserService struct {
 }
 
 func NewUserService(cfg UserConfig, codeCache AuthCodeCache, tokenStorage TokenStorage, taskScheduler TaskScheduler) *UserService {
+	auf.SetSecret([]byte(cfg.TokenSecret))
+
 	return &UserService{
 		cfg:                 cfg,
 		codeCache:           codeCache,
@@ -133,7 +135,7 @@ func (u *UserService) Login(ctx context.Context, email, code, fingerprint string
 }
 
 func (u *UserService) RefreshTokens(ctx context.Context, refreshToken string, fingerprint string) (domain.TokenPair, error) {
-	claims, err := auf.ValidateJWTAndExtractClaims(refreshToken, []byte(u.cfg.TokenSecret))
+	claims, err := auf.ValidateJWTAndExtractClaims(refreshToken)
 	if err != nil {
 		return domain.TokenPair{}, fmt.Errorf("%w: %w", domain.ErrValidateToken, err)
 	}
@@ -181,7 +183,6 @@ func (u *UserService) generateTokenPair(id string, fingerprint string) (domain.T
 	accessToken, err := auf.GenerateAccessJWT(auf.JWTAccessProperties{
 		ID:          id,
 		TTL:         u.cfg.AccessTokenTTL,
-		Secret:      []byte(u.cfg.TokenSecret),
 		Fingerprint: fingerprint,
 	})
 	if err != nil {
@@ -189,9 +190,8 @@ func (u *UserService) generateTokenPair(id string, fingerprint string) (domain.T
 	}
 
 	refreshToken, err := auf.GenerateRefreshJWT(auf.JWTRefreshProperties{
-		ID:     id,
-		TTL:    u.cfg.AccessTokenTTL,
-		Secret: []byte(u.cfg.TokenSecret),
+		ID:  id,
+		TTL: u.cfg.AccessTokenTTL,
 	})
 	if err != nil {
 		return domain.TokenPair{}, fmt.Errorf("can't generate refresh token: %w", err)
