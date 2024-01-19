@@ -1,4 +1,4 @@
-package service
+package domain
 
 import "errors"
 
@@ -8,4 +8,5 @@ var (
 
 	ErrCodeIsIncorrect = errors.New("code is not correct")
 	ErrValidateToken   = errors.New("token is not valid")
+	ErrTooMuchAttempts = errors.New("too much attempts with incorrect code")
 )

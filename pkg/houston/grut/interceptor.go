@@ -8,7 +8,7 @@ import (
 	"runtime/debug"
 )
 
-func withLogAndRecover() grpc_recovery.Option {
+func WithLogAndRecover() grpc_recovery.Option {
 	return grpc_recovery.WithRecoveryHandler(func(p interface{}) (err error) {
 		loggy.Errorln("PANIC:", p)
 		loggy.Errorln(string(debug.Stack()))

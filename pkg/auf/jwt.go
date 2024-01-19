@@ -16,7 +16,7 @@ func SetSecret(secret []byte) {
 }
 
 type JWTAccessProperties struct {
-	User        string
+	ID          string
 	TTL         time.Duration
 	Fingerprint string
 }
@@ -24,6 +24,7 @@ type JWTAccessProperties struct {
 type JWTRefreshProperties struct {
 	User string
 	TTL  time.Duration
+	ID     string
 }
 
 func GenerateAccessJWT(props JWTAccessProperties) (string, error) {
@@ -40,7 +41,7 @@ func ValidateJWTAndExtractClaims(token string) (map[string]any, error) {
 
 func GenerateAccessJWTWithCustomSecret(props JWTAccessProperties, secret []byte) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user":        props.User,
+		"id":          props.ID,
 		"fingerprint": props.Fingerprint,
 		"exp":         time.Now().Add(props.TTL).Unix(),
 	})
@@ -50,8 +51,8 @@ func GenerateAccessJWTWithCustomSecret(props JWTAccessProperties, secret []byte)
 
 func GenerateRefreshJWTWithCustomSecret(props JWTRefreshProperties, secret []byte) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user": props.User,
-		"exp":  time.Now().Add(props.TTL).Unix(),
+		"id":  props.ID,
+		"exp": time.Now().Add(props.TTL).Unix(),
 	})
 
 	return token.SignedString(secret)
