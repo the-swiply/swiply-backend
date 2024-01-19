@@ -7,39 +7,57 @@ import (
 	"time"
 )
 
+var (
+	secretInstance []byte
+)
+
+func SetSecret(secret []byte) {
+	secretInstance = secret
+}
+
 type JWTAccessProperties struct {
 	User        string
 	TTL         time.Duration
-	Secret      []byte
 	Fingerprint string
 }
 
 type JWTRefreshProperties struct {
-	User   string
-	TTL    time.Duration
-	Secret []byte
+	User string
+	TTL  time.Duration
 }
 
 func GenerateAccessJWT(props JWTAccessProperties) (string, error) {
+	return GenerateAccessJWTWithCustomSecret(props, secretInstance)
+}
+
+func GenerateRefreshJWT(props JWTRefreshProperties) (string, error) {
+	return GenerateRefreshJWTWithCustomSecret(props, secretInstance)
+}
+
+func ValidateJWTAndExtractClaims(token string) (map[string]any, error) {
+	return ValidateJWTAndExtractClaimsWithCustomSecret(token, secretInstance)
+}
+
+func GenerateAccessJWTWithCustomSecret(props JWTAccessProperties, secret []byte) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user":        props.User,
 		"fingerprint": props.Fingerprint,
 		"exp":         time.Now().Add(props.TTL).Unix(),
 	})
 
-	return token.SignedString(props.Secret)
+	return token.SignedString(secret)
 }
 
-func GenerateRefreshJWT(props JWTRefreshProperties) (string, error) {
+func GenerateRefreshJWTWithCustomSecret(props JWTRefreshProperties, secret []byte) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user": props.User,
 		"exp":  time.Now().Add(props.TTL).Unix(),
 	})
 
-	return token.SignedString(props.Secret)
+	return token.SignedString(secret)
 }
 
-func ValidateJWTAndExtractClaims(token string, secret []byte) (map[string]any, error) {
+func ValidateJWTAndExtractClaimsWithCustomSecret(token string, secret []byte) (map[string]any, error) {
 	t, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid signing method")
