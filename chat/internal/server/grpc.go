@@ -2,11 +2,14 @@ package server
 
 import (
 	"context"
+	"errors"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"github.com/the-swiply/swiply-backend/chat/internal/domain"
 	"github.com/the-swiply/swiply-backend/chat/internal/service"
 	"github.com/the-swiply/swiply-backend/chat/pkg/api/chat"
 	"github.com/the-swiply/swiply-backend/pkg/houston/grut"
@@ -34,6 +37,7 @@ func NewGRPCServer(chatService *service.ChatService) *GRPCServer {
 			grpc_ctxtags.UnaryServerInterceptor(),
 			grpc_opentracing.UnaryServerInterceptor(),
 			grpc_prometheus.UnaryServerInterceptor,
+			grpc_auth.UnaryServerInterceptor(jwtAuthFuncGRPC),
 			grpc_recovery.UnaryServerInterceptor(grut.WithLogAndRecover()),
 		)),
 	}
@@ -60,7 +64,15 @@ func (g *GRPCServer) Shutdown(ctx context.Context) error {
 }
 
 func (g *GRPCServer) SendMessage(ctx context.Context, req *chat.SendMessageRequest) (*chat.SendMessageResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
+	err := g.chatService.ReceiveChatMessage(ctx, req.GetChatId(), req.GetContent())
+	if errors.Is(err, domain.ErrEntityIsNotExists) || errors.Is(err, domain.ErrUserNotInChat) {
+		return nil, status.Error(codes.PermissionDenied, domain.ErrUserNotInChat.Error())
+	}
+	if err != nil {
+		return nil, grut.InternalError("can't receive message", err)
+	}
+
+	return &chat.SendMessageResponse{}, nil
 }
 
 func (g *GRPCServer) GetNextMessages(ctx context.Context, req *chat.GetNextMessagesRequest) (*chat.GetNextMessagesResponse, error) {

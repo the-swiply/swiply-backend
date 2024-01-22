@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/the-swiply/swiply-backend/chat/internal/sevents"
 	"github.com/the-swiply/swiply-backend/chat/pkg/api/chat"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -14,13 +15,15 @@ import (
 
 const (
 	swaggerFileName = "swagger.json"
+
+	subscribeOnChatsPath = "/v1/subscribe-on-chat-messages"
 )
 
 type HTTPServer struct {
 	*http.Server
 }
 
-func NewHTTPServer(ctx context.Context, cfg HTTPConfig) (*HTTPServer, error) {
+func NewHTTPServer(ctx context.Context, cfg HTTPConfig, ws *sevents.WS) (*HTTPServer, error) {
 	httpMux := http.NewServeMux()
 
 	err := registerGRPCGateway(ctx, httpMux, cfg.GRPCEndpoint)
@@ -29,6 +32,7 @@ func NewHTTPServer(ctx context.Context, cfg HTTPConfig) (*HTTPServer, error) {
 	}
 
 	registerSwagger(httpMux, cfg.SwaggerPath)
+	httpMux.Handle(subscribeOnChatsPath, authMiddlewareHTTP(ws.Connect))
 
 	srv := &HTTPServer{}
 	httpServer := &http.Server{

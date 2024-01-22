@@ -26,6 +26,7 @@ ARG BASE_PATH=chat
 
 COPY $BASE_PATH/configs configs
 COPY $BASE_PATH/third_party third_party
+COPY $BASE_PATH/migrations migrations
 
 
 COPY --from=builder /app/$BASE_PATH $BASE_PATH

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/redis/go-redis/v9"
+	"strconv"
 )
 
 type RedisSequenceCache struct {
@@ -27,6 +28,15 @@ func NewRedisSequenceCache(ctx context.Context, cfg RedisSequenceConfig) (*Redis
 		client: rc,
 		cfg:    cfg,
 	}, nil
+}
+
+func (r *RedisSequenceCache) GenerateNextID(ctx context.Context, chatID int64) (int64, error) {
+	nextID, err := r.client.Incr(ctx, strconv.FormatInt(chatID, 10)).Result()
+	if err != nil {
+		return 0, err
+	}
+
+	return nextID, nil
 }
 
 func (r *RedisSequenceCache) Stop(_ context.Context) error {
