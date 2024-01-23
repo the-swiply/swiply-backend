@@ -29,36 +29,54 @@ type ChatClient interface {
 	SendMessage(msg domain.ChatMessage) error
 }
 
+type ChatLocker interface {
+	Lock(ctx context.Context) error
+	Unlock(ctx context.Context) error
+}
+
 type ChatService struct {
 	cfg              ChatConfig
 	seqGen           SequenceGenerator
 	chatRepository   ChatRepository
 	messagePublisher MessagePublisher
+	createChatLock   func(chatID int64) ChatLocker
 
 	chatClients   map[uuid.UUID]ChatClient
 	chatClientsMu sync.RWMutex
 }
 
 func NewChatService(cfg ChatConfig, seqGen SequenceGenerator, chatRepository ChatRepository,
-	messagePublisher MessagePublisher) *ChatService {
+	messagePublisher MessagePublisher, createChatLock func(chatID int64) ChatLocker) *ChatService {
 	return &ChatService{
 		cfg:              cfg,
 		seqGen:           seqGen,
 		chatRepository:   chatRepository,
 		messagePublisher: messagePublisher,
+		createChatLock:   createChatLock,
 		chatClients:      make(map[uuid.UUID]ChatClient),
 		chatClientsMu:    sync.RWMutex{},
 	}
 }
 
 func (c *ChatService) ReceiveChatMessage(ctx context.Context, chatID int64, content string) error {
-	ok, err := c.checkUserInChat(ctx, chatID)
+	userID := extractUserIDFromContext(ctx)
+
+	ok, err := c.checkUserInChat(ctx, userID, chatID)
 	if err != nil {
 		return fmt.Errorf("can't check if user in chat: %w", err)
 	}
 	if !ok {
 		return domain.ErrUserNotInChat
 	}
+
+	mu := c.createChatLock(chatID)
+	err = mu.Lock(ctx)
+	defer func() {
+		err := mu.Unlock(ctx)
+		if err != nil {
+			loggy.Errorf("unlock chat error: %v", err)
+		}
+	}()
 
 	idInChat, err := c.seqGen.GenerateNextID(ctx, chatID)
 	if err != nil {
@@ -67,7 +85,7 @@ func (c *ChatService) ReceiveChatMessage(ctx context.Context, chatID int64, cont
 
 	msg := domain.ChatMessage{
 		ID:       uuid.New(),
-		From:     uuid.New(),
+		From:     userID,
 		ChatID:   chatID,
 		IDInChat: idInChat,
 		SendTime: time.Now(),
@@ -90,9 +108,8 @@ func (c *ChatService) ReceiveChatMessage(ctx context.Context, chatID int64, cont
 func (c *ChatService) SendChatMessage(ctx context.Context, msg domain.ChatMessage) error {
 	chatMembers, err := c.chatRepository.GetChatMembers(ctx, msg.ChatID)
 	if err != nil && !errors.Is(err, domain.ErrEntityIsNotExists) {
-		err = fmt.Errorf("can't get chat members: %w", err)
-		loggy.Errorln(err)
-		return err
+		loggy.Errorf("can't get chat members: %v", err)
+		return nil
 	}
 
 	c.chatClientsMu.RLock()
@@ -102,7 +119,7 @@ func (c *ChatService) SendChatMessage(ctx context.Context, msg domain.ChatMessag
 		if client, ok := c.chatClients[member]; ok {
 			err = client.SendMessage(msg)
 			if err != nil {
-				loggy.Infoln(err)
+				loggy.Errorln(err)
 			}
 		}
 	}
@@ -122,9 +139,7 @@ func (c *ChatService) RemoveChatClient(userID uuid.UUID) {
 	c.chatClientsMu.Unlock()
 }
 
-func (c *ChatService) checkUserInChat(ctx context.Context, chatID int64) (bool, error) {
-	userID := extractUserIDFromContext(ctx)
-
+func (c *ChatService) checkUserInChat(ctx context.Context, userID uuid.UUID, chatID int64) (bool, error) {
 	chatMembers, err := c.chatRepository.GetChatMembers(ctx, chatID)
 	if err != nil {
 		return false, fmt.Errorf("can't get chat members: %w", err)

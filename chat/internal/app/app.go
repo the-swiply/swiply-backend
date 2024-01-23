@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/the-swiply/swiply-backend/chat/internal/cache"
 	"github.com/the-swiply/swiply-backend/chat/internal/domain"
+	"github.com/the-swiply/swiply-backend/chat/internal/glsync"
 	"github.com/the-swiply/swiply-backend/chat/internal/pubsub"
 	"github.com/the-swiply/swiply-backend/chat/internal/repository"
 	"github.com/the-swiply/swiply-backend/chat/internal/server"
@@ -21,11 +22,13 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"time"
 )
 
 const (
 	sequenceRedisDB       = 0
 	messagesPubSubRedisDB = 1
+	syncerRedisDB         = 2
 )
 
 type App struct {
@@ -38,6 +41,7 @@ type App struct {
 	redisSequenceCache      *cache.RedisSequenceCache
 	redisMessagesPublisher  *pubsub.RedisMessagesPublisher
 	redisMessagesSubscriber *pubsub.RedisMessagesSubscriber
+	redisSyncer             *glsync.RedisSyncer
 	db                      *pgxpool.Pool
 	broadcastWP             *workerpool.Pool[domain.ChatMessage, error]
 
@@ -85,11 +89,9 @@ func (a *App) Run(ctx context.Context) error {
 	}
 
 	rdbSequence, err := cache.NewRedisSequenceCache(ctx, cache.RedisSequenceConfig{
-		RedisDefaultConfig: cache.RedisDefaultConfig{
-			Addr:     a.cfg.Redis.Addr,
-			Password: os.Getenv("REDIS_PASSWORD"),
-			DB:       sequenceRedisDB,
-		},
+		Addr:     a.cfg.Redis.Addr,
+		Password: os.Getenv("REDIS_PASSWORD"),
+		DB:       sequenceRedisDB,
 	})
 	if err != nil {
 		return fmt.Errorf("can't init redis cache: %w", err)
@@ -105,8 +107,18 @@ func (a *App) Run(ctx context.Context) error {
 		return fmt.Errorf("can't init redis publisher: %w", err)
 	}
 	a.redisMessagesPublisher = rdbPub
+	rdbSync, err := glsync.NewRedisSyncer(ctx, glsync.RedisSyncerConfig{
+		Addr:           a.cfg.Redis.Addr,
+		Password:       os.Getenv("REDIS_PASSWORD"),
+		DB:             syncerRedisDB,
+		LockExpiration: time.Millisecond * time.Duration(a.cfg.App.ChatLockExpirationMilliseconds),
+	})
+	if err != nil {
+		return fmt.Errorf("can't init redis syncer: %w", err)
+	}
+	a.redisSyncer = rdbSync
 
-	chatSvc := service.NewChatService(service.ChatConfig{}, a.redisSequenceCache, chatRepo, a.redisMessagesPublisher)
+	chatSvc := service.NewChatService(service.ChatConfig{}, a.redisSequenceCache, chatRepo, a.redisMessagesPublisher, a.redisSyncer.NewChatLock)
 
 	a.broadcastWP = workerpool.NewPool[domain.ChatMessage, error](int(a.cfg.App.NumOfMessageSenderWorkers),
 		chatSvc.SendChatMessage,
@@ -206,6 +218,7 @@ func (a *App) Stop(ctx context.Context) error {
 	err := multierr.Combine(
 		a.grpcServer.Shutdown(ctx),
 		a.httpServer.Shutdown(ctx),
+		a.redisSyncer.Stop(ctx),
 		a.redisSequenceCache.Stop(ctx),
 		a.redisMessagesPublisher.Stop(ctx),
 		a.redisMessagesSubscriber.Stop(ctx),

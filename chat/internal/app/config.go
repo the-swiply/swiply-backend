@@ -10,7 +10,8 @@ type Config struct {
 }
 
 type Application struct {
-	NumOfMessageSenderWorkers int64 `yaml:"num_of_message_sender_workers"`
+	NumOfMessageSenderWorkers      int64 `yaml:"num_of_message_sender_workers"`
+	ChatLockExpirationMilliseconds int64 `yaml:"chat_lock_expiration_milliseconds"`
 }
 
 type GRPC struct {

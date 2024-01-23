@@ -2,6 +2,7 @@ app:
   name: "chat"
   graceful_shutdown_timeout_seconds: 10
   num_of_message_sender_workers: 10
+  chat_lock_expiration_milliseconds: 400
 
 jaeger:
   addr: "jaeger:4317"
