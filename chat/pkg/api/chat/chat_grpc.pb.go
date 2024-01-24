@@ -25,6 +25,9 @@ type ChatClient interface {
 	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageResponse, error)
 	GetNextMessages(ctx context.Context, in *GetNextMessagesRequest, opts ...grpc.CallOption) (*GetNextMessagesResponse, error)
 	GetPreviousMessages(ctx context.Context, in *GetPreviousMessagesRequest, opts ...grpc.CallOption) (*GetPreviousMessagesResponse, error)
+	GetChats(ctx context.Context, in *GetChatsRequest, opts ...grpc.CallOption) (*GetChatsResponse, error)
+	GetChatMembers(ctx context.Context, in *GetChatMembersRequest, opts ...grpc.CallOption) (*GetChatMembersResponse, error)
+	LeaveChat(ctx context.Context, in *LeaveChatRequest, opts ...grpc.CallOption) (*LeaveChatResponse, error)
 }
 
 type chatClient struct {
@@ -62,6 +65,33 @@ func (c *chatClient) GetPreviousMessages(ctx context.Context, in *GetPreviousMes
 	return out, nil
 }
 
+func (c *chatClient) GetChats(ctx context.Context, in *GetChatsRequest, opts ...grpc.CallOption) (*GetChatsResponse, error) {
+	out := new(GetChatsResponse)
+	err := c.cc.Invoke(ctx, "/swiply.chat.Chat/GetChats", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatClient) GetChatMembers(ctx context.Context, in *GetChatMembersRequest, opts ...grpc.CallOption) (*GetChatMembersResponse, error) {
+	out := new(GetChatMembersResponse)
+	err := c.cc.Invoke(ctx, "/swiply.chat.Chat/GetChatMembers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatClient) LeaveChat(ctx context.Context, in *LeaveChatRequest, opts ...grpc.CallOption) (*LeaveChatResponse, error) {
+	out := new(LeaveChatResponse)
+	err := c.cc.Invoke(ctx, "/swiply.chat.Chat/LeaveChat", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChatServer is the server API for Chat service.
 // All implementations must embed UnimplementedChatServer
 // for forward compatibility
@@ -69,6 +99,9 @@ type ChatServer interface {
 	SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error)
 	GetNextMessages(context.Context, *GetNextMessagesRequest) (*GetNextMessagesResponse, error)
 	GetPreviousMessages(context.Context, *GetPreviousMessagesRequest) (*GetPreviousMessagesResponse, error)
+	GetChats(context.Context, *GetChatsRequest) (*GetChatsResponse, error)
+	GetChatMembers(context.Context, *GetChatMembersRequest) (*GetChatMembersResponse, error)
+	LeaveChat(context.Context, *LeaveChatRequest) (*LeaveChatResponse, error)
 	mustEmbedUnimplementedChatServer()
 }
 
@@ -84,6 +117,15 @@ func (UnimplementedChatServer) GetNextMessages(context.Context, *GetNextMessages
 }
 func (UnimplementedChatServer) GetPreviousMessages(context.Context, *GetPreviousMessagesRequest) (*GetPreviousMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPreviousMessages not implemented")
+}
+func (UnimplementedChatServer) GetChats(context.Context, *GetChatsRequest) (*GetChatsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetChats not implemented")
+}
+func (UnimplementedChatServer) GetChatMembers(context.Context, *GetChatMembersRequest) (*GetChatMembersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetChatMembers not implemented")
+}
+func (UnimplementedChatServer) LeaveChat(context.Context, *LeaveChatRequest) (*LeaveChatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LeaveChat not implemented")
 }
 func (UnimplementedChatServer) mustEmbedUnimplementedChatServer() {}
 
@@ -152,6 +194,60 @@ func _Chat_GetPreviousMessages_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Chat_GetChats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetChatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).GetChats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/swiply.chat.Chat/GetChats",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).GetChats(ctx, req.(*GetChatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Chat_GetChatMembers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetChatMembersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).GetChatMembers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/swiply.chat.Chat/GetChatMembers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).GetChatMembers(ctx, req.(*GetChatMembersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Chat_LeaveChat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LeaveChatRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).LeaveChat(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/swiply.chat.Chat/LeaveChat",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).LeaveChat(ctx, req.(*LeaveChatRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Chat_ServiceDesc is the grpc.ServiceDesc for Chat service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -170,6 +266,18 @@ var Chat_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPreviousMessages",
 			Handler:    _Chat_GetPreviousMessages_Handler,
+		},
+		{
+			MethodName: "GetChats",
+			Handler:    _Chat_GetChats_Handler,
+		},
+		{
+			MethodName: "GetChatMembers",
+			Handler:    _Chat_GetChatMembers_Handler,
+		},
+		{
+			MethodName: "LeaveChat",
+			Handler:    _Chat_LeaveChat_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

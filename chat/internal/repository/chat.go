@@ -43,9 +43,39 @@ func (c *ChatRepository) GetChatMembers(ctx context.Context, chatID int64) ([]uu
 }
 
 func (c *ChatRepository) SaveMessage(ctx context.Context, msg domain.ChatMessage) error {
-	q := fmt.Sprintf(`INSERT INTO %s (id, chat_id, id_in_chat, send_time, content) VALUES ($1, $2, $3, $4, $5)`,
+	q := fmt.Sprintf(`INSERT INTO %s (id, chat_id, id_in_chat, "from", send_time, content) VALUES ($1, $2, $3, $4, $5, $6)`,
 		messageTable)
 
-	_, err := c.db.Exec(ctx, q, msg.ID, msg.ChatID, msg.IDInChat, msg.SendTime, msg.Content)
+	_, err := c.db.Exec(ctx, q, msg.ID, msg.ChatID, msg.IDInChat, msg.From, msg.SendTime, msg.Content)
 	return err
+}
+
+func (c *ChatRepository) GetNextMessages(ctx context.Context, chatID int64, start int64, limit int64) ([]domain.ChatMessage, error) {
+	q := fmt.Sprintf(`SELECT id, chat_id, id_in_chat, "from", send_time, content FROM %s 
+WHERE chat_id = $1 AND id_in_chat > $2
+ORDER BY id_in_chat
+LIMIT $3`, messageTable)
+
+	rows, err := c.db.Query(ctx, q, chatID, start, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return pgx.CollectRows(rows, pgx.RowToStructByName[domain.ChatMessage])
+}
+
+func (c *ChatRepository) GetPreviousMessages(ctx context.Context, chatID int64, start int64, limit int64) ([]domain.ChatMessage, error) {
+	q := fmt.Sprintf(`SELECT id, chat_id, id_in_chat, "from", send_time, content FROM %s 
+WHERE chat_id = $1 AND id_in_chat < $2
+ORDER BY id_in_chat
+LIMIT $3`, messageTable)
+
+	rows, err := c.db.Query(ctx, q, chatID, start, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return pgx.CollectRows(rows, pgx.RowToStructByName[domain.ChatMessage])
 }

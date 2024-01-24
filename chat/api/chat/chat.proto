@@ -26,6 +26,24 @@ service Chat {
       get: "/v1/get-previous-messages"
     };
   }
+
+  rpc GetChats(GetChatsRequest) returns (GetChatsResponse){
+    option (google.api.http) = {
+      get: "/v1/get-chats"
+    };
+  }
+
+  rpc GetChatMembers(GetChatMembersRequest) returns (GetChatMembersResponse){
+    option (google.api.http) = {
+      get: "/v1/get-chat-members/{chat_id}"
+    };
+  }
+
+  rpc LeaveChat(LeaveChatRequest) returns (LeaveChatResponse){
+    option (google.api.http) = {
+      post: "/v1/leave-chat/{chat_id}"
+    };
+  }
 }
 
 message SendMessageRequest {
@@ -38,6 +56,7 @@ message SendMessageResponse {}
 message GetNextMessagesRequest {
   int64 chat_id = 1;
   int64 starting_from = 2;
+  int64 limit = 3;
 }
 
 message GetNextMessagesResponse {
@@ -47,16 +66,43 @@ message GetNextMessagesResponse {
 message GetPreviousMessagesRequest {
   int64 chat_id = 1;
   int64 starting_from = 2;
+  int64 limit = 3;
 }
 
 message GetPreviousMessagesResponse {
   repeated ChatMessage messages = 1;
 }
 
-message ChatMessage {
-  int64 chat_id = 1;
-  string from_id = 2;
-  string content = 3;
-  google.protobuf.Timestamp send_time = 4;
+message GetChatsRequest {}
+
+message GetChatsResponse{
+  repeated GenericChat chats = 1;
 }
 
+message GetChatMembersRequest {
+  int64 chat_id = 1;
+}
+
+message GetChatMembersResponse {
+  repeated string members = 1;
+}
+
+message LeaveChatRequest {
+  int64 chat_id = 1;
+}
+
+message LeaveChatResponse {}
+
+message ChatMessage {
+  string id = 1;
+  int64 chat_id = 2;
+  int64 id_in_chat = 3;
+  string from_id = 4;
+  string content = 5;
+  google.protobuf.Timestamp send_time = 6;
+}
+
+message GenericChat {
+  int64 id = 1;
+  repeated string members = 2;
+}

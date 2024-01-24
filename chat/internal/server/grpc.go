@@ -9,6 +9,7 @@ import (
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"github.com/the-swiply/swiply-backend/chat/internal/converter"
 	"github.com/the-swiply/swiply-backend/chat/internal/domain"
 	"github.com/the-swiply/swiply-backend/chat/internal/service"
 	"github.com/the-swiply/swiply-backend/chat/pkg/api/chat"
@@ -65,10 +66,12 @@ func (g *GRPCServer) Shutdown(ctx context.Context) error {
 
 func (g *GRPCServer) SendMessage(ctx context.Context, req *chat.SendMessageRequest) (*chat.SendMessageResponse, error) {
 	err := g.chatService.ReceiveChatMessage(ctx, req.GetChatId(), req.GetContent())
-	if errors.Is(err, domain.ErrEntityIsNotExists) || errors.Is(err, domain.ErrUserNotInChat) {
+	switch {
+	case errors.Is(err, domain.ErrEntityIsNotExists):
+		return nil, status.Error(codes.PermissionDenied, "no such chat")
+	case errors.Is(err, domain.ErrUserNotInChat):
 		return nil, status.Error(codes.PermissionDenied, domain.ErrUserNotInChat.Error())
-	}
-	if err != nil {
+	case err != nil:
 		return nil, grut.InternalError("can't receive message", err)
 	}
 
@@ -76,9 +79,51 @@ func (g *GRPCServer) SendMessage(ctx context.Context, req *chat.SendMessageReque
 }
 
 func (g *GRPCServer) GetNextMessages(ctx context.Context, req *chat.GetNextMessagesRequest) (*chat.GetNextMessagesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetNextMessages not implemented")
+	if req.GetLimit() < 0 {
+		return nil, status.Error(codes.InvalidArgument, "limit must be not negative")
+	}
+
+	messages, err := g.chatService.GetNextMessages(ctx, req.GetChatId(), req.GetStartingFrom(), req.GetLimit())
+	switch {
+	case errors.Is(err, domain.ErrEntityIsNotExists):
+		return nil, status.Error(codes.PermissionDenied, "no such chat")
+	case errors.Is(err, domain.ErrUserNotInChat):
+		return nil, status.Error(codes.PermissionDenied, domain.ErrUserNotInChat.Error())
+	case err != nil:
+		return nil, grut.InternalError("can't get next messages", err)
+	}
+
+	return &chat.GetNextMessagesResponse{
+		Messages: converter.MessagesToPB(messages),
+	}, nil
 }
 
 func (g *GRPCServer) GetPreviousMessages(ctx context.Context, req *chat.GetPreviousMessagesRequest) (*chat.GetPreviousMessagesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPreviousMessages not implemented")
+	if req.GetLimit() < 0 {
+		return nil, status.Error(codes.InvalidArgument, "limit must be not negative")
+	}
+
+	messages, err := g.chatService.GetPreviousMessages(ctx, req.GetChatId(), req.GetStartingFrom(), req.GetLimit())
+	switch {
+	case errors.Is(err, domain.ErrEntityIsNotExists):
+		return nil, status.Error(codes.PermissionDenied, "no such chat")
+	case errors.Is(err, domain.ErrUserNotInChat):
+		return nil, status.Error(codes.PermissionDenied, domain.ErrUserNotInChat.Error())
+	case err != nil:
+		return nil, grut.InternalError("can't get previous messages", err)
+	}
+
+	return &chat.GetPreviousMessagesResponse{
+		Messages: converter.MessagesToPB(messages),
+	}, nil
+}
+
+func (g *GRPCServer) GetChats(ctx context.Context, req *chat.GetChatsRequest) (*chat.GetChatsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetChats not implemented")
+}
+func (g *GRPCServer) GetChatMembers(ctx context.Context, req *chat.GetChatMembersRequest) (*chat.GetChatMembersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetChatMembers not implemented")
+}
+func (g *GRPCServer) LeaveChat(ctx context.Context, req *chat.LeaveChatRequest) (*chat.LeaveChatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LeaveChat not implemented")
 }

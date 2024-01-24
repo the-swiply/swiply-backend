@@ -16,6 +16,59 @@
     "application/json"
   ],
   "paths": {
+    "/v1/get-chat-members/{chatId}": {
+      "get": {
+        "operationId": "Chat_GetChatMembers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/chatGetChatMembersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Chat"
+        ]
+      }
+    },
+    "/v1/get-chats": {
+      "get": {
+        "operationId": "Chat_GetChats",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/chatGetChatsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Chat"
+        ]
+      }
+    },
     "/v1/get-next-messages": {
       "get": {
         "operationId": "Chat_GetNextMessages",
@@ -43,6 +96,13 @@
           },
           {
             "name": "startingFrom",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "limit",
             "in": "query",
             "required": false,
             "type": "string",
@@ -83,6 +143,44 @@
             "name": "startingFrom",
             "in": "query",
             "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Chat"
+        ]
+      }
+    },
+    "/v1/leave-chat/{chatId}": {
+      "post": {
+        "operationId": "Chat_LeaveChat",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/chatLeaveChatResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
             "type": "string",
             "format": "int64"
           }
@@ -129,7 +227,14 @@
     "chatChatMessage": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "string"
+        },
         "chatId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "idInChat": {
           "type": "string",
           "format": "int64"
         },
@@ -142,6 +247,44 @@
         "sendTime": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "chatGenericChat": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "chatGetChatMembersResponse": {
+      "type": "object",
+      "properties": {
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "chatGetChatsResponse": {
+      "type": "object",
+      "properties": {
+        "chats": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/chatGenericChat"
+          }
         }
       }
     },
@@ -168,6 +311,9 @@
           }
         }
       }
+    },
+    "chatLeaveChatResponse": {
+      "type": "object"
     },
     "chatSendMessageRequest": {
       "type": "object",

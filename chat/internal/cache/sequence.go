@@ -39,6 +39,10 @@ func (r *RedisSequenceCache) GenerateNextID(ctx context.Context, chatID int64) (
 	return nextID, nil
 }
 
+func (r *RedisSequenceCache) RollbackID(ctx context.Context, chatID int64) error {
+	return r.client.Decr(ctx, strconv.FormatInt(chatID, 10)).Err()
+}
+
 func (r *RedisSequenceCache) Stop(_ context.Context) error {
 	return r.client.Close()
 }

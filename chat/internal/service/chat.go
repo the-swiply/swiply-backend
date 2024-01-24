@@ -14,11 +14,14 @@ import (
 
 type SequenceGenerator interface {
 	GenerateNextID(ctx context.Context, chatID int64) (int64, error)
+	RollbackID(ctx context.Context, chatID int64) error
 }
 
 type ChatRepository interface {
 	GetChatMembers(ctx context.Context, chatID int64) ([]uuid.UUID, error)
 	SaveMessage(ctx context.Context, msg domain.ChatMessage) error
+	GetNextMessages(ctx context.Context, chatID int64, start int64, limit int64) ([]domain.ChatMessage, error)
+	GetPreviousMessages(ctx context.Context, chatID int64, start int64, limit int64) ([]domain.ChatMessage, error)
 }
 
 type MessagePublisher interface {
@@ -61,18 +64,15 @@ func NewChatService(cfg ChatConfig, seqGen SequenceGenerator, chatRepository Cha
 func (c *ChatService) ReceiveChatMessage(ctx context.Context, chatID int64, content string) error {
 	userID := extractUserIDFromContext(ctx)
 
-	ok, err := c.checkUserInChat(ctx, userID, chatID)
+	err := c.checkUserInChatWithError(ctx, userID, chatID)
 	if err != nil {
-		return fmt.Errorf("can't check if user in chat: %w", err)
-	}
-	if !ok {
-		return domain.ErrUserNotInChat
+		return err
 	}
 
-	mu := c.createChatLock(chatID)
-	err = mu.Lock(ctx)
+	gmu := c.createChatLock(chatID)
+	err = gmu.Lock(ctx)
 	defer func() {
-		err := mu.Unlock(ctx)
+		err := gmu.Unlock(ctx)
 		if err != nil {
 			loggy.Errorf("unlock chat error: %v", err)
 		}
@@ -80,7 +80,7 @@ func (c *ChatService) ReceiveChatMessage(ctx context.Context, chatID int64, cont
 
 	idInChat, err := c.seqGen.GenerateNextID(ctx, chatID)
 	if err != nil {
-		return fmt.Errorf("can't generate sequence id for chat: %w", err)
+		return fmt.Errorf("can't generate message sequence id for chat: %w", err)
 	}
 
 	msg := domain.ChatMessage{
@@ -94,6 +94,11 @@ func (c *ChatService) ReceiveChatMessage(ctx context.Context, chatID int64, cont
 
 	err = c.chatRepository.SaveMessage(ctx, msg)
 	if err != nil {
+		rollbackErr := c.seqGen.RollbackID(ctx, chatID)
+		if rollbackErr != nil {
+			loggy.Errorf("can't rollback message sequence id for chat: %v", err)
+		}
+
 		return fmt.Errorf("can't save message: %w", err)
 	}
 
@@ -139,11 +144,51 @@ func (c *ChatService) RemoveChatClient(userID uuid.UUID) {
 	c.chatClientsMu.Unlock()
 }
 
-func (c *ChatService) checkUserInChat(ctx context.Context, userID uuid.UUID, chatID int64) (bool, error) {
-	chatMembers, err := c.chatRepository.GetChatMembers(ctx, chatID)
+func (c *ChatService) GetNextMessages(ctx context.Context, chatID int64, start int64, limit int64) ([]domain.ChatMessage, error) {
+	userID := extractUserIDFromContext(ctx)
+
+	err := c.checkUserInChatWithError(ctx, userID, chatID)
 	if err != nil {
-		return false, fmt.Errorf("can't get chat members: %w", err)
+		return nil, err
 	}
 
-	return slices.Contains(chatMembers, userID), nil
+	messages, err := c.chatRepository.GetNextMessages(ctx, chatID, start, limit)
+	if err != nil {
+		return nil, fmt.Errorf("can't get messages: %w", err)
+	}
+
+	return messages, nil
+}
+
+func (c *ChatService) GetPreviousMessages(ctx context.Context, chatID int64, start int64, limit int64) ([]domain.ChatMessage, error) {
+	userID := extractUserIDFromContext(ctx)
+
+	err := c.checkUserInChatWithError(ctx, userID, chatID)
+	if err != nil {
+		return nil, err
+	}
+
+	messages, err := c.chatRepository.GetPreviousMessages(ctx, chatID, start, limit)
+	if err != nil {
+		return nil, fmt.Errorf("can't get messages: %w", err)
+	}
+
+	return messages, nil
+}
+
+func (c *ChatService) checkUserInChatWithError(ctx context.Context, userID uuid.UUID, chatID int64) error {
+	chatMembers, err := c.chatRepository.GetChatMembers(ctx, chatID)
+
+	if errors.Is(err, domain.ErrEntityIsNotExists) {
+		return domain.ErrEntityIsNotExists
+	}
+	if err != nil {
+		return fmt.Errorf("can't get chat members: %w", err)
+	}
+
+	if !slices.Contains(chatMembers, userID) {
+		return domain.ErrUserNotInChat
+	}
+
+	return nil
 }
