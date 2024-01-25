@@ -43,8 +43,8 @@ func (c *ChatRepository) GetChatMembers(ctx context.Context, chatID int64) ([]uu
 }
 
 func (c *ChatRepository) SaveMessage(ctx context.Context, msg domain.ChatMessage) error {
-	q := fmt.Sprintf(`INSERT INTO %s (id, chat_id, id_in_chat, "from", send_time, content) VALUES ($1, $2, $3, $4, $5, $6)`,
-		messageTable)
+	q := fmt.Sprintf(`INSERT INTO %s (id, chat_id, id_in_chat, "from", send_time, content)
+VALUES ($1, $2, $3, $4, $5, $6)`, messageTable)
 
 	_, err := c.db.Exec(ctx, q, msg.ID, msg.ChatID, msg.IDInChat, msg.From, msg.SendTime, msg.Content)
 	return err
@@ -78,4 +78,35 @@ LIMIT $3`, messageTable)
 	defer rows.Close()
 
 	return pgx.CollectRows(rows, pgx.RowToStructByName[domain.ChatMessage])
+}
+
+func (c *ChatRepository) GetUserChats(ctx context.Context, userID uuid.UUID) ([]domain.Chat, error) {
+	q := fmt.Sprintf(`SELECT id, members FROM %s
+WHERE $1 = ANY(members)`, chatTable)
+
+	rows, err := c.db.Query(ctx, q, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return pgx.CollectRows(rows, pgx.RowToStructByName[domain.Chat])
+}
+
+func (c *ChatRepository) RemoveUserFromChatMembers(ctx context.Context, userID uuid.UUID, chatID int64) error {
+	q := fmt.Sprintf(`UPDATE %s
+SET members = array_remove(members, $1)
+WHERE id = $2`, chatTable)
+
+	_, err := c.db.Exec(ctx, q, userID, chatID)
+	return err
+}
+
+func (c *ChatRepository) CreateChat(ctx context.Context, members []uuid.UUID) error {
+	q := fmt.Sprintf(`INSERT INTO %s (members)
+VALUES ($1)`, chatTable)
+
+	_, err := c.db.Exec(ctx, q, members)
+
+	return err
 }

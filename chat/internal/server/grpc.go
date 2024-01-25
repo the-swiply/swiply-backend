@@ -38,7 +38,7 @@ func NewGRPCServer(chatService *service.ChatService) *GRPCServer {
 			grpc_ctxtags.UnaryServerInterceptor(),
 			grpc_opentracing.UnaryServerInterceptor(),
 			grpc_prometheus.UnaryServerInterceptor,
-			grpc_auth.UnaryServerInterceptor(jwtAuthFuncGRPC),
+			grpc_auth.UnaryServerInterceptor(nil),
 			grpc_recovery.UnaryServerInterceptor(grut.WithLogAndRecover()),
 		)),
 	}
@@ -70,7 +70,7 @@ func (g *GRPCServer) SendMessage(ctx context.Context, req *chat.SendMessageReque
 	case errors.Is(err, domain.ErrEntityIsNotExists):
 		return nil, status.Error(codes.PermissionDenied, "no such chat")
 	case errors.Is(err, domain.ErrUserNotInChat):
-		return nil, status.Error(codes.PermissionDenied, domain.ErrUserNotInChat.Error())
+		return nil, status.Error(codes.InvalidArgument, domain.ErrUserNotInChat.Error())
 	case err != nil:
 		return nil, grut.InternalError("can't receive message", err)
 	}
@@ -88,7 +88,7 @@ func (g *GRPCServer) GetNextMessages(ctx context.Context, req *chat.GetNextMessa
 	case errors.Is(err, domain.ErrEntityIsNotExists):
 		return nil, status.Error(codes.PermissionDenied, "no such chat")
 	case errors.Is(err, domain.ErrUserNotInChat):
-		return nil, status.Error(codes.PermissionDenied, domain.ErrUserNotInChat.Error())
+		return nil, status.Error(codes.InvalidArgument, domain.ErrUserNotInChat.Error())
 	case err != nil:
 		return nil, grut.InternalError("can't get next messages", err)
 	}
@@ -119,11 +119,40 @@ func (g *GRPCServer) GetPreviousMessages(ctx context.Context, req *chat.GetPrevi
 }
 
 func (g *GRPCServer) GetChats(ctx context.Context, req *chat.GetChatsRequest) (*chat.GetChatsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetChats not implemented")
+	chats, err := g.chatService.GetUserChats(ctx)
+	if err != nil {
+		return nil, grut.InternalError("can't get user's chats", err)
+	}
+
+	return &chat.GetChatsResponse{
+		Chats: converter.ChatsToPB(chats),
+	}, nil
 }
-func (g *GRPCServer) GetChatMembers(ctx context.Context, req *chat.GetChatMembersRequest) (*chat.GetChatMembersResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetChatMembers not implemented")
-}
+
 func (g *GRPCServer) LeaveChat(ctx context.Context, req *chat.LeaveChatRequest) (*chat.LeaveChatResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LeaveChat not implemented")
+	err := g.chatService.LeaveChat(ctx, req.GetChatId())
+	switch {
+	case errors.Is(err, domain.ErrEntityIsNotExists):
+		return nil, status.Error(codes.PermissionDenied, "no such chat")
+	case errors.Is(err, domain.ErrUserNotInChat):
+		return nil, status.Error(codes.InvalidArgument, domain.ErrUserNotInChat.Error())
+	case err != nil:
+		return nil, grut.InternalError("user can't leave chat", err)
+	}
+
+	return &chat.LeaveChatResponse{}, nil
+}
+
+func (g *GRPCServer) CreateChat(ctx context.Context, req *chat.CreateChatRequest) (*chat.CreateChatResponse, error) {
+	members, err := converter.StringsToUUIDs(req.GetMembers())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	err = g.chatService.CreateChat(ctx, members)
+	if err != nil {
+		return nil, grut.InternalError("can't create chat", err)
+	}
+
+	return &chat.CreateChatResponse{}, nil
 }

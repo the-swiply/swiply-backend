@@ -26,8 +26,8 @@ type ChatClient interface {
 	GetNextMessages(ctx context.Context, in *GetNextMessagesRequest, opts ...grpc.CallOption) (*GetNextMessagesResponse, error)
 	GetPreviousMessages(ctx context.Context, in *GetPreviousMessagesRequest, opts ...grpc.CallOption) (*GetPreviousMessagesResponse, error)
 	GetChats(ctx context.Context, in *GetChatsRequest, opts ...grpc.CallOption) (*GetChatsResponse, error)
-	GetChatMembers(ctx context.Context, in *GetChatMembersRequest, opts ...grpc.CallOption) (*GetChatMembersResponse, error)
 	LeaveChat(ctx context.Context, in *LeaveChatRequest, opts ...grpc.CallOption) (*LeaveChatResponse, error)
+	CreateChat(ctx context.Context, in *CreateChatRequest, opts ...grpc.CallOption) (*CreateChatResponse, error)
 }
 
 type chatClient struct {
@@ -74,18 +74,18 @@ func (c *chatClient) GetChats(ctx context.Context, in *GetChatsRequest, opts ...
 	return out, nil
 }
 
-func (c *chatClient) GetChatMembers(ctx context.Context, in *GetChatMembersRequest, opts ...grpc.CallOption) (*GetChatMembersResponse, error) {
-	out := new(GetChatMembersResponse)
-	err := c.cc.Invoke(ctx, "/swiply.chat.Chat/GetChatMembers", in, out, opts...)
+func (c *chatClient) LeaveChat(ctx context.Context, in *LeaveChatRequest, opts ...grpc.CallOption) (*LeaveChatResponse, error) {
+	out := new(LeaveChatResponse)
+	err := c.cc.Invoke(ctx, "/swiply.chat.Chat/LeaveChat", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *chatClient) LeaveChat(ctx context.Context, in *LeaveChatRequest, opts ...grpc.CallOption) (*LeaveChatResponse, error) {
-	out := new(LeaveChatResponse)
-	err := c.cc.Invoke(ctx, "/swiply.chat.Chat/LeaveChat", in, out, opts...)
+func (c *chatClient) CreateChat(ctx context.Context, in *CreateChatRequest, opts ...grpc.CallOption) (*CreateChatResponse, error) {
+	out := new(CreateChatResponse)
+	err := c.cc.Invoke(ctx, "/swiply.chat.Chat/CreateChat", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -100,8 +100,8 @@ type ChatServer interface {
 	GetNextMessages(context.Context, *GetNextMessagesRequest) (*GetNextMessagesResponse, error)
 	GetPreviousMessages(context.Context, *GetPreviousMessagesRequest) (*GetPreviousMessagesResponse, error)
 	GetChats(context.Context, *GetChatsRequest) (*GetChatsResponse, error)
-	GetChatMembers(context.Context, *GetChatMembersRequest) (*GetChatMembersResponse, error)
 	LeaveChat(context.Context, *LeaveChatRequest) (*LeaveChatResponse, error)
+	CreateChat(context.Context, *CreateChatRequest) (*CreateChatResponse, error)
 	mustEmbedUnimplementedChatServer()
 }
 
@@ -121,11 +121,11 @@ func (UnimplementedChatServer) GetPreviousMessages(context.Context, *GetPrevious
 func (UnimplementedChatServer) GetChats(context.Context, *GetChatsRequest) (*GetChatsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetChats not implemented")
 }
-func (UnimplementedChatServer) GetChatMembers(context.Context, *GetChatMembersRequest) (*GetChatMembersResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetChatMembers not implemented")
-}
 func (UnimplementedChatServer) LeaveChat(context.Context, *LeaveChatRequest) (*LeaveChatResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LeaveChat not implemented")
+}
+func (UnimplementedChatServer) CreateChat(context.Context, *CreateChatRequest) (*CreateChatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateChat not implemented")
 }
 func (UnimplementedChatServer) mustEmbedUnimplementedChatServer() {}
 
@@ -212,24 +212,6 @@ func _Chat_GetChats_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Chat_GetChatMembers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetChatMembersRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ChatServer).GetChatMembers(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/swiply.chat.Chat/GetChatMembers",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServer).GetChatMembers(ctx, req.(*GetChatMembersRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Chat_LeaveChat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(LeaveChatRequest)
 	if err := dec(in); err != nil {
@@ -244,6 +226,24 @@ func _Chat_LeaveChat_Handler(srv interface{}, ctx context.Context, dec func(inte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ChatServer).LeaveChat(ctx, req.(*LeaveChatRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Chat_CreateChat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateChatRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).CreateChat(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/swiply.chat.Chat/CreateChat",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).CreateChat(ctx, req.(*CreateChatRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -272,12 +272,12 @@ var Chat_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Chat_GetChats_Handler,
 		},
 		{
-			MethodName: "GetChatMembers",
-			Handler:    _Chat_GetChatMembers_Handler,
-		},
-		{
 			MethodName: "LeaveChat",
 			Handler:    _Chat_LeaveChat_Handler,
+		},
+		{
+			MethodName: "CreateChat",
+			Handler:    _Chat_CreateChat_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -22,6 +22,9 @@ type ChatRepository interface {
 	SaveMessage(ctx context.Context, msg domain.ChatMessage) error
 	GetNextMessages(ctx context.Context, chatID int64, start int64, limit int64) ([]domain.ChatMessage, error)
 	GetPreviousMessages(ctx context.Context, chatID int64, start int64, limit int64) ([]domain.ChatMessage, error)
+	GetUserChats(ctx context.Context, userID uuid.UUID) ([]domain.Chat, error)
+	RemoveUserFromChatMembers(ctx context.Context, userID uuid.UUID, chatID int64) error
+	CreateChat(ctx context.Context, members []uuid.UUID) error
 }
 
 type MessagePublisher interface {
@@ -174,6 +177,26 @@ func (c *ChatService) GetPreviousMessages(ctx context.Context, chatID int64, sta
 	}
 
 	return messages, nil
+}
+
+func (c *ChatService) GetUserChats(ctx context.Context) ([]domain.Chat, error) {
+	userID := extractUserIDFromContext(ctx)
+
+	return c.chatRepository.GetUserChats(ctx, userID)
+}
+
+func (c *ChatService) LeaveChat(ctx context.Context, chatID int64) error {
+	userID := extractUserIDFromContext(ctx)
+	err := c.checkUserInChatWithError(ctx, userID, chatID)
+	if err != nil {
+		return err
+	}
+
+	return c.chatRepository.RemoveUserFromChatMembers(ctx, userID, chatID)
+}
+
+func (c *ChatService) CreateChat(ctx context.Context, members []uuid.UUID) error {
+	return c.chatRepository.CreateChat(ctx, members)
 }
 
 func (c *ChatService) checkUserInChatWithError(ctx context.Context, userID uuid.UUID, chatID int64) error {

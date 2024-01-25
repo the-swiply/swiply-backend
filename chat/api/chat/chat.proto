@@ -33,15 +33,16 @@ service Chat {
     };
   }
 
-  rpc GetChatMembers(GetChatMembersRequest) returns (GetChatMembersResponse){
-    option (google.api.http) = {
-      get: "/v1/get-chat-members/{chat_id}"
-    };
-  }
-
   rpc LeaveChat(LeaveChatRequest) returns (LeaveChatResponse){
     option (google.api.http) = {
       post: "/v1/leave-chat/{chat_id}"
+    };
+  }
+
+  rpc CreateChat(CreateChatRequest) returns (CreateChatResponse){
+    option (google.api.http) = {
+      post: "/v1/create-chat"
+      body: "*"
     };
   }
 }
@@ -79,19 +80,17 @@ message GetChatsResponse{
   repeated GenericChat chats = 1;
 }
 
-message GetChatMembersRequest {
-  int64 chat_id = 1;
-}
-
-message GetChatMembersResponse {
-  repeated string members = 1;
-}
-
 message LeaveChatRequest {
   int64 chat_id = 1;
 }
 
 message LeaveChatResponse {}
+
+message CreateChatRequest {
+  repeated string members = 1;
+}
+
+message CreateChatResponse {}
 
 message ChatMessage {
   string id = 1;

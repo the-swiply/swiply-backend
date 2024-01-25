@@ -14,7 +14,6 @@ import (
 	"github.com/the-swiply/swiply-backend/chat/internal/service"
 	"github.com/the-swiply/swiply-backend/chat/internal/sevents"
 	"github.com/the-swiply/swiply-backend/chat/internal/workerpool"
-	"github.com/the-swiply/swiply-backend/pkg/auf"
 	"github.com/the-swiply/swiply-backend/pkg/dobby"
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"github.com/the-swiply/swiply-backend/pkg/houston/runner"
@@ -26,6 +25,8 @@ import (
 )
 
 const (
+	authConfigPath = "configs/authorization.yaml"
+
 	sequenceRedisDB       = 0
 	messagesPubSubRedisDB = 1
 	syncerRedisDB         = 2
@@ -62,6 +63,13 @@ func (a *App) Run(ctx context.Context) error {
 	err := a.RunStopper.Run(ctx)
 	if err != nil {
 		return err
+	}
+
+	server.SetUserJWTSecret(os.Getenv("JWT_SECRET"))
+	server.SetS2SJWTSecret(os.Getenv("S2S_JWT_SECRET"))
+	err = server.ParseAuthorizationConfig(authConfigPath)
+	if err != nil {
+		return fmt.Errorf("can't parse auth config: %w", err)
 	}
 
 	db, err := dobby.NewPGXPool(ctx, dobby.PGXConfig{
@@ -173,8 +181,6 @@ func (a *App) Run(ctx context.Context) error {
 }
 
 func (a *App) runGRPCServer(chatSvc *service.ChatService) error {
-	auf.SetSecret([]byte(os.Getenv("JWT_SECRET")))
-
 	srv := server.NewGRPCServer(chatSvc)
 	a.grpcServer = srv
 

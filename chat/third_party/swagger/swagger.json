@@ -16,14 +16,14 @@
     "application/json"
   ],
   "paths": {
-    "/v1/get-chat-members/{chatId}": {
-      "get": {
-        "operationId": "Chat_GetChatMembers",
+    "/v1/create-chat": {
+      "post": {
+        "operationId": "Chat_CreateChat",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/chatGetChatMembersResponse"
+              "$ref": "#/definitions/chatCreateChatResponse"
             }
           },
           "default": {
@@ -35,11 +35,12 @@
         },
         "parameters": [
           {
-            "name": "chatId",
-            "in": "path",
+            "name": "body",
+            "in": "body",
             "required": true,
-            "type": "string",
-            "format": "int64"
+            "schema": {
+              "$ref": "#/definitions/chatCreateChatRequest"
+            }
           }
         ],
         "tags": [
@@ -250,13 +251,9 @@
         }
       }
     },
-    "chatGenericChat": {
+    "chatCreateChatRequest": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
-        },
         "members": {
           "type": "array",
           "items": {
@@ -265,9 +262,16 @@
         }
       }
     },
-    "chatGetChatMembersResponse": {
+    "chatCreateChatResponse": {
+      "type": "object"
+    },
+    "chatGenericChat": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
         "members": {
           "type": "array",
           "items": {
