@@ -102,11 +102,18 @@ WHERE id = $2`, chatTable)
 	return err
 }
 
-func (c *ChatRepository) CreateChat(ctx context.Context, members []uuid.UUID) error {
+func (c *ChatRepository) CreateChat(ctx context.Context, members []uuid.UUID) (int64, error) {
 	q := fmt.Sprintf(`INSERT INTO %s (members)
-VALUES ($1)`, chatTable)
+VALUES ($1)
+RETURNING id`, chatTable)
 
-	_, err := c.db.Exec(ctx, q, members)
+	var id int64
+	row := c.db.QueryRow(ctx, q, members)
 
-	return err
+	err := row.Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }

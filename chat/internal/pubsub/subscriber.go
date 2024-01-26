@@ -20,14 +20,14 @@ type RedisMessagesSubscriber struct {
 	cfg         RedisPubSubConfig
 	client      *redis.Client
 	redisPubSub *redis.PubSub
-	workerPool  *workerpool.Pool[domain.ChatMessage, error]
+	workerPool  *workerpool.Pool[domain.Message, error]
 
 	chatService *service.ChatService
 	stopCh      chan struct{}
 }
 
 func NewRedisMessagesSubscriber(ctx context.Context, cfg RedisPubSubConfig, chatService *service.ChatService,
-	workerPool *workerpool.Pool[domain.ChatMessage, error]) (*RedisMessagesSubscriber, error) {
+	workerPool *workerpool.Pool[domain.Message, error]) (*RedisMessagesSubscriber, error) {
 	rc := redis.NewClient(&redis.Options{
 		Addr:     cfg.Addr,
 		Password: cfg.Password,
@@ -47,6 +47,7 @@ func NewRedisMessagesSubscriber(ctx context.Context, cfg RedisPubSubConfig, chat
 		stopCh:      make(chan struct{}),
 	}, nil
 }
+
 func (r *RedisMessagesSubscriber) SubscribeOnMessages(ctx context.Context) error {
 	sub := r.client.Subscribe(ctx, r.cfg.ChannelName)
 	_, err := sub.Receive(ctx)
@@ -59,7 +60,7 @@ func (r *RedisMessagesSubscriber) SubscribeOnMessages(ctx context.Context) error
 	redisMsgCh := sub.Channel(redis.WithChannelSendTimeout(defaultSendTimeout))
 
 	go func() {
-		var msg domain.ChatMessage
+		var msg domain.Message
 		for redisMsg := range redisMsgCh {
 			err = json.Unmarshal([]byte(redisMsg.Payload), &msg)
 			if err != nil {

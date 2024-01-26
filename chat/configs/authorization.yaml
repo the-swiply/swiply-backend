@@ -2,7 +2,6 @@
   user: true
   s2s: false
 
-
 /swiply.chat.Chat/GetNextMessages:
   user: true
   s2s: false

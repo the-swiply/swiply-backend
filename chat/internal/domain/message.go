@@ -5,6 +5,20 @@ import (
 	"time"
 )
 
+const (
+	MessageTypeChatCreated MessageType = "CHAT_CREATED"
+	MessageTypeMessage     MessageType = "MESSAGE"
+	MessageTypeUserLeft    MessageType = "USER_LEFT"
+)
+
+type MessageType string
+
+type Message struct {
+	Type    MessageType `json:"type"`
+	ChatID  int64       `json:"chat_id"`
+	Payload any         `json:"payload"`
+}
+
 type ChatMessage struct {
 	ID       uuid.UUID `json:"id"`
 	From     uuid.UUID `json:"from"`

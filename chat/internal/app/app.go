@@ -30,6 +30,8 @@ const (
 	sequenceRedisDB       = 0
 	messagesPubSubRedisDB = 1
 	syncerRedisDB         = 2
+
+	chatBroadcastChannel = "chat_broadcast"
 )
 
 type App struct {
@@ -44,7 +46,7 @@ type App struct {
 	redisMessagesSubscriber *pubsub.RedisMessagesSubscriber
 	redisSyncer             *glsync.RedisSyncer
 	db                      *pgxpool.Pool
-	broadcastWP             *workerpool.Pool[domain.ChatMessage, error]
+	broadcastWP             *workerpool.Pool[domain.Message, error]
 
 	stopCh chan struct{}
 }
@@ -107,9 +109,10 @@ func (a *App) Run(ctx context.Context) error {
 	a.redisSequenceCache = rdbSequence
 
 	rdbPub, err := pubsub.NewRedisMessagesPublisher(ctx, pubsub.RedisPubSubConfig{
-		Addr:     a.cfg.Redis.Addr,
-		Password: os.Getenv("REDIS_PASSWORD"),
-		DB:       messagesPubSubRedisDB,
+		Addr:        a.cfg.Redis.Addr,
+		Password:    os.Getenv("REDIS_PASSWORD"),
+		DB:          messagesPubSubRedisDB,
+		ChannelName: chatBroadcastChannel,
 	})
 	if err != nil {
 		return fmt.Errorf("can't init redis publisher: %w", err)
@@ -128,19 +131,20 @@ func (a *App) Run(ctx context.Context) error {
 
 	chatSvc := service.NewChatService(service.ChatConfig{}, a.redisSequenceCache, chatRepo, a.redisMessagesPublisher, a.redisSyncer.NewChatLock)
 
-	a.broadcastWP = workerpool.NewPool[domain.ChatMessage, error](int(a.cfg.App.NumOfMessageSenderWorkers),
-		chatSvc.SendChatMessage,
-		func(msg domain.ChatMessage) int64 {
+	a.broadcastWP = workerpool.NewPool[domain.Message, error](int(a.cfg.App.NumOfMessageSenderWorkers),
+		chatSvc.SendMessageToChat,
+		func(msg domain.Message) int64 {
 			return msg.ChatID
 		},
-		workerpool.WithIgnoreResult[domain.ChatMessage, error](),
+		workerpool.WithIgnoreResult[domain.Message, error](),
 	)
 	a.broadcastWP.Start()
 
 	rdbSub, err := pubsub.NewRedisMessagesSubscriber(ctx, pubsub.RedisPubSubConfig{
-		Addr:     a.cfg.Redis.Addr,
-		Password: os.Getenv("REDIS_PASSWORD"),
-		DB:       messagesPubSubRedisDB,
+		Addr:        a.cfg.Redis.Addr,
+		Password:    os.Getenv("REDIS_PASSWORD"),
+		DB:          messagesPubSubRedisDB,
+		ChannelName: chatBroadcastChannel,
 	}, chatSvc, a.broadcastWP)
 	if err != nil {
 		return fmt.Errorf("can't init redis subscriber: %w", err)

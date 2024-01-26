@@ -31,7 +31,7 @@ func NewRedisMessagesPublisher(ctx context.Context, cfg RedisPubSubConfig) (*Red
 	}, nil
 }
 
-func (r *RedisMessagesPublisher) PublishMessage(ctx context.Context, msg domain.ChatMessage) error {
+func (r *RedisMessagesPublisher) PublishMessage(ctx context.Context, msg domain.Message) error {
 	marshalledMsg, err := json.Marshal(msg)
 	if err != nil {
 		return fmt.Errorf("can't marshal message: %w", err)

@@ -10,7 +10,7 @@ type Client struct {
 	conn *websocket.Conn
 }
 
-func (c *Client) SendMessage(msg domain.ChatMessage) error {
+func (c *Client) SendMessage(msg domain.Message) error {
 	err := c.conn.WriteJSON(msg)
 	if errors.Is(err, websocket.ErrCloseSent) {
 		return nil

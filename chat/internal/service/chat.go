@@ -24,15 +24,15 @@ type ChatRepository interface {
 	GetPreviousMessages(ctx context.Context, chatID int64, start int64, limit int64) ([]domain.ChatMessage, error)
 	GetUserChats(ctx context.Context, userID uuid.UUID) ([]domain.Chat, error)
 	RemoveUserFromChatMembers(ctx context.Context, userID uuid.UUID, chatID int64) error
-	CreateChat(ctx context.Context, members []uuid.UUID) error
+	CreateChat(ctx context.Context, members []uuid.UUID) (int64, error)
 }
 
 type MessagePublisher interface {
-	PublishMessage(ctx context.Context, msg domain.ChatMessage) error
+	PublishMessage(ctx context.Context, msg domain.Message) error
 }
 
 type ChatClient interface {
-	SendMessage(msg domain.ChatMessage) error
+	SendMessage(msg domain.Message) error
 }
 
 type ChatLocker interface {
@@ -86,7 +86,7 @@ func (c *ChatService) ReceiveChatMessage(ctx context.Context, chatID int64, cont
 		return fmt.Errorf("can't generate message sequence id for chat: %w", err)
 	}
 
-	msg := domain.ChatMessage{
+	chatMsg := domain.ChatMessage{
 		ID:       uuid.New(),
 		From:     userID,
 		ChatID:   chatID,
@@ -95,7 +95,7 @@ func (c *ChatService) ReceiveChatMessage(ctx context.Context, chatID int64, cont
 		Content:  content,
 	}
 
-	err = c.chatRepository.SaveMessage(ctx, msg)
+	err = c.chatRepository.SaveMessage(ctx, chatMsg)
 	if err != nil {
 		rollbackErr := c.seqGen.RollbackID(ctx, chatID)
 		if rollbackErr != nil {
@@ -105,15 +105,21 @@ func (c *ChatService) ReceiveChatMessage(ctx context.Context, chatID int64, cont
 		return fmt.Errorf("can't save message: %w", err)
 	}
 
+	msg := domain.Message{
+		Type:    domain.MessageTypeMessage,
+		ChatID:  chatID,
+		Payload: chatMsg,
+	}
+
 	err = c.messagePublisher.PublishMessage(ctx, msg)
 	if err != nil {
-		loggy.Errorf("can't publish message: %v", err)
+		loggy.Errorf("can't publish message on receive chat message: %v", err)
 	}
 
 	return nil
 }
 
-func (c *ChatService) SendChatMessage(ctx context.Context, msg domain.ChatMessage) error {
+func (c *ChatService) SendMessageToChat(ctx context.Context, msg domain.Message) error {
 	chatMembers, err := c.chatRepository.GetChatMembers(ctx, msg.ChatID)
 	if err != nil && !errors.Is(err, domain.ErrEntityIsNotExists) {
 		loggy.Errorf("can't get chat members: %v", err)
@@ -192,11 +198,47 @@ func (c *ChatService) LeaveChat(ctx context.Context, chatID int64) error {
 		return err
 	}
 
-	return c.chatRepository.RemoveUserFromChatMembers(ctx, userID, chatID)
+	err = c.chatRepository.RemoveUserFromChatMembers(ctx, userID, chatID)
+	if err != nil {
+		return err
+	}
+
+	msg := domain.Message{
+		Type:   domain.MessageTypeUserLeft,
+		ChatID: chatID,
+		Payload: map[string]uuid.UUID{
+			"user_id": userID,
+		},
+	}
+
+	err = c.messagePublisher.PublishMessage(ctx, msg)
+	if err != nil {
+		loggy.Errorf("can't publish message on leave chat: %v", err)
+	}
+
+	return nil
 }
 
 func (c *ChatService) CreateChat(ctx context.Context, members []uuid.UUID) error {
-	return c.chatRepository.CreateChat(ctx, members)
+	chatID, err := c.chatRepository.CreateChat(ctx, members)
+	if err != nil {
+		return err
+	}
+
+	msg := domain.Message{
+		Type:   domain.MessageTypeChatCreated,
+		ChatID: chatID,
+		Payload: map[string][]uuid.UUID{
+			"members": members,
+		},
+	}
+
+	err = c.messagePublisher.PublishMessage(ctx, msg)
+	if err != nil {
+		loggy.Errorf("can't publish message on create chat: %v", err)
+	}
+
+	return nil
 }
 
 func (c *ChatService) checkUserInChatWithError(ctx context.Context, userID uuid.UUID, chatID int64) error {
