@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: swiply-vs
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - swiply-gateway
+  http:
+    - route:
+        - destination:
+            host: user
+            port:
+              number: 80
