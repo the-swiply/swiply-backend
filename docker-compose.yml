@@ -16,6 +16,7 @@ services:
     ports:
       - 8481:84
       - 18081:80
+
   user-redis:
     image: redis:7.2
     container_name: user-redis
@@ -23,10 +24,51 @@ services:
     env_file:
       - user-infra/redis/dev.env
     ports:
-      - 6379:6379
+      - 6381:6379
     command: bash -c "redis-server --requirepass $$REDIS_PASSWORD"
     volumes:
       - user_redis_data:/data
+
+  chat:
+    container_name: chat-service
+    build:
+      context: .
+      dockerfile: chat/Dockerfile
+    restart: on-failure
+    env_file:
+      - chat/dev.env
+    depends_on:
+      - jaeger
+      - otel-collector
+      - prometheus
+      - vault
+      - chat-postgres
+      - chat-redis
+    ports:
+      - 18082:80
+
+  chat-postgres:
+    image: postgres:16.0
+    container_name: chat-postgres
+    restart: on-failure
+    env_file:
+      - chat-infra/postgres/dev.env
+    volumes:
+      - chat_postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5442:5432
+
+  chat-redis:
+    image: redis:7.2
+    container_name: chat-redis
+    restart: on-failure
+    env_file:
+      - chat-infra/redis/dev.env
+    command: bash -c "redis-server --requirepass $$REDIS_PASSWORD"
+    volumes:
+      - chat_redis_data:/data
+    ports:
+      - 6382:6379
 
   vault:
     image: vault:1.13.0
@@ -95,6 +137,7 @@ services:
 
 volumes:
   user_redis_data:
-  user_postgres_data:
+  chat_redis_data:
+  chat_postgres_data:
 
   prometheus_data:
