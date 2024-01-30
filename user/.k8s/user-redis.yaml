@@ -1,0 +1,34 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-redis
+  labels:
+    app: user-redis
+spec:
+  selector:
+    matchLabels:
+      app: user-redis
+  template:
+    metadata:
+      labels:
+        app: user-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7.2
+          imagePullPolicy: IfNotPresent
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-redis
+  labels:
+    app: user-redis
+    service: user-redis
+spec:
+  ports:
+    - name: redis
+      port: 6379
+  selector:
+    app: user-redis
