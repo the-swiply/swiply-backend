@@ -1,0 +1,26 @@
+/swiply.chat.Chat/SendMessage:
+  user: true
+  s2s: false
+
+/swiply.chat.Chat/GetNextMessages:
+  user: true
+  s2s: false
+
+/swiply.chat.Chat/GetPreviousMessages:
+  user: true
+  s2s: false
+
+/swiply.chat.Chat/GetChats:
+  user: true
+  s2s: false
+
+/swiply.chat.Chat/LeaveChat:
+  user: true
+  s2s: false
+
+/swiply.chat.Chat/CreateChat:
+  user: false
+  s2s: true
+  authorized:
+    - service1
+    - service2

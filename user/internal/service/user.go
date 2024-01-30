@@ -191,7 +191,7 @@ func (u *UserService) generateTokenPair(id string, fingerprint string) (domain.T
 
 	refreshToken, err := auf.GenerateRefreshJWT(auf.JWTRefreshProperties{
 		ID:  id,
-		TTL: u.cfg.AccessTokenTTL,
+		TTL: u.cfg.RefreshTokenTTL,
 	})
 	if err != nil {
 		return domain.TokenPair{}, fmt.Errorf("can't generate refresh token: %w", err)
