@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user
+  labels:
+    app: user
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: user
+      version: v1
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: '/metrics'
+        prometheus.io/port: '5000'
+      labels:
+        app: user
+        version: v1
+    spec:
+      containers:
+        - name: user
+          image: cr.yandex/crpf76jp63emqup99s4l/user:stable
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: user-env
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user
+  labels:
+    app: user
+    service: user
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+  selector:
+    app: user
