@@ -15,7 +15,7 @@ const (
 	configPathEnvKey  = "CONFIG_PATH"
 
 	devConfigName  = "values-dev"
-	prodConfigName = "values-production"
+	prodConfigName = "values-prod"
 )
 
 var (

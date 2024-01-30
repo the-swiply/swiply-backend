@@ -1,3 +1,5 @@
+export DOCKER_DEFAULT_PLATFORM=linux/amd64
+
 YC_CONTAINER_REGISTRY := cr.yandex/crpf76jp63emqup99s4l
 
 .PHONY: up
