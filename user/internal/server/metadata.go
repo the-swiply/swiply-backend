@@ -16,7 +16,10 @@ var fingerprintHeaders = []string{
 func createFingerprintFromMeta(md metadata.MD) string {
 	extractedHeaders := make([]string, len(fingerprintHeaders))
 	for i, header := range fingerprintHeaders {
-		extractedHeaders[i] = md.Get(header)[0]
+		h := md.Get(header)
+		if len(h) > 0 {
+			extractedHeaders[i] = h[0]
+		}
 	}
 	fingerprint := strings.Join(extractedHeaders, ":")
 
