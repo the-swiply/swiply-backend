@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-env
+data:
+  STAGE: DEV
+  USER: dev
+  SENDER_PASSWORD: f8E8KmDsBhADWagGhQuF
+  REDIS_PASSWORD: ""
+  JWT_SECRET: eHCPnzZtLNdJKgux449PXZQfEeRO9z
