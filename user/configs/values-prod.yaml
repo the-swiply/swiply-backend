@@ -1,0 +1,30 @@
+app:
+  name: "user-service"
+  graceful_shutdown_timeout_seconds: 10
+  auth_code_ttl_minutes: 15
+  auth_code_sending_min_retry_time_minutes: 2
+  max_invalid_code_attempts: 3
+  access_token_ttl_minutes: 10
+  refresh_token_ttl_hours: 168
+  uuid_namespace: c5a83fe0-a99c-4195-8eaa-2faf8f8dffc3
+
+jaeger:
+  addr: "opentelemetry-collector.otel-collector.svc.cluster.local:4317"
+
+grpc:
+  addr: ":84"
+
+http:
+  addr: ":80"
+
+swagger:
+  path: "third_party/swagger"
+
+mailer:
+  smtp_addr: "smtp.mail.ru:587"
+  sender_email: "swiply-no-reply@inbox.ru"
+  send_timeout_seconds: 5
+  after_send_pause_seconds: 1
+
+redis:
+  addr: "user-redis:6379"

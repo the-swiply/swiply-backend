@@ -64,6 +64,9 @@ func (a *App) Run(ctx context.Context) error {
 		},
 		AuthCodeTTL: time.Minute * time.Duration(a.cfg.App.AuthCodeTTLMinutes),
 	})
+	if err != nil {
+		return fmt.Errorf("can't init redis code cache: %w", err)
+	}
 	a.redisCodeCache = rdbCodes
 
 	rdbTokens, err := cache.NewRedisTokenCache(ctx, cache.RedisTokensConfig{
@@ -74,11 +77,10 @@ func (a *App) Run(ctx context.Context) error {
 		},
 		RefreshTokenTTL: time.Duration(a.cfg.App.RefreshTokenTTLHours) * time.Hour,
 	})
-	a.redisTokenCache = rdbTokens
-
 	if err != nil {
-		return fmt.Errorf("can't init redis cache: %w", err)
+		return fmt.Errorf("can't init redis token cache: %w", err)
 	}
+	a.redisTokenCache = rdbTokens
 
 	mailSender, err := mailer.NewSMTPClient(mailer.SMTPConfig{
 		SenderEmail:    a.cfg.Mailer.SenderEmail,
