@@ -8,8 +8,17 @@ spec:
   gateways:
     - swiply-gateway
   http:
-    - route:
+    - match:
+        - port: 80
+      route:
         - destination:
             host: user
             port:
               number: 80
+    - match:
+        - port: 84
+      route:
+        - destination:
+            host: user
+            port:
+              number: 84

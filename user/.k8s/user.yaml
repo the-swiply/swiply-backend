@@ -26,7 +26,10 @@ spec:
           image: cr.yandex/crpf76jp63emqup99s4l/user:stable
           imagePullPolicy: Always
           ports:
-            - containerPort: 80
+            - name: http
+              containerPort: 80
+            - name: grpc
+              containerPort: 84
           envFrom:
             - secretRef:
                 name: user-secret
@@ -44,5 +47,9 @@ spec:
       protocol: TCP
       port: 80
       targetPort: 80
+    - name: grpc
+      protocol: TCP
+      port: 84
+      targetPort: 84
   selector:
     app: user

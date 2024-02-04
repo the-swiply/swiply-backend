@@ -14,7 +14,7 @@ spec:
         - "*"
     - port:
         number: 84
-        name: http2
-        protocol: HTTP2
+        name: grpc
+        protocol: GRPC
       hosts:
         - "*"
