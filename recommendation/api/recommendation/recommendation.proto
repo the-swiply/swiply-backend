@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option go_package = "github.com/the-swiply/recommendation/pkg/api/recommendation";
+
+import "google/api/annotations.proto";
+
+package swiply.recommendation;
+
+service Recommendation {
+  rpc GetRecommendations(GetRecommendationsRequest) returns (GetRecommendationsResponse){
+    option (google.api.http) = {
+      post: "/v1/get-recommendations"
+      body: "*"
+    };
+  }
+}
+
+message GetRecommendationsRequest {
+  int64 limit = 1;
+}
+
+message GetRecommendationsResponse{
+  repeated string userIDs = 1;
+}
