@@ -70,6 +70,34 @@ services:
     ports:
       - 6382:6379
 
+  recommendation:
+    container_name: recommendation-service
+    build:
+      context: .
+      dockerfile: recommendation/Dockerfile
+    restart: on-failure
+    env_file:
+      - recommendation/dev.env
+    depends_on:
+      - jaeger
+      - otel-collector
+      - prometheus
+      - vault
+      - recommendation-postgres
+    ports:
+      - 18083:80
+
+  recommendation-postgres:
+    image: postgres:16.0
+    container_name: recommendation-postgres
+    restart: on-failure
+    env_file:
+      - recommendation-infra/postgres/dev.env
+    volumes:
+      - recommendation_postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5443:5432
+
   vault:
     image: vault:1.13.0
     container_name: vault
@@ -139,5 +167,6 @@ volumes:
   user_redis_data:
   chat_redis_data:
   chat_postgres_data:
+  recommendation_postgres_data:
 
   prometheus_data:
