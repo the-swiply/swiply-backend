@@ -70,6 +70,17 @@ services:
     ports:
       - 6382:6379
 
+  oracle:
+    container_name: oracle-service
+    build:
+      context: .
+      dockerfile: oracle/Dockerfile
+    restart: on-failure
+    env_file:
+      - oracle/dev.env
+    ports:
+      - 18084:80
+
   recommendation:
     container_name: recommendation-service
     build:
