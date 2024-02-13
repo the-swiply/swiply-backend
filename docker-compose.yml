@@ -84,6 +84,7 @@ services:
       - prometheus
       - vault
       - recommendation-postgres
+      - recommendation-redis
     ports:
       - 18083:80
 
@@ -97,6 +98,18 @@ services:
       - recommendation_postgres_data:/var/lib/postgresql/data
     ports:
       - 5443:5432
+
+  recommendation-redis:
+    image: redis:7.2
+    container_name: recommendation-redis
+    restart: on-failure
+    env_file:
+      - recommendation-infra/redis/dev.env
+    command: bash -c "redis-server --requirepass $$REDIS_PASSWORD"
+    volumes:
+      - recommendation_redis_data:/data
+    ports:
+      - 6383:6379
 
   vault:
     image: vault:1.13.0
@@ -168,5 +181,6 @@ volumes:
   chat_redis_data:
   chat_postgres_data:
   recommendation_postgres_data:
+  recommendation_redis_data:
 
   prometheus_data:

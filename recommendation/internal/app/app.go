@@ -4,11 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/the-swiply/swiply-backend/pkg/dobby"
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"github.com/the-swiply/swiply-backend/pkg/houston/runner"
 	"github.com/the-swiply/swiply-backend/recommendation/internal/repository"
+	"github.com/the-swiply/swiply-backend/recommendation/internal/scheduler"
 	"github.com/the-swiply/swiply-backend/recommendation/internal/server"
 	"github.com/the-swiply/swiply-backend/recommendation/internal/service"
 	"go.uber.org/multierr"
@@ -19,6 +21,8 @@ import (
 
 const (
 	authConfigPath = "configs/authorization.yaml"
+
+	cronRedisDB = 0
 )
 
 type App struct {
@@ -28,7 +32,8 @@ type App struct {
 	grpcServer *server.GRPCServer
 	httpServer *server.HTTPServer
 
-	db *pgxpool.Pool
+	db        *pgxpool.Pool
+	redisCron *scheduler.RedisCron
 
 	stopCh chan struct{}
 }
@@ -73,10 +78,46 @@ func (a *App) Run(ctx context.Context) error {
 	a.db = db
 
 	recRepo := repository.NewRecommendationRepository(a.db)
+	dpRepo := repository.NewDataProviderRepository(a.db)
+
+	dpSvc := service.NewDataProviderService(service.DataProviderConfig{}, dpRepo)
+
+	rdbCron, err := scheduler.NewRedisCron(scheduler.RedisCronConfig{
+		Addr:                   a.cfg.Redis.Addr,
+		Password:               os.Getenv("REDIS_PASSWORD"),
+		DB:                     cronRedisDB,
+		StatisticUpdateCron:    a.cfg.App.StatisticUpdateCron,
+		TriggerOracleLearnCron: a.cfg.App.TriggerOracleLearnCron,
+	}, dpSvc)
+	if err != nil {
+		return fmt.Errorf("can't init redis cron scheduler: %w", err)
+	}
+	a.redisCron = rdbCron
+
+	if err != nil {
+		return fmt.Errorf("can't register update statistic task")
+	}
 
 	recSvc := service.NewRecommendationService(service.RecommendationConfig{}, recRepo)
 
-	errCh := make(chan error, 2)
+	errCh := make(chan error, 4)
+	go func() {
+		err = a.runUpdateServer()
+		if err != nil && !errors.Is(err, asynq.ErrServerClosed) {
+			errCh <- fmt.Errorf("can't run cron server: %w", err)
+		} else {
+			errCh <- nil
+		}
+	}()
+
+	go func() {
+		err = a.runUpdateScheduler()
+		if err != nil && !errors.Is(err, asynq.ErrServerClosed) {
+			errCh <- fmt.Errorf("can't run cron scheduler: %w", err)
+		} else {
+			errCh <- nil
+		}
+	}()
 
 	go func() {
 		if err = a.runGRPCServer(recSvc); err != nil {
@@ -99,6 +140,22 @@ func (a *App) Run(ctx context.Context) error {
 		if err = <-errCh; err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (a *App) runUpdateServer() error {
+	if err := a.redisCron.RunServer(); err != nil {
+		return fmt.Errorf("can't run: %w", err)
+	}
+
+	return nil
+}
+
+func (a *App) runUpdateScheduler() error {
+	if err := a.redisCron.RunScheduler(); err != nil {
+		return fmt.Errorf("can't run: %w", err)
 	}
 
 	return nil
