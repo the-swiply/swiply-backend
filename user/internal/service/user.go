@@ -13,8 +13,7 @@ import (
 )
 
 const (
-	authTemplatePath = "templates/auth_mail.html"
-	authSubject      = "Swiply Authorization"
+	authSubject = "Swiply Authorization"
 )
 
 type AuthCodeCache interface {
