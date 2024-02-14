@@ -7,6 +7,10 @@ import (
 	"html/template"
 )
 
+var (
+	authMailTemplate = template.Must(template.New("auth_mail.html").ParseFiles("templates/auth_mail.html"))
+)
+
 type MailSender interface {
 	SendEmail(ctx context.Context, to []string, subject string, body []byte) error
 }
@@ -23,12 +27,8 @@ func NewSenderService(mailSender MailSender) *SenderService {
 
 func (f *SenderService) SendEmailWithAuthorizationCode(ctx context.Context, to []string, subject string, code int) error {
 	buffer := &bytes.Buffer{}
-	tmpl, err := template.ParseFiles(authTemplatePath)
-	if err != nil {
-		return fmt.Errorf("can't parse template: %w", err)
-	}
 
-	err = tmpl.Execute(buffer, struct {
+	err := authMailTemplate.Execute(buffer, struct {
 		Code int
 	}{
 		Code: code,
