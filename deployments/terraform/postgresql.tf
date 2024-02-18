@@ -25,9 +25,9 @@ resource "yandex_mdb_postgresql_cluster" "mdb" {
   }
 }
 
-resource "yandex_mdb_postgresql_database" "test" {
+resource "yandex_mdb_postgresql_database" "srv" {
   cluster_id = yandex_mdb_postgresql_cluster.mdb.id
-  name       = "test"
+  name       = "srv"
   owner      = var.postgres-admin.login
   depends_on = [
     yandex_mdb_postgresql_user.postgres-admin

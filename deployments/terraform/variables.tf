@@ -6,3 +6,9 @@ variable "postgres-admin" {
 
   sensitive = true
 }
+
+variable "redis-admin-password" {
+  type = string
+
+  sensitive = true
+}
