@@ -27,10 +27,6 @@ import (
 const (
 	authConfigPath = "configs/authorization.yaml"
 
-	sequenceRedisDB       = 0
-	messagesPubSubRedisDB = 1
-	syncerRedisDB         = 2
-
 	chatBroadcastChannel = "chat_broadcast"
 )
 
@@ -101,7 +97,7 @@ func (a *App) Run(ctx context.Context) error {
 	rdbSequence, err := cache.NewRedisSequenceCache(ctx, cache.RedisSequenceConfig{
 		Addr:     a.cfg.Redis.Addr,
 		Password: os.Getenv("REDIS_PASSWORD"),
-		DB:       sequenceRedisDB,
+		DB:       int(a.cfg.Redis.DB.Sequence),
 	})
 	if err != nil {
 		return fmt.Errorf("can't init redis cache: %w", err)
@@ -111,7 +107,7 @@ func (a *App) Run(ctx context.Context) error {
 	rdbPub, err := pubsub.NewRedisMessagesPublisher(ctx, pubsub.RedisPubSubConfig{
 		Addr:        a.cfg.Redis.Addr,
 		Password:    os.Getenv("REDIS_PASSWORD"),
-		DB:          messagesPubSubRedisDB,
+		DB:          int(a.cfg.Redis.DB.MessagesPubSub),
 		ChannelName: chatBroadcastChannel,
 	})
 	if err != nil {
@@ -121,7 +117,7 @@ func (a *App) Run(ctx context.Context) error {
 	rdbSync, err := glsync.NewRedisSyncer(ctx, glsync.RedisSyncerConfig{
 		Addr:           a.cfg.Redis.Addr,
 		Password:       os.Getenv("REDIS_PASSWORD"),
-		DB:             syncerRedisDB,
+		DB:             int(a.cfg.Redis.DB.Syncer),
 		LockExpiration: time.Millisecond * time.Duration(a.cfg.App.ChatLockExpirationMilliseconds),
 	})
 	if err != nil {
@@ -143,7 +139,7 @@ func (a *App) Run(ctx context.Context) error {
 	rdbSub, err := pubsub.NewRedisMessagesSubscriber(ctx, pubsub.RedisPubSubConfig{
 		Addr:        a.cfg.Redis.Addr,
 		Password:    os.Getenv("REDIS_PASSWORD"),
-		DB:          messagesPubSubRedisDB,
+		DB:          int(a.cfg.Redis.DB.MessagesPubSub),
 		ChannelName: chatBroadcastChannel,
 	}, chatSvc, a.broadcastWP)
 	if err != nil {

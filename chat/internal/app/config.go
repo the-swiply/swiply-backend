@@ -27,7 +27,14 @@ type Swagger struct {
 }
 
 type Redis struct {
-	Addr string `yaml:"addr"`
+	Addr string  `yaml:"addr"`
+	DB   RedisDB `yaml:"db"`
+}
+
+type RedisDB struct {
+	Sequence       int64
+	MessagesPubSub int64
+	Syncer         int64
 }
 
 type Postgres struct {

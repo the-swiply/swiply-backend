@@ -27,4 +27,8 @@ mailer:
   after_send_pause_seconds: 1
 
 redis:
-  addr: "user-redis:6379"
+  addr: "c-c9qgvgufjkosoif8cuca.rw.mdb.yandexcloud.net:6379"
+  db:
+    codes: 1
+    tokens: 2
+    mailer_queue: 3
