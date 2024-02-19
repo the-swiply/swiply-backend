@@ -40,5 +40,12 @@ type Mailer struct {
 }
 
 type Redis struct {
-	Addr string `yaml:"addr"`
+	Addr string  `yaml:"addr"`
+	DB   RedisDB `yaml:"db"`
+}
+
+type RedisDB struct {
+	Codes       int64
+	Tokens      int64
+	MailerQueue int64
 }

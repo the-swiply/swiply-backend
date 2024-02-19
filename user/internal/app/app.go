@@ -20,12 +20,6 @@ import (
 	"time"
 )
 
-const (
-	codesRedisDB       = 0
-	tokensRedisDB      = 1
-	mailerQueueRedisDB = 2
-)
-
 type App struct {
 	runner.RunStopper
 	cfg *Config
@@ -60,7 +54,7 @@ func (a *App) Run(ctx context.Context) error {
 		RedisDefaultConfig: cache.RedisDefaultConfig{
 			Addr:     a.cfg.Redis.Addr,
 			Password: os.Getenv("REDIS_PASSWORD"),
-			DB:       codesRedisDB,
+			DB:       int(a.cfg.Redis.DB.Codes),
 		},
 		AuthCodeTTL: time.Minute * time.Duration(a.cfg.App.AuthCodeTTLMinutes),
 	})
@@ -73,7 +67,7 @@ func (a *App) Run(ctx context.Context) error {
 		RedisDefaultConfig: cache.RedisDefaultConfig{
 			Addr:     a.cfg.Redis.Addr,
 			Password: os.Getenv("REDIS_PASSWORD"),
-			DB:       tokensRedisDB,
+			DB:       int(a.cfg.Redis.DB.Tokens),
 		},
 		RefreshTokenTTL: time.Duration(a.cfg.App.RefreshTokenTTLHours) * time.Hour,
 	})
@@ -96,7 +90,7 @@ func (a *App) Run(ctx context.Context) error {
 	mailerQueue := queue.NewMailerQueue(queue.MailerConfig{
 		RedisAddr:            a.cfg.Redis.Addr,
 		RedisPassword:        os.Getenv("REDIS_PASSWORD"),
-		RedisDB:              mailerQueueRedisDB,
+		RedisDB:              int(a.cfg.Redis.DB.MailerQueue),
 		SendTimeout:          time.Duration(a.cfg.Mailer.SendTimeoutSeconds) * time.Second,
 		AfterSendWorkerPause: time.Duration(a.cfg.Mailer.AfterSendPauseSeconds) * time.Second,
 	}, senderSvc)

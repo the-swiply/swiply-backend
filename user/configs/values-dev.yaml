@@ -28,3 +28,7 @@ mailer:
 
 redis:
   addr: "user-redis:6379"
+  db:
+    codes: 0
+    tokens: 1
+    mailer_queue: 2
