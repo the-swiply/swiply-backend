@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option go_package = "github.com/the-swiply/oracle/pkg/api/oracle";
+
+package swiply.oracle;
+
+service Oracle {
+  rpc RetrainLFMv1(RetrainLFMv1Request) returns (RetrainLFMv1Response);
+  rpc GetTaskStatus(GetTaskStatusRequest) returns (GetTaskStatusResponse);
+}
+
+message RetrainLFMv1Request {}
+
+message RetrainLFMv1Response{
+  string task_id = 1;
+}
+
+message GetTaskStatusRequest{
+  string task_id = 1;
+}
+
+enum TaskStatus {
+  UNKNOWN = 0;
+  IN_PROGRESS = 1;
+  SUCCESS = 2;
+  ERROR = 3;
+}
+
+message GetTaskStatusResponse{
+  TaskStatus status = 1;
+  string details = 2;
+}
