@@ -111,6 +111,17 @@ services:
     ports:
       - 6383:6379
 
+  oracle:
+    container_name: oracle-service
+    build:
+      context: .
+      dockerfile: oracle/Dockerfile
+    restart: on-failure
+    env_file:
+      - oracle/dev.env
+    ports:
+      - 18084:80
+
   vault:
     image: vault:1.13.0
     container_name: vault
