@@ -10,6 +10,7 @@ import (
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"github.com/the-swiply/swiply-backend/pkg/houston/runner"
 	"github.com/the-swiply/swiply-backend/recommendation/internal/repository"
+	"github.com/the-swiply/swiply-backend/recommendation/internal/rpclients"
 	"github.com/the-swiply/swiply-backend/recommendation/internal/scheduler"
 	"github.com/the-swiply/swiply-backend/recommendation/internal/server"
 	"github.com/the-swiply/swiply-backend/recommendation/internal/service"
@@ -80,7 +81,13 @@ func (a *App) Run(ctx context.Context) error {
 	recRepo := repository.NewRecommendationRepository(a.db)
 	dpRepo := repository.NewDataProviderRepository(a.db)
 
-	dpSvc := service.NewDataProviderService(service.DataProviderConfig{}, dpRepo)
+	oracleClient, err := rpclients.NewOracleClient(a.cfg.Oracle.Addr)
+	if err != nil {
+		return fmt.Errorf("can't get oracle client: %w", err)
+	}
+	defer oracleClient.CloseConn()
+
+	dpSvc := service.NewDataProviderService(service.DataProviderConfig{}, dpRepo, oracleClient)
 
 	rdbCron, err := scheduler.NewRedisCron(scheduler.RedisCronConfig{
 		Addr:                   a.cfg.Redis.Addr,
@@ -204,6 +211,7 @@ func (a *App) Stop(ctx context.Context) error {
 	err := multierr.Combine(
 		a.grpcServer.Shutdown(ctx),
 		a.httpServer.Shutdown(ctx),
+
 		a.RunStopper.Stop(ctx),
 	)
 	a.db.Close()
