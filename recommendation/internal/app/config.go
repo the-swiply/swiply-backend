@@ -7,6 +7,7 @@ type Config struct {
 	Swagger  `yaml:"swagger"`
 	Postgres `yaml:"postgres"`
 	Redis    `yaml:"redis"`
+	Oracle   `yaml:"oracle"`
 }
 
 type Application struct {
@@ -37,5 +38,9 @@ type Postgres struct {
 }
 
 type Redis struct {
+	Addr string `yaml:"addr"`
+}
+
+type Oracle struct {
 	Addr string `yaml:"addr"`
 }

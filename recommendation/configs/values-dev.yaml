@@ -26,3 +26,6 @@ postgres:
 
 redis:
   addr: "recommendation-redis:6379"
+
+oracle:
+  addr: "oracle:84"
