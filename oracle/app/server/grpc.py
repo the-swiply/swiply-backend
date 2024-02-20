@@ -1,9 +1,9 @@
-import logging
 from concurrent import futures
 from typing import NoReturn
 
 import grpc
 from app.api.oracle import oracle_pb2_grpc
+from app.houston import loggy
 
 
 class OracleServer:
@@ -16,8 +16,8 @@ class OracleServer:
 
     def serve(self) -> NoReturn:
         self.__server.start()
-        logging.info(f'server started on {self.__address}')
+        loggy.info(f'server started on {self.__address}')
 
     def stop(self, grace_timeout_seconds: int) -> NoReturn:
         self.__server.stop(grace=grace_timeout_seconds)
-        logging.info('server stopped')
+        loggy.info('server stopped')

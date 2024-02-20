@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/the-swiply/swiply-backend/recommendation/internal/pb/oracle"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type OracleClient struct {
@@ -14,6 +15,7 @@ type OracleClient struct {
 
 func NewOracleClient(addr string) (*OracleClient, error) {
 	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	conn, err := grpc.Dial(addr, opts...)
 	if err != nil {

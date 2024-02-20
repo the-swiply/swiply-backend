@@ -119,7 +119,9 @@ func (s *statisticUpdateHandler) ProcessTask(ctx context.Context, _ *asynq.Task)
 	loggy.Infoln("start updating statistics")
 	err := s.dpService.UpdateStatistic(ctx)
 	if err != nil {
-		return fmt.Errorf("can't update statistics: %w", err)
+		err := fmt.Errorf("can't update statistics: %w", err)
+		loggy.Errorln(err)
+		return err
 	}
 	loggy.Infoln("statistics updated")
 
@@ -131,10 +133,15 @@ type triggerOracleLearnHandler struct {
 }
 
 func (s *triggerOracleLearnHandler) ProcessTask(ctx context.Context, _ *asynq.Task) error {
+	loggy.Infoln("start updating oracle data")
+
 	err := s.dpService.UpdateOracleData(ctx)
 	if err != nil {
-		return fmt.Errorf("can't update oracle data: %w", err)
+		err := fmt.Errorf("can't update oracle data: %w", err)
+		loggy.Errorln(err)
+		return err
 	}
+	loggy.Infoln("ok")
 
 	return nil
 }
