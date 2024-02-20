@@ -1,2 +1,6 @@
 app:
   name: "oracle"
+  graceful_shutdown_timeout_seconds: 10
+
+grpc:
+  addr: "0.0.0.0:84"

@@ -3,7 +3,7 @@ import logging
 
 import yaml
 
-from app.snake import stage
+from app.houston import stage
 
 DEV_CONFIG_NAME = "values-dev"
 PROD_CONFIG_NAME = "values-prod"
@@ -22,7 +22,6 @@ def parse_yaml():
     with open(cfg_path, 'r') as f:
         global __instance
         __instance = yaml.full_load(f)
-    print(__instance)
 
 
 def get(key: str):
