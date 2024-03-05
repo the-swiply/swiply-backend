@@ -9,6 +9,7 @@ import (
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/the-swiply/swiply-backend/pkg/houston/grut"
+	"github.com/the-swiply/swiply-backend/pkg/houston/tracy"
 	"github.com/the-swiply/swiply-backend/user/internal/domain"
 	"github.com/the-swiply/swiply-backend/user/internal/service"
 	"github.com/the-swiply/swiply-backend/user/pkg/api/user"
@@ -64,6 +65,9 @@ func (g *GRPCServer) Shutdown(ctx context.Context) error {
 }
 
 func (g *GRPCServer) SendAuthorizationCode(ctx context.Context, req *user.SendAuthorizationCodeRequest) (*user.SendAuthorizationCodeResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	_, err := mail.ParseAddress(req.GetEmail())
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid email")
@@ -81,6 +85,9 @@ func (g *GRPCServer) SendAuthorizationCode(ctx context.Context, req *user.SendAu
 }
 
 func (g *GRPCServer) Login(ctx context.Context, req *user.LoginRequest) (*user.LoginResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, status.Error(codes.InvalidArgument, "no incoming meta")
@@ -102,6 +109,9 @@ func (g *GRPCServer) Login(ctx context.Context, req *user.LoginRequest) (*user.L
 }
 
 func (g *GRPCServer) Refresh(ctx context.Context, req *user.RefreshRequest) (*user.RefreshResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, status.Error(codes.InvalidArgument, "no incoming meta")
