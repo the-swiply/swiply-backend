@@ -3,6 +3,7 @@ package mailer
 import (
 	"context"
 	"fmt"
+	"github.com/the-swiply/swiply-backend/pkg/houston/tracy"
 	"net"
 	"net/smtp"
 )
@@ -27,6 +28,9 @@ func NewSMTPClient(cfg SMTPConfig) (*SMTPClient, error) {
 }
 
 func (s *SMTPClient) SendEmail(ctx context.Context, to []string, subject string, body []byte) error {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	smtpMsg := fmt.Sprintf(
 		`Subject: %s
 %s

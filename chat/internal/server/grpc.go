@@ -14,6 +14,7 @@ import (
 	"github.com/the-swiply/swiply-backend/chat/internal/service"
 	"github.com/the-swiply/swiply-backend/chat/pkg/api/chat"
 	"github.com/the-swiply/swiply-backend/pkg/houston/grut"
+	"github.com/the-swiply/swiply-backend/pkg/houston/tracy"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -65,6 +66,9 @@ func (g *GRPCServer) Shutdown(ctx context.Context) error {
 }
 
 func (g *GRPCServer) SendMessage(ctx context.Context, req *chat.SendMessageRequest) (*chat.SendMessageResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	err := g.chatService.ReceiveChatMessage(ctx, req.GetChatId(), req.GetContent())
 	switch {
 	case errors.Is(err, domain.ErrEntityIsNotExists):
@@ -79,6 +83,9 @@ func (g *GRPCServer) SendMessage(ctx context.Context, req *chat.SendMessageReque
 }
 
 func (g *GRPCServer) GetNextMessages(ctx context.Context, req *chat.GetNextMessagesRequest) (*chat.GetNextMessagesResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	if req.GetLimit() < 0 {
 		return nil, status.Error(codes.InvalidArgument, "limit must be not negative")
 	}
@@ -99,6 +106,9 @@ func (g *GRPCServer) GetNextMessages(ctx context.Context, req *chat.GetNextMessa
 }
 
 func (g *GRPCServer) GetPreviousMessages(ctx context.Context, req *chat.GetPreviousMessagesRequest) (*chat.GetPreviousMessagesResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	if req.GetLimit() < 0 {
 		return nil, status.Error(codes.InvalidArgument, "limit must be not negative")
 	}
@@ -118,7 +128,10 @@ func (g *GRPCServer) GetPreviousMessages(ctx context.Context, req *chat.GetPrevi
 	}, nil
 }
 
-func (g *GRPCServer) GetChats(ctx context.Context, req *chat.GetChatsRequest) (*chat.GetChatsResponse, error) {
+func (g *GRPCServer) GetChats(ctx context.Context, _ *chat.GetChatsRequest) (*chat.GetChatsResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	chats, err := g.chatService.GetUserChats(ctx)
 	if err != nil {
 		return nil, grut.InternalError("can't get user's chats", err)
@@ -130,6 +143,9 @@ func (g *GRPCServer) GetChats(ctx context.Context, req *chat.GetChatsRequest) (*
 }
 
 func (g *GRPCServer) LeaveChat(ctx context.Context, req *chat.LeaveChatRequest) (*chat.LeaveChatResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	err := g.chatService.LeaveChat(ctx, req.GetChatId())
 	switch {
 	case errors.Is(err, domain.ErrEntityIsNotExists):
@@ -144,6 +160,9 @@ func (g *GRPCServer) LeaveChat(ctx context.Context, req *chat.LeaveChatRequest) 
 }
 
 func (g *GRPCServer) CreateChat(ctx context.Context, req *chat.CreateChatRequest) (*chat.CreateChatResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	members, err := converter.StringsToUUIDs(req.GetMembers())
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
