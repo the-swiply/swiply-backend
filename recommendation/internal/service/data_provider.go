@@ -3,9 +3,20 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/the-swiply/swiply-backend/recommendation/internal/domain"
+	"time"
 )
 
 type DataProviderRepository interface {
+	GetLastProfileUpdate(ctx context.Context) (time.Time, error)
+	GetLastInteractionUpdate(ctx context.Context) (time.Time, error)
+	UpsertProfiles(ctx context.Context, profiles []domain.Profile) error
+	UpsertInteractions(ctx context.Context, interactions []domain.Interaction) error
+}
+
+type ProfileClient interface {
+	GetInteractions(ctx context.Context, from time.Time) ([]domain.Interaction, error)
+	GetProfiles(ctx context.Context, from time.Time) ([]domain.Profile, error)
 }
 
 type OracleClient interface {
@@ -13,20 +24,53 @@ type OracleClient interface {
 }
 
 type DataProviderService struct {
-	cfg          DataProviderConfig
-	dpRepo       DataProviderRepository
-	oracleClient OracleClient
+	cfg           DataProviderConfig
+	dpRepo        DataProviderRepository
+	oracleClient  OracleClient
+	profileClient ProfileClient
 }
 
-func NewDataProviderService(cfg DataProviderConfig, dpRepo DataProviderRepository, oracleClient OracleClient) *DataProviderService {
+func NewDataProviderService(cfg DataProviderConfig, dpRepo DataProviderRepository,
+	oracleClient OracleClient, profileClient ProfileClient) *DataProviderService {
 	return &DataProviderService{
-		cfg:          cfg,
-		dpRepo:       dpRepo,
-		oracleClient: oracleClient,
+		cfg:           cfg,
+		dpRepo:        dpRepo,
+		oracleClient:  oracleClient,
+		profileClient: profileClient,
 	}
 }
 
 func (d *DataProviderService) UpdateStatistic(ctx context.Context) error {
+	lastProfileUpdate, err := d.dpRepo.GetLastProfileUpdate(ctx)
+	if err != nil {
+		return fmt.Errorf("can't get last time update of profiles: %w", err)
+	}
+
+	lastInteractionUpdate, err := d.dpRepo.GetLastInteractionUpdate(ctx)
+	if err != nil {
+		return fmt.Errorf("can't get last time update of interactions: %w", err)
+	}
+
+	profiles, err := d.profileClient.GetProfiles(ctx, lastProfileUpdate)
+	if err != nil {
+		return fmt.Errorf("can't get profiles: %w", err)
+	}
+
+	err = d.dpRepo.UpsertProfiles(ctx, profiles)
+	if err != nil {
+		return fmt.Errorf("can't upsert pofiles")
+	}
+
+	interactions, err := d.profileClient.GetInteractions(ctx, lastInteractionUpdate)
+	if err != nil {
+		return fmt.Errorf("can't get interactions: %w", err)
+	}
+
+	err = d.dpRepo.UpsertInteractions(ctx, interactions)
+	if err != nil {
+		return fmt.Errorf("can't upsert interactions")
+	}
+
 	return nil
 }
 
