@@ -4,3 +4,10 @@ app:
 
 grpc:
   addr: "0.0.0.0:84"
+
+postgres:
+  username: "recommendation-owner"
+  host: "recommendation-postgres"
+  port: "5432"
+  db_name: "recommendation"
+  ssl_mode: "disable"
