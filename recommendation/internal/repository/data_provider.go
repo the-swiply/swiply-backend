@@ -43,6 +43,24 @@ func (d *DataProviderRepository) getLastUpdate(ctx context.Context, table string
 	return lastUpdate, nil
 }
 
+func (d *DataProviderRepository) UpdateLastProfileUpdate(ctx context.Context, ts time.Time) error {
+	return d.setLastUpdate(ctx, "profile", ts)
+}
+
+func (d *DataProviderRepository) UpdateLastInteractionUpdate(ctx context.Context, ts time.Time) error {
+	return d.setLastUpdate(ctx, "interaction", ts)
+}
+
+func (d *DataProviderRepository) setLastUpdate(ctx context.Context, table string, ts time.Time) error {
+	q := fmt.Sprintf(`UPDATE %s SET last_update = $1 WHERE entity = $2`, updateInfoTable)
+	_, err := d.db.Exec(ctx, q, ts, table)
+	if err != nil {
+		return fmt.Errorf("can't exec query: %w", err)
+	}
+
+	return nil
+}
+
 func (d *DataProviderRepository) UpsertProfiles(ctx context.Context, profiles []domain.Profile) error {
 	q := fmt.Sprintf(`INSERT INTO %s (id, from, to, positive, updated_at)
 VALUES (@id, @from, @to, @positive, @updated_at)

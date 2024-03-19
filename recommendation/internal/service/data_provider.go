@@ -10,6 +10,8 @@ import (
 type DataProviderRepository interface {
 	GetLastProfileUpdate(ctx context.Context) (time.Time, error)
 	GetLastInteractionUpdate(ctx context.Context) (time.Time, error)
+	UpdateLastProfileUpdate(ctx context.Context, ts time.Time) error
+	UpdateLastInteractionUpdate(ctx context.Context, ts time.Time) error
 	UpsertProfiles(ctx context.Context, profiles []domain.Profile) error
 	UpsertInteractions(ctx context.Context, interactions []domain.Interaction) error
 }
@@ -69,6 +71,16 @@ func (d *DataProviderService) UpdateStatistic(ctx context.Context) error {
 	err = d.dpRepo.UpsertInteractions(ctx, interactions)
 	if err != nil {
 		return fmt.Errorf("can't upsert interactions")
+	}
+
+	err = d.dpRepo.UpdateLastProfileUpdate(ctx, time.Now())
+	if err != nil {
+		return fmt.Errorf("can't udpate last time update of profiles: %w", err)
+	}
+
+	err = d.dpRepo.UpdateLastInteractionUpdate(ctx, time.Now())
+	if err != nil {
+		return fmt.Errorf("can't update last time update of interactions: %w", err)
 	}
 
 	return nil
