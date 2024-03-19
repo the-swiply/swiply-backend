@@ -78,6 +78,15 @@ func (a *App) Run(ctx context.Context) error {
 	}
 	a.db = db
 
+	if os.Getenv("DISABLE_AUTO_MIGRATION") == "" {
+		loggy.Infoln("starting migrations")
+		err = dobby.AutoMigratePostgres(a.db, a.cfg.Postgres.MigrationsFolder)
+		if err != nil {
+			return fmt.Errorf("can't apply migrations: %w", err)
+		}
+		loggy.Infoln("migration done")
+	}
+
 	recRepo := repository.NewRecommendationRepository(a.db)
 	dpRepo := repository.NewDataProviderRepository(a.db)
 
@@ -87,8 +96,12 @@ func (a *App) Run(ctx context.Context) error {
 	}
 	defer oracleClient.CloseConn()
 
-	dpSvc := service.NewDataProviderService(service.DataProviderConfig{}, dpRepo, oracleClient)
+	dpSvc := service.NewDataProviderService(service.DataProviderConfig{}, dpRepo, oracleClient, nil)
 
+	err = dpSvc.UpdateStatistic(ctx)
+	if err != nil {
+		loggy.Fatal(err)
+	}
 	rdbCron, err := scheduler.NewRedisCron(scheduler.RedisCronConfig{
 		Addr:                   a.cfg.Redis.Addr,
 		Password:               os.Getenv("REDIS_PASSWORD"),
