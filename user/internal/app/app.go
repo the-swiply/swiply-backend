@@ -14,6 +14,7 @@ import (
 	"github.com/the-swiply/swiply-backend/user/internal/server"
 	"github.com/the-swiply/swiply-backend/user/internal/service"
 	"go.uber.org/multierr"
+	"html/template"
 	"net"
 	"net/http"
 	"os"
@@ -85,7 +86,8 @@ func (a *App) Run(ctx context.Context) error {
 		return fmt.Errorf("can't init smtp client: %w", err)
 	}
 
-	senderSvc := service.NewSenderService(mailSender)
+	authTmpl := template.Must(template.New("auth_mail.html").ParseFiles("templates/auth_mail.html"))
+	senderSvc := service.NewSenderService(mailSender, authTmpl)
 
 	mailerQueue := queue.NewMailerQueue(queue.MailerConfig{
 		RedisAddr:            a.cfg.Redis.Addr,
