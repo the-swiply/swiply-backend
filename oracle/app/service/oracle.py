@@ -10,3 +10,8 @@ class OracleService(oracle_pb2_grpc.OracleServicer):
         loggy.info("start retrain LFMv1")
 
         return oracle_pb2.RetrainLFMv1Response()
+
+    def GetTaskStatus(self, request, context):
+        loggy.info("stub for future release")
+
+        return oracle_pb2.GetTaskStatusResponse()
