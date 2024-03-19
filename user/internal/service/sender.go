@@ -12,23 +12,21 @@ type MailSender interface {
 }
 
 type SenderService struct {
-	mailSender MailSender
+	authMailTemplate *template.Template
+	mailSender       MailSender
 }
 
-func NewSenderService(mailSender MailSender) *SenderService {
+func NewSenderService(mailSender MailSender, tmpl *template.Template) *SenderService {
 	return &SenderService{
-		mailSender: mailSender,
+		authMailTemplate: tmpl,
+		mailSender:       mailSender,
 	}
 }
 
 func (f *SenderService) SendEmailWithAuthorizationCode(ctx context.Context, to []string, subject string, code int) error {
 	buffer := &bytes.Buffer{}
-	tmpl, err := template.ParseFiles(authTemplatePath)
-	if err != nil {
-		return fmt.Errorf("can't parse template: %w", err)
-	}
 
-	err = tmpl.Execute(buffer, struct {
+	err := f.authMailTemplate.Execute(buffer, struct {
 		Code int
 	}{
 		Code: code,

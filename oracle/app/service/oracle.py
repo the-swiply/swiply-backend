@@ -1,6 +1,5 @@
-import logging
-
 from app.api.oracle import oracle_pb2_grpc, oracle_pb2
+from app.houston import loggy
 
 
 class OracleService(oracle_pb2_grpc.OracleServicer):
@@ -8,6 +7,6 @@ class OracleService(oracle_pb2_grpc.OracleServicer):
         pass
 
     def RetrainLFMv1(self, request, context):
-        logging.info("start retrain LFMv1")
+        loggy.info("start retrain LFMv1")
 
         return oracle_pb2.RetrainLFMv1Response()

@@ -3,11 +3,12 @@ import os
 from app.db.pg_repo import OracleRepository
 from app.service import oracle
 
-from app.houston import config, runner
+from app.houston import config, runner, loggy
 from app.server import grpc
 
 if __name__ == "__main__":
     config.parse_yaml()
+    loggy.init(config.get("app").get("name"))
 
     oracle_repo = OracleRepository(
         config.get("postgres").get("host"),

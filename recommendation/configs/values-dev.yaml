@@ -1,0 +1,31 @@
+app:
+  name: "recommendation"
+  graceful_shutdown_timeout_seconds: 10
+  statistic_update_cron: "0 */1 * * *" # Every hour
+  trigger_oracle_learn_cron: "0 */2 * * *" # Every 2nd hour.
+
+jaeger:
+  addr: "jaeger:4317"
+
+grpc:
+  addr: ":84"
+
+http:
+  addr: ":80"
+
+swagger:
+  path: "third_party/swagger"
+
+postgres:
+  username: "recommendation-owner"
+  host: "recommendation-postgres"
+  port: "5432"
+  db_name: "recommendation"
+  ssl_mode: "disable"
+  migrations_folder: "migrations"
+
+redis:
+  addr: "recommendation-redis:6379"
+
+oracle:
+  addr: "oracle:84"
