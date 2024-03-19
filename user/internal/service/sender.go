@@ -7,28 +7,26 @@ import (
 	"html/template"
 )
 
-var (
-	authMailTemplate = template.Must(template.New("auth_mail.html").ParseFiles("templates/auth_mail.html"))
-)
-
 type MailSender interface {
 	SendEmail(ctx context.Context, to []string, subject string, body []byte) error
 }
 
 type SenderService struct {
-	mailSender MailSender
+	authMailTemplate *template.Template
+	mailSender       MailSender
 }
 
-func NewSenderService(mailSender MailSender) *SenderService {
+func NewSenderService(mailSender MailSender, tmpl *template.Template) *SenderService {
 	return &SenderService{
-		mailSender: mailSender,
+		authMailTemplate: tmpl,
+		mailSender:       mailSender,
 	}
 }
 
 func (f *SenderService) SendEmailWithAuthorizationCode(ctx context.Context, to []string, subject string, code int) error {
 	buffer := &bytes.Buffer{}
 
-	err := authMailTemplate.Execute(buffer, struct {
+	err := f.authMailTemplate.Execute(buffer, struct {
 		Code int
 	}{
 		Code: code,
