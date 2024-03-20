@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/the-swiply/swiply-backend/recommendation/internal/domain"
@@ -10,7 +11,9 @@ import (
 )
 
 const (
-	updateInfoTable = "update_info"
+	updateInfoTable   = "update_info"
+	interactionsTable = "interactions"
+	statisticsTable   = "statistics"
 )
 
 type DataProviderRepository struct {
@@ -130,4 +133,85 @@ updated_at = @updated_at`, interactionTable)
 	}
 
 	return results.Close()
+}
+
+func (d *DataProviderRepository) CalculateRatings(ctx context.Context) (map[string]float64, error) {
+	q := fmt.Sprintf(`WITH 
+     positives AS (SELECT count(1) AS cnt, "to"
+                   FROM %s
+                   WHERE positive = true
+                   GROUP BY "to"),
+     alll AS (SELECT count(1) AS cnt, "to"
+              FROM %s
+              GROUP BY "to")
+SELECT positives.cnt / alll.cnt::double precision
+FROM positives JOIN alll  ON positives."to" = alll."to"`, interactionsTable, interactionsTable)
+
+	rows, err := d.db.Query(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var (
+		userID string
+		rating float64
+	)
+	var ratings map[string]float64
+
+	for rows.Next() {
+		err = rows.Scan(&userID, &rating)
+		if err != nil {
+			return nil, fmt.Errorf("unable to scan row: %w", err)
+		}
+		ratings[userID] = rating
+	}
+
+	return ratings, nil
+}
+
+func (d *DataProviderRepository) UpdateStatistics(ctx context.Context, ratings map[string]float64) error {
+	tx, err := d.db.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return fmt.Errorf("can't begin tx: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	_, err = tx.Exec(
+		ctx,
+		fmt.Sprintf("TRUNCATE TABLE %s", statisticsTable),
+	)
+
+	q := fmt.Sprintf(`INSERT INTO %s (id, user_id, like_ratio, updated_at)
+VALUES (@id, @user_id, @like_ratio, @updated_at)`, statisticsTable)
+
+	updateTs := time.Now()
+	batch := &pgx.Batch{}
+	for userID, rating := range ratings {
+		args := pgx.NamedArgs{
+			"id":         uuid.New(),
+			"user_id":    userID,
+			"like_ratio": rating,
+			"updated_at": updateTs,
+		}
+
+		batch.Queue(q, args)
+	}
+
+	results := d.db.SendBatch(ctx, batch)
+	defer results.Close()
+
+	for range ratings {
+		_, err := results.Exec()
+		if err != nil {
+			return fmt.Errorf("unable to update statistic row: %w", err)
+		}
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return fmt.Errorf("can't commit tx: %w", err)
+	}
+
+	return nil
 }

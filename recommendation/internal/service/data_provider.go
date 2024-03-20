@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"github.com/the-swiply/swiply-backend/recommendation/internal/domain"
 	"time"
 )
@@ -14,8 +15,9 @@ type DataProviderRepository interface {
 	UpdateLastInteractionUpdate(ctx context.Context, ts time.Time) error
 	UpsertProfiles(ctx context.Context, profiles []domain.Profile) error
 	UpsertInteractions(ctx context.Context, interactions []domain.Interaction) error
+	CalculateRatings(ctx context.Context) (map[string]float64, error)
+	UpdateStatistics(ctx context.Context, ratings map[string]float64) error
 }
-
 type ProfileClient interface {
 	GetInteractions(ctx context.Context, from time.Time) ([]domain.Interaction, error)
 	GetProfiles(ctx context.Context, from time.Time) ([]domain.Profile, error)
@@ -73,6 +75,8 @@ func (d *DataProviderService) UpdateStatistic(ctx context.Context) error {
 		return fmt.Errorf("can't upsert interactions")
 	}
 
+	go d.updateStatistics(ctx)
+
 	err = d.dpRepo.UpdateLastProfileUpdate(ctx, time.Now())
 	if err != nil {
 		return fmt.Errorf("can't udpate last time update of profiles: %w", err)
@@ -84,6 +88,18 @@ func (d *DataProviderService) UpdateStatistic(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (d *DataProviderService) updateStatistics(ctx context.Context) {
+	ratings, err := d.dpRepo.CalculateRatings(ctx)
+	if err != nil {
+		loggy.Error("can't calculate ratings:", err)
+	}
+
+	err = d.dpRepo.UpdateStatistics(ctx, ratings)
+	if err != nil {
+		loggy.Error("can't update statistics:", err)
+	}
 }
 
 func (d *DataProviderService) UpdateOracleData(ctx context.Context) error {
