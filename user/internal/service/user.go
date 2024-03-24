@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/the-swiply/swiply-backend/pkg/auf"
+	"github.com/the-swiply/swiply-backend/pkg/houston/auf"
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"github.com/the-swiply/swiply-backend/user/internal/domain"
 	"math/rand"

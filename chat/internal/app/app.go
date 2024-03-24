@@ -14,7 +14,7 @@ import (
 	"github.com/the-swiply/swiply-backend/chat/internal/service"
 	"github.com/the-swiply/swiply-backend/chat/internal/sevents"
 	"github.com/the-swiply/swiply-backend/chat/internal/workerpool"
-	"github.com/the-swiply/swiply-backend/pkg/dobby"
+	"github.com/the-swiply/swiply-backend/pkg/houston/dobby"
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"github.com/the-swiply/swiply-backend/pkg/houston/runner"
 	"go.uber.org/multierr"

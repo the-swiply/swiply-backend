@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/the-swiply/swiply-backend/chat/internal/domain"
+	"github.com/the-swiply/swiply-backend/pkg/houston/auf"
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"slices"
 	"sync"
@@ -65,7 +66,7 @@ func NewChatService(cfg ChatConfig, seqGen SequenceGenerator, chatRepository Cha
 }
 
 func (c *ChatService) ReceiveChatMessage(ctx context.Context, chatID int64, content string) error {
-	userID := extractUserIDFromContext(ctx)
+	userID := auf.ExtractUserIDFromContext[uuid.UUID](ctx)
 
 	err := c.checkUserInChatWithError(ctx, userID, chatID)
 	if err != nil {
@@ -154,7 +155,7 @@ func (c *ChatService) RemoveChatClient(userID uuid.UUID) {
 }
 
 func (c *ChatService) GetNextMessages(ctx context.Context, chatID int64, start int64, limit int64) ([]domain.ChatMessage, error) {
-	userID := extractUserIDFromContext(ctx)
+	userID := auf.ExtractUserIDFromContext[uuid.UUID](ctx)
 
 	err := c.checkUserInChatWithError(ctx, userID, chatID)
 	if err != nil {
@@ -170,7 +171,7 @@ func (c *ChatService) GetNextMessages(ctx context.Context, chatID int64, start i
 }
 
 func (c *ChatService) GetPreviousMessages(ctx context.Context, chatID int64, start int64, limit int64) ([]domain.ChatMessage, error) {
-	userID := extractUserIDFromContext(ctx)
+	userID := auf.ExtractUserIDFromContext[uuid.UUID](ctx)
 
 	err := c.checkUserInChatWithError(ctx, userID, chatID)
 	if err != nil {
@@ -186,13 +187,13 @@ func (c *ChatService) GetPreviousMessages(ctx context.Context, chatID int64, sta
 }
 
 func (c *ChatService) GetUserChats(ctx context.Context) ([]domain.Chat, error) {
-	userID := extractUserIDFromContext(ctx)
+	userID := auf.ExtractUserIDFromContext[uuid.UUID](ctx)
 
 	return c.chatRepository.GetUserChats(ctx, userID)
 }
 
 func (c *ChatService) LeaveChat(ctx context.Context, chatID int64) error {
-	userID := extractUserIDFromContext(ctx)
+	userID := auf.ExtractUserIDFromContext[uuid.UUID](ctx)
 	err := c.checkUserInChatWithError(ctx, userID, chatID)
 	if err != nil {
 		return err

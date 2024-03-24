@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/grpc-ecosystem/go-grpc-middleware/util/metautils"
-	"github.com/the-swiply/swiply-backend/pkg/auf"
-	"github.com/the-swiply/swiply-backend/recommendation/internal/domain"
+	"github.com/the-swiply/swiply-backend/pkg/houston/auf"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gopkg.in/yaml.v3"
@@ -117,7 +116,7 @@ func userAuth(ctx context.Context) (context.Context, error) {
 		return nil, status.Error(codes.PermissionDenied, "invalid id type: uuid expected")
 	}
 
-	return context.WithValue(ctx, domain.UserIDKey{}, userIDParsed), nil
+	return auf.AddUserIDToContext(ctx, userIDParsed), nil
 }
 
 func s2sAuth(ctx context.Context, authorizedServices map[string]struct{}) (context.Context, error) {
@@ -181,7 +180,7 @@ func authMiddlewareHTTP(next http.HandlerFunc) http.Handler {
 			return
 		}
 
-		r = r.WithContext(context.WithValue(r.Context(), domain.UserIDKey{}, userIDParsed))
+		r = r.WithContext(auf.AddUserIDToContext(r.Context(), userIDParsed))
 
 		next.ServeHTTP(rw, r)
 	})

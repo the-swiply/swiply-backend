@@ -24,7 +24,7 @@ type JWTAccessProperties struct {
 type JWTRefreshProperties struct {
 	User string
 	TTL  time.Duration
-	ID     string
+	ID   string
 }
 
 func GenerateAccessJWT(props JWTAccessProperties) (string, error) {
