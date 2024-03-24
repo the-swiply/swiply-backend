@@ -98,7 +98,6 @@ func (a *App) Run(ctx context.Context) error {
 
 	dpSvc := service.NewDataProviderService(service.DataProviderConfig{}, dpRepo, oracleClient, nil)
 
-	err = dpSvc.UpdateStatistic(ctx)
 	if err != nil {
 		loggy.Fatal(err)
 	}

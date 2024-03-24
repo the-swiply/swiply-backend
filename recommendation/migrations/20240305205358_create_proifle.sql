@@ -2,7 +2,7 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS profile
 (
-    id         uuid,
+    id         uuid PRIMARY KEY,
    -- TODO
     updated_at timestamp
 );
