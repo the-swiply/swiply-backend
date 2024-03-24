@@ -13,6 +13,8 @@ import (
 	"github.com/the-swiply/swiply-backend/recommendation/pkg/api/recommendation"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type GRPCServer struct {
@@ -57,4 +59,8 @@ func (g *GRPCServer) Shutdown(ctx context.Context) error {
 	case <-stopCh:
 		return nil
 	}
+}
+
+func (g *GRPCServer) GetRecommendations(ctx context.Context, req *recommendation.GetRecommendationsRequest) (*recommendation.GetRecommendationsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRecommendations not implemented")
 }

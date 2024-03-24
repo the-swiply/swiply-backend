@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/the-swiply/swiply-backend/recommendation/internal/domain"
@@ -65,8 +64,8 @@ func (d *DataProviderRepository) setLastUpdate(ctx context.Context, table string
 }
 
 func (d *DataProviderRepository) UpsertProfiles(ctx context.Context, profiles []domain.Profile) error {
-	q := fmt.Sprintf(`INSERT INTO %s (id, from, to, positive, updated_at)
-VALUES (@id, @from, @to, @positive, @updated_at)
+	q := fmt.Sprintf(`INSERT INTO %s (id, updated_at)
+VALUES (@id, @updated_at)
 ON CONFLICT(id) 
 DO UPDATE SET
 id = @id,
@@ -182,14 +181,13 @@ func (d *DataProviderRepository) UpdateStatistics(ctx context.Context, ratings m
 		fmt.Sprintf("TRUNCATE TABLE %s", statisticsTable),
 	)
 
-	q := fmt.Sprintf(`INSERT INTO %s (id, user_id, like_ratio, updated_at)
-VALUES (@id, @user_id, @like_ratio, @updated_at)`, statisticsTable)
+	q := fmt.Sprintf(`INSERT INTO %s (user_id, like_ratio, updated_at)
+VALUES (@user_id, @like_ratio, @updated_at)`, statisticsTable)
 
 	updateTs := time.Now()
 	batch := &pgx.Batch{}
 	for userID, rating := range ratings {
 		args := pgx.NamedArgs{
-			"id":         uuid.New(),
 			"user_id":    userID,
 			"like_ratio": rating,
 			"updated_at": updateTs,

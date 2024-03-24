@@ -5,9 +5,10 @@ import (
 	"time"
 )
 
+type Recommendation uuid.UUID
+
 type Profile struct {
-	ID uuid.UUID
-	// TODO
+	ID        uuid.UUID
 	UpdatedAt time.Time
 }
 

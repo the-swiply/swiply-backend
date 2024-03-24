@@ -2,7 +2,7 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS interaction
 (
-    id         uuid,
+    id         uuid PRIMARY KEY,
     "from"     uuid,
     "to"       uuid,
     positive   bool,

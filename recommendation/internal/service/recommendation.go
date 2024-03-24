@@ -1,5 +1,12 @@
 package service
 
+import (
+	"context"
+	"github.com/google/uuid"
+	"github.com/the-swiply/swiply-backend/pkg/houston/auf"
+	"github.com/the-swiply/swiply-backend/recommendation/internal/domain"
+)
+
 type RecommendationRepository interface {
 }
 
@@ -13,4 +20,11 @@ func NewRecommendationService(cfg RecommendationConfig, recRepo RecommendationRe
 		cfg:     cfg,
 		recRepo: recRepo,
 	}
+}
+
+func (r *RecommendationService) Recommend(ctx context.Context, count int64) ([]domain.Recommendation, error) {
+	userID := auf.ExtractUserIDFromContext[uuid.UUID](ctx)
+	_ = userID
+	recs := make([]domain.Recommendation, count)
+	return recs, nil
 }
