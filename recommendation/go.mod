@@ -2,20 +2,15 @@ module github.com/the-swiply/swiply-backend/recommendation
 
 go 1.21.4
 
-replace (
-	github.com/the-swiply/swiply-backend/pkg/auf => ../pkg/auf
-	github.com/the-swiply/swiply-backend/pkg/dobby => ../pkg/dobby
-	github.com/the-swiply/swiply-backend/pkg/houston => ../pkg/houston
-)
+replace github.com/the-swiply/swiply-backend/pkg/houston => ../pkg/houston
 
 require (
 	github.com/google/uuid v1.6.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.1
-	github.com/jackc/pgx/v5 v5.5.2
-	github.com/the-swiply/swiply-backend/pkg/auf v0.0.0-00010101000000-000000000000
-	github.com/the-swiply/swiply-backend/pkg/dobby v0.0.0-00010101000000-000000000000
+	github.com/hibiken/asynq v0.24.1
+	github.com/jackc/pgx/v5 v5.5.5
 	github.com/the-swiply/swiply-backend/pkg/houston v0.0.0-00010101000000-000000000000
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.46.1
 	go.uber.org/multierr v1.11.0
@@ -33,10 +28,9 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-logr/logr v1.3.0 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/golang-jwt/jwt/v5 v5.2.0 // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/hibiken/asynq v0.24.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect

@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/the-swiply/swiply-backend/chat/internal/service"
+	"github.com/the-swiply/swiply-backend/pkg/houston/auf"
 	"net/http"
 )
 
@@ -32,7 +33,7 @@ func (w *WS) Connect(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID := extractUserIDFromContext(r.Context())
+	userID := auf.ExtractUserIDFromContext[uuid.UUID](r.Context())
 	go w.handleClientConn(conn, userID)
 }
 
