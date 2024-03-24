@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/the-swiply/swiply-backend/pkg/dobby"
+	"github.com/the-swiply/swiply-backend/pkg/houston/dobby"
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"github.com/the-swiply/swiply-backend/pkg/houston/runner"
 	"github.com/the-swiply/swiply-backend/recommendation/internal/repository"
