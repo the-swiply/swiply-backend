@@ -10,9 +10,8 @@ import (
 )
 
 const (
-	updateInfoTable   = "update_info"
-	interactionsTable = "interactions"
-	statisticsTable   = "statistics"
+	updateInfoTable = "update_info"
+	statisticsTable = "statistics"
 )
 
 type DataProviderRepository struct {
@@ -144,7 +143,7 @@ func (d *DataProviderRepository) CalculateRatings(ctx context.Context) (map[stri
               FROM %s
               GROUP BY "to")
 SELECT positives.cnt / alll.cnt::double precision
-FROM positives JOIN alll  ON positives."to" = alll."to"`, interactionsTable, interactionsTable)
+FROM positives JOIN alll  ON positives."to" = alll."to"`, interactionTable, interactionTable)
 
 	rows, err := d.db.Query(ctx, q)
 	if err != nil {

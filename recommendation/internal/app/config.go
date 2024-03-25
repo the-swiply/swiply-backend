@@ -11,8 +11,9 @@ type Config struct {
 }
 
 type Application struct {
-	StatisticUpdateCron    string `yaml:"statistic_update_cron"`
-	TriggerOracleLearnCron string `yaml:"trigger_oracle_learn_cron"`
+	StatisticUpdateCron          string `yaml:"statistic_update_cron"`
+	TriggerOracleLearnCron       string `yaml:"trigger_oracle_learn_cron"`
+	FreezeHoursForRecommendation int64  `yaml:"freeze_hours_for_recommendation"`
 }
 
 type GRPC struct {

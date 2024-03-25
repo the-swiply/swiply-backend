@@ -5,8 +5,6 @@ import (
 	"time"
 )
 
-type Recommendation uuid.UUID
-
 type Profile struct {
 	ID        uuid.UUID
 	UpdatedAt time.Time
