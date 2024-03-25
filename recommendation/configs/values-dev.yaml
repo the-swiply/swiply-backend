@@ -3,6 +3,7 @@ app:
   graceful_shutdown_timeout_seconds: 10
   statistic_update_cron: "0 */1 * * *" # Every hour
   trigger_oracle_learn_cron: "0 */2 * * *" # Every 2nd hour.
+  freeze_hours_for_recommendation: 24
 
 jaeger:
   addr: "jaeger:4317"

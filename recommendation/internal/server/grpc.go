@@ -9,12 +9,12 @@ import (
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/the-swiply/swiply-backend/pkg/houston/grut"
+	"github.com/the-swiply/swiply-backend/pkg/houston/tracy"
+	"github.com/the-swiply/swiply-backend/recommendation/internal/converter"
 	"github.com/the-swiply/swiply-backend/recommendation/internal/service"
 	"github.com/the-swiply/swiply-backend/recommendation/pkg/api/recommendation"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type GRPCServer struct {
@@ -62,5 +62,15 @@ func (g *GRPCServer) Shutdown(ctx context.Context) error {
 }
 
 func (g *GRPCServer) GetRecommendations(ctx context.Context, req *recommendation.GetRecommendationsRequest) (*recommendation.GetRecommendationsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRecommendations not implemented")
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
+	recommendations, err := g.recService.Recommend(ctx, req.GetLimit())
+	if err != nil {
+		return nil, grut.InternalError("can't create chat", err)
+	}
+
+	return &recommendation.GetRecommendationsResponse{
+		UserIDs: converter.UUIDsToStrings(recommendations),
+	}, nil
 }

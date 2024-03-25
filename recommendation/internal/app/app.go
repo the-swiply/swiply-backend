@@ -117,7 +117,9 @@ func (a *App) Run(ctx context.Context) error {
 		return fmt.Errorf("can't register update statistic task")
 	}
 
-	recSvc := service.NewRecommendationService(service.RecommendationConfig{}, recRepo)
+	recSvc := service.NewRecommendationService(service.RecommendationConfig{
+		FreezeHoursForRecommendation: a.cfg.App.FreezeHoursForRecommendation,
+	}, recRepo)
 
 	errCh := make(chan error, 4)
 	go func() {
