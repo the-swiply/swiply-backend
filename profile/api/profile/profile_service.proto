@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+option go_package = "github.com/the-swiply/profile/pkg/api/profile";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "profile.proto";
+
+package swiply.profile;
+
+service Profile {
+  rpc Create(CreateProfileRequest) returns (CreateProfileResponse);
+  rpc Update(UpdateProfileRequest) returns (UpdateProfileResponse);
+  rpc Get(GetRequest) returns (GetResponse);
+  rpc GetRecommendations(GetRecommendationsRequest) returns (GetRecommendationsResponse);
+  rpc Interaction(InteractionRequest) returns (InteractionResponse);
+  rpc Liked(LikedRequest) returns (LikedResponse);
+  rpc LikedMe(LikedMeRequest) returns (LikedMeResponse);
+}
+
+// Create
+message CreateProfileRequest {
+  UserProfile user_profile = 1;
+}
+
+message CreateProfileResponse {}
+
+// Update
+message UpdateProfileRequest {
+  UserProfile user_profile = 2;
+}
+
+message UpdateProfileResponse {}
+
+// Get
+message GetRequest {
+  string id = 1;
+}
+
+message GetResponse {
+  UserProfile user_profile = 3;
+}
+
+// GetRecommendations
+message GetRecommendationsRequest {
+  int64 limit = 1;
+}
+
+message GetRecommendationsResponse {
+  repeated string ids = 1;
+}
+
+// Interaction
+message InteractionRequest {
+  enum InteractionType {
+    INTERACTION_TYPE_UNSPECIFIED = 0;
+    LIKE = 1;
+    DISLIKE = 2;
+  }
+
+  string id = 2;
+  InteractionType type = 3;
+}
+
+message InteractionResponse {}
+
+// Liked
+message LikedRequest {}
+
+message LikedResponse {
+  repeated string ids = 1;
+}
+
+// LikedMe
+message LikedMeRequest {}
+
+message LikedMeResponse {
+  repeated string ids = 1;
+}
