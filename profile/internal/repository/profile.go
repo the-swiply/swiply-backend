@@ -10,7 +10,9 @@ import (
 )
 
 const (
-	interestTable = "interest"
+	interestTable    = "interest"
+	profileTable     = "profile"
+	interactionTable = "interaction"
 )
 
 type ProfileRepository struct {
@@ -41,6 +43,10 @@ func (p *ProfileRepository) CreateInteraction(ctx context.Context, interaction d
 
 }
 
-func (p *ProfileRepository) LikedProfiles(ctx context.Context, userID uuid.UUID) error {
+func (p *ProfileRepository) LikedProfiles(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error) {
+
+}
+
+func (p *ProfileRepository) LikedMeProfiles(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error) {
 
 }
