@@ -1,0 +1,28 @@
+app:
+  name: "profile"
+  graceful_shutdown_timeout_seconds: 10
+
+jaeger:
+  addr: "jaeger:4317"
+
+grpc:
+  addr: ":84"
+
+http:
+  addr: ":80"
+
+swagger:
+  path: "third_party/swagger"
+
+postgres:
+  username: "profile-owner"
+  host: "profile-postgres"
+  port: "5432"
+  db_name: "chat"
+  ssl_mode: "disable"
+  migrations_folder: "migrations"
+
+s3:
+  addr: "storage.yandexcloud.net"
+  bucket_name: "swiply"
+  access_key: YCAJED9kjBxxO8bHOrkON7TL1

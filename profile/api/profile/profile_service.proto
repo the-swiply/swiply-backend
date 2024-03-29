@@ -12,10 +12,12 @@ service Profile {
   rpc Create(CreateProfileRequest) returns (CreateProfileResponse);
   rpc Update(UpdateProfileRequest) returns (UpdateProfileResponse);
   rpc Get(GetRequest) returns (GetResponse);
+  rpc GetMyProfile(GetMyProfileRequest) returns (GetMyProfileResponse);
   rpc GetRecommendations(GetRecommendationsRequest) returns (GetRecommendationsResponse);
   rpc Interaction(InteractionRequest) returns (InteractionResponse);
   rpc Liked(LikedRequest) returns (LikedResponse);
   rpc LikedMe(LikedMeRequest) returns (LikedMeResponse);
+  rpc ListInterests(ListInterestsRequest) returns (ListInterestsResponse)
 }
 
 // Create
@@ -23,14 +25,18 @@ message CreateProfileRequest {
   UserProfile user_profile = 1;
 }
 
-message CreateProfileResponse {}
+message CreateProfileResponse {
+  string id = 1;
+}
 
 // Update
 message UpdateProfileRequest {
   UserProfile user_profile = 2;
 }
 
-message UpdateProfileResponse {}
+message UpdateProfileResponse {
+  string id = 1;
+}
 
 // Get
 message GetRequest {
@@ -38,6 +44,13 @@ message GetRequest {
 }
 
 message GetResponse {
+  UserProfile user_profile = 3;
+}
+
+// GetMyProfile
+message GetMyProfileRequest {}
+
+message GetMyProfileResponse {
   UserProfile user_profile = 3;
 }
 
@@ -76,4 +89,10 @@ message LikedMeRequest {}
 
 message LikedMeResponse {
   repeated string ids = 1;
+}
+
+message ListInterestsRequest {}
+
+message ListInterestsResponse {
+  repeated Interest interests = 1;
 }
