@@ -19,11 +19,11 @@ if __name__ == "__main__":
         config.get("postgres").get("ssl_mode"),
     )
 
-    oracle_service = oracle.OracleService()
+    oracle_service = oracle.OracleService(oracle_repo)
+    oracle_service.RetrainLFMv1(None, None)
 
     server = grpc.OracleServer(config.get("grpc").get("addr"), oracle_service)
     server.serve()
     runner.terminator().wait()
 
     server.stop(config.get("app").get("graceful_shutdown_timeout_seconds"))
-    oracle_repo.close()
