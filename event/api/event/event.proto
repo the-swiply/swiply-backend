@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+option go_package = "github.com/the-swiply/event/pkg/api/event";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+package swiply.event;
+
+service Event {
+  rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse){
+    option (google.api.http) = {
+      post: "/v1/event/create"
+      body: "*"
+    };
+  }
+
+  rpc UpdateEvent(UpdateEventRequest) returns (UpdateEventResponse){
+    option (google.api.http) = {
+      post: "/v1/event/update"
+      body: "*"
+    };
+  }
+
+  rpc GetEvents(GetEventsRequest) returns (GetEventsResponse){
+    option (google.api.http) = {
+      get: "/v1/events"
+    };
+  }
+
+  rpc GetUserEvents(GetUserEventsRequest) returns (GetUserEventsResponse){
+    option (google.api.http) = {
+      get: "/v1/events/my"
+    };
+  }
+
+  rpc JoinEvent(JoinEventRequest) returns (JoinEventResponse){
+    option (google.api.http) = {
+      post: "/v1/event/join/{event_id}"
+    };
+  }
+
+  rpc AcceptEventJoin(AcceptEventJoinRequest) returns (AcceptEventJoinResponse){
+    option (google.api.http) = {
+      post: "/v1/event/accept-join/{event_id}"
+    };
+  }
+}
+
+message EventModel {
+  int64 event_id = 1;
+  string title = 2;
+  string description = 3;
+  repeated bytes photos = 4;
+  google.protobuf.Timestamp date = 5;
+}
+
+message CreateEventRequest {
+  string title = 1;
+  string description = 2;
+  repeated bytes photos = 3;
+  google.protobuf.Timestamp date = 4;
+}
+
+message CreateEventResponse {
+  int64 event_id = 1;
+}
+
+message UpdateEventRequest {
+  EventModel event = 1;
+}
+
+message UpdateEventResponse {}
+
+message GetEventsRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+}
+
+message GetEventsResponse{
+  repeated EventModel event = 1;
+}
+
+message GetUserEventsRequest {}
+
+message GetUserEventsResponse{
+  repeated EventModel event = 1;
+}
+
+message JoinEventRequest {
+  int64 event_id = 1;
+}
+
+message JoinEventResponse {}
+
+message AcceptEventJoinRequest {
+  int64 event_id = 1;
+  string user_id = 2;
+}
+
+message AcceptEventJoinResponse {}

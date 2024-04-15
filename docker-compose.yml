@@ -122,6 +122,34 @@ services:
     ports:
       - 18084:80
 
+  event:
+    container_name: event-service
+    build:
+      context: .
+      dockerfile: event/Dockerfile
+    restart: on-failure
+    env_file:
+      - event/dev.env
+    depends_on:
+      - jaeger
+      - otel-collector
+      - prometheus
+      - vault
+      - event-postgres
+    ports:
+      - 18085:80
+
+  event-postgres:
+    image: postgres:16.0
+    container_name: event-postgres
+    restart: on-failure
+    env_file:
+      - event-infra/postgres/dev.env
+    volumes:
+      - event_postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5445:5432
+
   vault:
     image: vault:1.13.0
     container_name: vault
@@ -193,5 +221,6 @@ volumes:
   chat_postgres_data:
   recommendation_postgres_data:
   recommendation_redis_data:
+  event_postgres_data:
 
   prometheus_data:
