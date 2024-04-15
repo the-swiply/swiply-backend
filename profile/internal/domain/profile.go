@@ -64,5 +64,4 @@ type Profile struct {
 	Info         string
 	Subscription subscriptionType
 	Location     Location
-	Photos       []Photo
 }

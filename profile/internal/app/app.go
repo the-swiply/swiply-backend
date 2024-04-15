@@ -95,7 +95,7 @@ func (a *App) Run(ctx context.Context) error {
 	a.s3 = minioClient
 
 	profileRepo := repository.NewProfileRepository(a.db)
-	photoRepo := repository.NewPhotoRepository(a.cfg.S3.BucketName, a.s3)
+	photoRepo := repository.NewPhotoContentRepository(a.cfg.S3.BucketName, a.s3)
 
 	profileSvc := service.NewProfileService(service.ProfileConfig{}, photoRepo, profileRepo)
 

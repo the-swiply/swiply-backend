@@ -5,15 +5,10 @@ import (
 	"github.com/the-swiply/swiply-backend/profile/internal/domain"
 )
 
-func ProfileFromDBModelToDomain(interests []dbmodel.Interest, photos []dbmodel.Photo, profile dbmodel.Profile) (domain.Profile, error) {
+func ProfileFromDBModelToDomain(interests []dbmodel.Interest, profile dbmodel.Profile) (domain.Profile, error) {
 	var intrs []domain.Interest
 	for _, intr := range interests {
 		intrs = append(intrs, InterestFromDBModelToDomain(intr))
-	}
-
-	var phts []domain.Photo
-	for _, pht := range photos {
-		phts = append(phts, PhotoFromDBModelToDomain(pht))
 	}
 
 	p := domain.Profile{
@@ -27,7 +22,6 @@ func ProfileFromDBModelToDomain(interests []dbmodel.Interest, photos []dbmodel.P
 			Lat:  profile.Lat,
 			Long: profile.Long,
 		},
-		Photos: phts,
 	}
 
 	if err := p.Gender.Set(profile.Gender); err != nil {

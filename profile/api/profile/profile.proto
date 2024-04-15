@@ -23,6 +23,12 @@ enum SubscriptionType {
   PRIMARY = 2;
 }
 
+enum InteractionType {
+  INTERACTION_TYPE_UNSPECIFIED = 0;
+  LIKE = 1;
+  DISLIKE = 2;
+}
+
 message Location {
   double lat = 1;
   double long = 2;

@@ -33,6 +33,12 @@ CREATE TABLE IF NOT EXISTS interaction
     "type" interaction_type
 );
 
+CREATE TABLE IF NOT EXISTS photo
+(
+    id         uuid   PRIMARY KEY,
+    photo_ids  uuid[]
+);
+
 CREATE INDEX IF NOT EXISTS idx_interaction_from ON interaction ("from");
 CREATE INDEX IF NOT EXISTS idx_interaction_to ON interaction ("to");
 -- +goose StatementEnd
@@ -42,6 +48,7 @@ CREATE INDEX IF NOT EXISTS idx_interaction_to ON interaction ("to");
 DROP INDEX IF EXISTS idx_interaction_to;
 DROP INDEX IF EXISTS idx_interaction_from;
 
+DROP TABLE IF EXISTS photo;
 DROP TABLE IF EXISTS interaction;
 
 DROP TYPE IF EXISTS interaction_type;
