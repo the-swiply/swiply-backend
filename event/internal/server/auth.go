@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/grpc-ecosystem/go-grpc-middleware/util/metautils"
 	"github.com/the-swiply/swiply-backend/pkg/houston/auf"
+	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gopkg.in/yaml.v3"
@@ -114,7 +115,7 @@ func userAuth(ctx context.Context) (context.Context, error) {
 	if err != nil {
 		return nil, status.Error(codes.PermissionDenied, "invalid id type: uuid expected")
 	}
-
+	loggy.Info("0-0-0 ", userID)
 	return auf.AddUserIDToContext(ctx, userIDParsed), nil
 }
 

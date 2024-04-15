@@ -49,10 +49,11 @@ service Event {
 
 message EventModel {
   int64 event_id = 1;
-  string title = 2;
-  string description = 3;
-  repeated bytes photos = 4;
-  google.protobuf.Timestamp date = 5;
+  repeated string members = 2;
+  string title = 3;
+  string description = 4;
+  repeated bytes photos = 5;
+  google.protobuf.Timestamp date = 6;
 }
 
 message CreateEventRequest {
@@ -78,13 +79,13 @@ message GetEventsRequest {
 }
 
 message GetEventsResponse{
-  repeated EventModel event = 1;
+  repeated EventModel events = 1;
 }
 
 message GetUserEventsRequest {}
 
 message GetUserEventsResponse{
-  repeated EventModel event = 1;
+  repeated EventModel events = 1;
 }
 
 message JoinEventRequest {

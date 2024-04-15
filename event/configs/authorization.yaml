@@ -1,0 +1,11 @@
+/swiply.event.Event/CreateEvent:
+  user: true
+  s2s: false
+
+/swiply.event.Event/UpdateEvent:
+  user: true
+  s2s: false
+
+/swiply.event.Event/GetUserEvents:
+  user: true
+  s2s: false

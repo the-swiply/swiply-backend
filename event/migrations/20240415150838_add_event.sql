@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS event
     title       varchar(64),
     description text,
     date        timestamp
-    );
+);
 
 CREATE INDEX IF NOT EXISTS idx_event_owner ON event (owner);
 CREATE INDEX IF NOT EXISTS idx_event_title ON event (title);

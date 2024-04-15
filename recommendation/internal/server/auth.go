@@ -9,7 +9,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gopkg.in/yaml.v3"
-	"net/http"
 	"os"
 	"strings"
 )
@@ -140,50 +139,6 @@ func s2sAuth(ctx context.Context, authorizedServices map[string]struct{}) (conte
 	}
 
 	return ctx, nil
-}
-
-func authMiddlewareHTTP(next http.HandlerFunc) http.Handler {
-	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		authHeader := r.Header.Get(authorizationHeader)
-		if authHeader == "" {
-			rw.WriteHeader(http.StatusUnauthorized)
-			fmt.Fprint(rw, "authorization header is not set")
-			return
-		}
-
-		splits := strings.SplitN(authHeader, " ", 2)
-		if len(splits) < 2 || !strings.EqualFold(splits[0], "bearer") {
-			rw.WriteHeader(http.StatusUnauthorized)
-			fmt.Fprint(rw, "invalid token type: expected bearer token")
-			return
-		}
-
-		token := splits[1]
-		claims, err := auf.ValidateJWTAndExtractClaimsWithCustomSecret(token, userJWTSecret)
-		if err != nil {
-			rw.WriteHeader(http.StatusUnauthorized)
-			fmt.Fprint(rw, "invallid auth token: ", err)
-			return
-		}
-
-		userID, ok := claims["id"].(string)
-		if !ok || userID == "" {
-			rw.WriteHeader(http.StatusUnauthorized)
-			fmt.Fprint(rw, "token has invalid user id")
-			return
-		}
-
-		userIDParsed, err := uuid.Parse(userID)
-		if err != nil {
-			rw.WriteHeader(http.StatusForbidden)
-			fmt.Fprint(rw, "invalid id type: uuid expected")
-			return
-		}
-
-		r = r.WithContext(auf.AddUserIDToContext(r.Context(), userIDParsed))
-
-		next.ServeHTTP(rw, r)
-	})
 }
 
 func authFromMD(ctx context.Context, header string, expectedScheme string) (string, error) {
