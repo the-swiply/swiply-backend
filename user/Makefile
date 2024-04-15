@@ -12,7 +12,9 @@ generate-pb:
 
 .PHONY: lint
 lint:
-	./bin/golangci-lint run
+	./bin/golangci-lint run \
+	--config=.golangci.pipeline.yaml \
+	./...
 
 .PHONY: create-migration
 create-migration:
