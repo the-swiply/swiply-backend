@@ -117,3 +117,12 @@ RETURNING id`, chatTable)
 
 	return id, nil
 }
+
+func (c *ChatRepository) AddChatMember(ctx context.Context, chatID int64, member uuid.UUID) error {
+	q := fmt.Sprintf(`UPDATE %s
+SET members = array_append(members, $1)
+WHERE id = $2`, chatTable)
+
+	_, err := c.db.Exec(ctx, q, member, chatID)
+	return err
+}

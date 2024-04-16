@@ -1,0 +1,31 @@
+/swiply.event.Event/CreateEvent:
+  user: true
+  s2s: false
+
+/swiply.event.Event/UpdateEvent:
+  user: true
+  s2s: false
+
+/swiply.event.Event/GetEvents:
+  user: false
+  s2s: false
+
+/swiply.event.Event/GetUserMembershipEvents:
+  user: true
+  s2s: false
+
+/swiply.event.Event/GetUserOwnEvents:
+  user: true
+  s2s: false
+
+/swiply.event.Event/GetEventMembers:
+  user: false
+  s2s: false
+
+/swiply.event.Event/JoinEvent:
+  user: true
+  s2s: false
+
+/swiply.event.Event/AcceptEventJoin:
+  user: true
+  s2s: false

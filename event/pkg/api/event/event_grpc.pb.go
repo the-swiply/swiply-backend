@@ -25,7 +25,9 @@ type EventClient interface {
 	CreateEvent(ctx context.Context, in *CreateEventRequest, opts ...grpc.CallOption) (*CreateEventResponse, error)
 	UpdateEvent(ctx context.Context, in *UpdateEventRequest, opts ...grpc.CallOption) (*UpdateEventResponse, error)
 	GetEvents(ctx context.Context, in *GetEventsRequest, opts ...grpc.CallOption) (*GetEventsResponse, error)
-	GetUserEvents(ctx context.Context, in *GetUserEventsRequest, opts ...grpc.CallOption) (*GetUserEventsResponse, error)
+	GetUserOwnEvents(ctx context.Context, in *GetUserOwnEventsRequest, opts ...grpc.CallOption) (*GetUserOwnEventsResponse, error)
+	GetUserMembershipEvents(ctx context.Context, in *GetUserMembershipEventsRequest, opts ...grpc.CallOption) (*GetUserMembershipEventsResponse, error)
+	GetEventMembers(ctx context.Context, in *GetEventMembersRequest, opts ...grpc.CallOption) (*GetEventMembersResponse, error)
 	JoinEvent(ctx context.Context, in *JoinEventRequest, opts ...grpc.CallOption) (*JoinEventResponse, error)
 	AcceptEventJoin(ctx context.Context, in *AcceptEventJoinRequest, opts ...grpc.CallOption) (*AcceptEventJoinResponse, error)
 }
@@ -65,9 +67,27 @@ func (c *eventClient) GetEvents(ctx context.Context, in *GetEventsRequest, opts 
 	return out, nil
 }
 
-func (c *eventClient) GetUserEvents(ctx context.Context, in *GetUserEventsRequest, opts ...grpc.CallOption) (*GetUserEventsResponse, error) {
-	out := new(GetUserEventsResponse)
-	err := c.cc.Invoke(ctx, "/swiply.event.Event/GetUserEvents", in, out, opts...)
+func (c *eventClient) GetUserOwnEvents(ctx context.Context, in *GetUserOwnEventsRequest, opts ...grpc.CallOption) (*GetUserOwnEventsResponse, error) {
+	out := new(GetUserOwnEventsResponse)
+	err := c.cc.Invoke(ctx, "/swiply.event.Event/GetUserOwnEvents", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *eventClient) GetUserMembershipEvents(ctx context.Context, in *GetUserMembershipEventsRequest, opts ...grpc.CallOption) (*GetUserMembershipEventsResponse, error) {
+	out := new(GetUserMembershipEventsResponse)
+	err := c.cc.Invoke(ctx, "/swiply.event.Event/GetUserMembershipEvents", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *eventClient) GetEventMembers(ctx context.Context, in *GetEventMembersRequest, opts ...grpc.CallOption) (*GetEventMembersResponse, error) {
+	out := new(GetEventMembersResponse)
+	err := c.cc.Invoke(ctx, "/swiply.event.Event/GetEventMembers", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +119,9 @@ type EventServer interface {
 	CreateEvent(context.Context, *CreateEventRequest) (*CreateEventResponse, error)
 	UpdateEvent(context.Context, *UpdateEventRequest) (*UpdateEventResponse, error)
 	GetEvents(context.Context, *GetEventsRequest) (*GetEventsResponse, error)
-	GetUserEvents(context.Context, *GetUserEventsRequest) (*GetUserEventsResponse, error)
+	GetUserOwnEvents(context.Context, *GetUserOwnEventsRequest) (*GetUserOwnEventsResponse, error)
+	GetUserMembershipEvents(context.Context, *GetUserMembershipEventsRequest) (*GetUserMembershipEventsResponse, error)
+	GetEventMembers(context.Context, *GetEventMembersRequest) (*GetEventMembersResponse, error)
 	JoinEvent(context.Context, *JoinEventRequest) (*JoinEventResponse, error)
 	AcceptEventJoin(context.Context, *AcceptEventJoinRequest) (*AcceptEventJoinResponse, error)
 	mustEmbedUnimplementedEventServer()
@@ -118,8 +140,14 @@ func (UnimplementedEventServer) UpdateEvent(context.Context, *UpdateEventRequest
 func (UnimplementedEventServer) GetEvents(context.Context, *GetEventsRequest) (*GetEventsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetEvents not implemented")
 }
-func (UnimplementedEventServer) GetUserEvents(context.Context, *GetUserEventsRequest) (*GetUserEventsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserEvents not implemented")
+func (UnimplementedEventServer) GetUserOwnEvents(context.Context, *GetUserOwnEventsRequest) (*GetUserOwnEventsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserOwnEvents not implemented")
+}
+func (UnimplementedEventServer) GetUserMembershipEvents(context.Context, *GetUserMembershipEventsRequest) (*GetUserMembershipEventsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserMembershipEvents not implemented")
+}
+func (UnimplementedEventServer) GetEventMembers(context.Context, *GetEventMembersRequest) (*GetEventMembersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetEventMembers not implemented")
 }
 func (UnimplementedEventServer) JoinEvent(context.Context, *JoinEventRequest) (*JoinEventResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method JoinEvent not implemented")
@@ -194,20 +222,56 @@ func _Event_GetEvents_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Event_GetUserEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserEventsRequest)
+func _Event_GetUserOwnEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserOwnEventsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(EventServer).GetUserEvents(ctx, in)
+		return srv.(EventServer).GetUserOwnEvents(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/swiply.event.Event/GetUserEvents",
+		FullMethod: "/swiply.event.Event/GetUserOwnEvents",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EventServer).GetUserEvents(ctx, req.(*GetUserEventsRequest))
+		return srv.(EventServer).GetUserOwnEvents(ctx, req.(*GetUserOwnEventsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Event_GetUserMembershipEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserMembershipEventsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EventServer).GetUserMembershipEvents(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/swiply.event.Event/GetUserMembershipEvents",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EventServer).GetUserMembershipEvents(ctx, req.(*GetUserMembershipEventsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Event_GetEventMembers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetEventMembersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EventServer).GetEventMembers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/swiply.event.Event/GetEventMembers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EventServer).GetEventMembers(ctx, req.(*GetEventMembersRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -268,8 +332,16 @@ var Event_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Event_GetEvents_Handler,
 		},
 		{
-			MethodName: "GetUserEvents",
-			Handler:    _Event_GetUserEvents_Handler,
+			MethodName: "GetUserOwnEvents",
+			Handler:    _Event_GetUserOwnEvents_Handler,
+		},
+		{
+			MethodName: "GetUserMembershipEvents",
+			Handler:    _Event_GetUserMembershipEvents_Handler,
+		},
+		{
+			MethodName: "GetEventMembers",
+			Handler:    _Event_GetEventMembers_Handler,
 		},
 		{
 			MethodName: "JoinEvent",

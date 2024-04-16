@@ -168,10 +168,27 @@ func (g *GRPCServer) CreateChat(ctx context.Context, req *chat.CreateChatRequest
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	err = g.chatService.CreateChat(ctx, members)
+	chatID, err := g.chatService.CreateChat(ctx, members)
 	if err != nil {
 		return nil, grut.InternalError("can't create chat", err)
 	}
 
-	return &chat.CreateChatResponse{}, nil
+	return &chat.CreateChatResponse{ChatId: chatID}, nil
+}
+
+func (g *GRPCServer) AddChatMembers(ctx context.Context, req *chat.AddChatMembersRequest) (*chat.AddChatMembersResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
+	newMembers, err := converter.StringsToUUIDs(req.GetMembers())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	err = g.chatService.AddChatMembers(ctx, req.GetChatId(), newMembers)
+	if err != nil {
+		return nil, grut.InternalError("can't add members", err)
+	}
+
+	return &chat.AddChatMembersResponse{}, nil
 }

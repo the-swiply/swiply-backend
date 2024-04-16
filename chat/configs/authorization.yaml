@@ -22,5 +22,10 @@
   user: false
   s2s: true
   authorized:
-    - service1
-    - service2
+    - event
+
+/swiply.chat.Chat/AddChatMembers:
+  user: false
+  s2s: true
+  authorized:
+    - event

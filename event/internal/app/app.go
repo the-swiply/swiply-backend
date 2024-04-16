@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/the-swiply/swiply-backend/event/internal/repository"
+	"github.com/the-swiply/swiply-backend/event/internal/rpclients"
 	"github.com/the-swiply/swiply-backend/event/internal/server"
 	"github.com/the-swiply/swiply-backend/event/internal/service"
 	"github.com/the-swiply/swiply-backend/pkg/houston/dobby"
@@ -80,7 +81,13 @@ func (a *App) Run(ctx context.Context) error {
 		loggy.Infoln("migration done")
 	}
 
-	eventSvc := service.NewEventService(service.EventConfig{}, eventRepo)
+	chatClient, err := rpclients.NewChatClient(a.cfg.Chat.Addr, os.Getenv("S2S_CHAT_TOKEN"))
+	if err != nil {
+		return fmt.Errorf("can't get chat client: %w", err)
+	}
+	defer chatClient.CloseConn()
+
+	eventSvc := service.NewEventService(service.EventConfig{}, eventRepo, chatClient)
 
 	errCh := make(chan error, 2)
 

@@ -148,6 +148,37 @@
         ]
       }
     },
+    "/v1/event/{eventId}/members": {
+      "get": {
+        "operationId": "Event_GetEventMembers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/eventGetEventMembersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Event"
+        ]
+      }
+    },
     "/v1/events": {
       "get": {
         "operationId": "Event_GetEvents",
@@ -186,14 +217,36 @@
         ]
       }
     },
-    "/v1/events/my": {
+    "/v1/events/membership": {
       "get": {
-        "operationId": "Event_GetUserEvents",
+        "operationId": "Event_GetUserMembershipEvents",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/eventGetUserEventsResponse"
+              "$ref": "#/definitions/eventGetUserMembershipEventsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Event"
+        ]
+      }
+    },
+    "/v1/events/my": {
+      "get": {
+        "operationId": "Event_GetUserOwnEvents",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/eventGetUserOwnEventsResponse"
             }
           },
           "default": {
@@ -210,6 +263,17 @@
     }
   },
   "definitions": {
+    "GetEventMembersResponseUserWithEventStatus": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/eventUserEventStatus"
+        }
+      }
+    },
     "eventAcceptEventJoinResponse": {
       "type": "object"
     },
@@ -264,16 +328,32 @@
             "format": "byte"
           }
         },
+        "chatId": {
+          "type": "string",
+          "format": "int64"
+        },
         "date": {
           "type": "string",
           "format": "date-time"
         }
       }
     },
+    "eventGetEventMembersResponse": {
+      "type": "object",
+      "properties": {
+        "usersStatuses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/GetEventMembersResponseUserWithEventStatus"
+          }
+        }
+      }
+    },
     "eventGetEventsResponse": {
       "type": "object",
       "properties": {
-        "event": {
+        "events": {
           "type": "array",
           "items": {
             "type": "object",
@@ -282,10 +362,22 @@
         }
       }
     },
-    "eventGetUserEventsResponse": {
+    "eventGetUserMembershipEventsResponse": {
       "type": "object",
       "properties": {
-        "event": {
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/eventEventModel"
+          }
+        }
+      }
+    },
+    "eventGetUserOwnEventsResponse": {
+      "type": "object",
+      "properties": {
+        "events": {
           "type": "array",
           "items": {
             "type": "object",
@@ -307,6 +399,15 @@
     },
     "eventUpdateEventResponse": {
       "type": "object"
+    },
+    "eventUserEventStatus": {
+      "type": "string",
+      "enum": [
+        "USER_EVENT_STATUS_UNKNOWN",
+        "JOIN_REQUEST",
+        "MEMBER"
+      ],
+      "default": "USER_EVENT_STATUS_UNKNOWN"
     },
     "protobufAny": {
       "type": "object",
