@@ -136,6 +136,7 @@ services:
       - prometheus
       - vault
       - event-postgres
+      - minio
     ports:
       - 18085:80
 
@@ -149,6 +150,18 @@ services:
       - event_postgres_data:/var/lib/postgresql/data
     ports:
       - 5445:5432
+
+  minio:
+    image: bitnami/minio
+    container_name: minio
+    restart: on-failure
+    ports:
+      - 9000:9000
+      - 9090:9090
+    volumes:
+      - minio_data:/data
+    env_file:
+      - minio/dev.env
 
   vault:
     image: vault:1.13.0
@@ -224,3 +237,4 @@ volumes:
   event_postgres_data:
 
   prometheus_data:
+  minio_data:

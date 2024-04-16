@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/the-swiply/swiply-backend/event/internal/repository"
 	"github.com/the-swiply/swiply-backend/event/internal/rpclients"
 	"github.com/the-swiply/swiply-backend/event/internal/server"
@@ -30,6 +32,7 @@ type App struct {
 	httpServer *server.HTTPServer
 
 	db *pgxpool.Pool
+	s3 *minio.Client
 
 	stopCh chan struct{}
 }
@@ -80,6 +83,19 @@ func (a *App) Run(ctx context.Context) error {
 		}
 		loggy.Infoln("migration done")
 	}
+
+	minioClient, err := minio.New(a.cfg.S3.Addr, &minio.Options{
+		Creds:  credentials.NewStaticV4(a.cfg.S3.AccessKey, os.Getenv("PHOTO_STORAGE_SECRET_KEY"), ""),
+		Secure: a.cfg.S3.Secure,
+	})
+	a.s3 = minioClient
+
+	photoRepo, err := repository.NewPhotoContentRepository(ctx, a.cfg.S3.BucketName, a.s3)
+	if err != nil {
+		return fmt.Errorf("can't connect to s3: %w", err)
+	}
+
+	_ = photoRepo
 
 	chatClient, err := rpclients.NewChatClient(a.cfg.Chat.Addr, os.Getenv("S2S_CHAT_TOKEN"))
 	if err != nil {
