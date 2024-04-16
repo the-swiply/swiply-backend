@@ -10,38 +10,45 @@ package swiply.chat;
 service Chat {
   rpc SendMessage(SendMessageRequest) returns (SendMessageResponse){
     option (google.api.http) = {
-      post: "/v1/send-message"
+      post: "/v1/message/send"
       body: "*"
     };
   }
 
   rpc GetNextMessages(GetNextMessagesRequest) returns (GetNextMessagesResponse){
     option (google.api.http) = {
-      get: "/v1/get-next-messages"
+      get: "/v1/message/get-next"
     };
   }
 
   rpc GetPreviousMessages(GetPreviousMessagesRequest) returns (GetPreviousMessagesResponse){
     option (google.api.http) = {
-      get: "/v1/get-previous-messages"
+      get: "/v1/message/get-previous"
     };
   }
 
   rpc GetChats(GetChatsRequest) returns (GetChatsResponse){
     option (google.api.http) = {
-      get: "/v1/get-chats"
+      get: "/v1/chats"
     };
   }
 
   rpc LeaveChat(LeaveChatRequest) returns (LeaveChatResponse){
     option (google.api.http) = {
-      post: "/v1/leave-chat/{chat_id}"
+      post: "/v1/chat/leave/{chat_id}"
     };
   }
 
   rpc CreateChat(CreateChatRequest) returns (CreateChatResponse){
     option (google.api.http) = {
-      post: "/v1/create-chat"
+      post: "/v1/chat/create"
+      body: "*"
+    };
+  }
+
+  rpc AddChatMembers(AddChatMembersRequest) returns (AddChatMembersResponse){
+    option (google.api.http) = {
+      post: "/v1/chat/add-members"
       body: "*"
     };
   }
@@ -90,7 +97,16 @@ message CreateChatRequest {
   repeated string members = 1;
 }
 
-message CreateChatResponse {}
+message CreateChatResponse {
+  int64 chat_id = 1;
+}
+
+message AddChatMembersRequest {
+  int64 chat_id = 1;
+  repeated string members = 2;
+}
+
+message AddChatMembersResponse{}
 
 message ChatMessage {
   string id = 1;

@@ -1,6 +1,7 @@
 package converter
 
 import (
+	"github.com/google/uuid"
 	"github.com/the-swiply/swiply-backend/event/internal/domain"
 	"github.com/the-swiply/swiply-backend/event/pkg/api/event"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -33,6 +34,16 @@ func EventsToGetUserEventsResponse(events []domain.Event) *event.GetUserEventsRe
 			Description: ev.Description,
 			Date:        timestamppb.New(ev.Date),
 		})
+	}
+
+	return res
+}
+
+func UUIDsToStrings(uuids []uuid.UUID) []string {
+	res := make([]string, 0, len(uuids))
+
+	for _, u := range uuids {
+		res = append(res, u.String())
 	}
 
 	return res

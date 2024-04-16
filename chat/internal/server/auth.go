@@ -80,14 +80,14 @@ func (g *GRPCServer) AuthFuncOverride(ctx context.Context, fullMethodName string
 		if handlerAuthCfg.S2S {
 			ctx, err = s2sAuth(ctx, handlerAuthCfg.Authorized)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("s2s auth failed: %w", err)
 			}
 		}
 
 		if handlerAuthCfg.User {
 			ctx, err = userAuth(ctx)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("user auth failed: %w", err)
 			}
 		}
 	}

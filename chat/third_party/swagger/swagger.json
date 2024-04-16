@@ -16,7 +16,39 @@
     "application/json"
   ],
   "paths": {
-    "/v1/create-chat": {
+    "/v1/chat/add-members": {
+      "post": {
+        "operationId": "Chat_AddChatMembers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/chatAddChatMembersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/chatAddChatMembersRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Chat"
+        ]
+      }
+    },
+    "/v1/chat/create": {
       "post": {
         "operationId": "Chat_CreateChat",
         "responses": {
@@ -48,7 +80,38 @@
         ]
       }
     },
-    "/v1/get-chats": {
+    "/v1/chat/leave/{chatId}": {
+      "post": {
+        "operationId": "Chat_LeaveChat",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/chatLeaveChatResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Chat"
+        ]
+      }
+    },
+    "/v1/chats": {
       "get": {
         "operationId": "Chat_GetChats",
         "responses": {
@@ -70,7 +133,7 @@
         ]
       }
     },
-    "/v1/get-next-messages": {
+    "/v1/message/get-next": {
       "get": {
         "operationId": "Chat_GetNextMessages",
         "responses": {
@@ -115,7 +178,7 @@
         ]
       }
     },
-    "/v1/get-previous-messages": {
+    "/v1/message/get-previous": {
       "get": {
         "operationId": "Chat_GetPreviousMessages",
         "responses": {
@@ -160,38 +223,7 @@
         ]
       }
     },
-    "/v1/leave-chat/{chatId}": {
-      "post": {
-        "operationId": "Chat_LeaveChat",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/chatLeaveChatResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "chatId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          }
-        ],
-        "tags": [
-          "Chat"
-        ]
-      }
-    },
-    "/v1/send-message": {
+    "/v1/message/send": {
       "post": {
         "operationId": "Chat_SendMessage",
         "responses": {
@@ -225,6 +257,24 @@
     }
   },
   "definitions": {
+    "chatAddChatMembersRequest": {
+      "type": "object",
+      "properties": {
+        "chatId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "chatAddChatMembersResponse": {
+      "type": "object"
+    },
     "chatChatMessage": {
       "type": "object",
       "properties": {
@@ -263,7 +313,13 @@
       }
     },
     "chatCreateChatResponse": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "chatId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
     },
     "chatGenericChat": {
       "type": "object",

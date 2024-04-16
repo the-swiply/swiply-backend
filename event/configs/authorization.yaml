@@ -9,3 +9,12 @@
 /swiply.event.Event/GetUserEvents:
   user: true
   s2s: false
+
+/swiply.event.Event/JoinEvent:
+  user: true
+  s2s: false
+
+
+/swiply.event.Event/AcceptEventJoin:
+  user: true
+  s2s: false

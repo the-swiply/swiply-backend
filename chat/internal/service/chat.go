@@ -26,6 +26,7 @@ type ChatRepository interface {
 	GetUserChats(ctx context.Context, userID uuid.UUID) ([]domain.Chat, error)
 	RemoveUserFromChatMembers(ctx context.Context, userID uuid.UUID, chatID int64) error
 	CreateChat(ctx context.Context, members []uuid.UUID) (int64, error)
+	AddChatMember(ctx context.Context, chatID int64, member uuid.UUID) error
 }
 
 type MessagePublisher interface {
@@ -220,10 +221,10 @@ func (c *ChatService) LeaveChat(ctx context.Context, chatID int64) error {
 	return nil
 }
 
-func (c *ChatService) CreateChat(ctx context.Context, members []uuid.UUID) error {
+func (c *ChatService) CreateChat(ctx context.Context, members []uuid.UUID) (int64, error) {
 	chatID, err := c.chatRepository.CreateChat(ctx, members)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	msg := domain.Message{
@@ -237,6 +238,34 @@ func (c *ChatService) CreateChat(ctx context.Context, members []uuid.UUID) error
 	err = c.messagePublisher.PublishMessage(ctx, msg)
 	if err != nil {
 		loggy.Errorf("can't publish message on create chat: %v", err)
+	}
+
+	return chatID, nil
+}
+
+func (c *ChatService) AddChatMembers(ctx context.Context, chatID int64, newMembers []uuid.UUID) error {
+	for _, userID := range newMembers {
+		err := c.checkUserInChatWithError(ctx, userID, chatID)
+		if err != nil {
+			continue
+		}
+
+		err = c.chatRepository.AddChatMember(ctx, chatID, userID)
+		if err != nil {
+			return fmt.Errorf("can't add member %s to chat: %w", userID.String(), err)
+		}
+		msg := domain.Message{
+			Type:   domain.MessageTypeUserJoined,
+			ChatID: chatID,
+			Payload: map[string]uuid.UUID{
+				"user": userID,
+			},
+		}
+
+		err = c.messagePublisher.PublishMessage(ctx, msg)
+		if err != nil {
+			loggy.Errorf("can't publish message on create chat: %v", err)
+		}
 	}
 
 	return nil

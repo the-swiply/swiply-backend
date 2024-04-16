@@ -6,6 +6,7 @@ type Config struct {
 	HTTP     `yaml:"http"`
 	Swagger  `yaml:"swagger"`
 	Postgres `yaml:"postgres"`
+	Chat     `yaml:"chat"`
 }
 
 type Application struct {
@@ -31,4 +32,8 @@ type Postgres struct {
 	SSLMode  string `yaml:"ssl_mode"`
 
 	MigrationsFolder string `yaml:"migrations_folder"`
+}
+
+type Chat struct {
+	Addr string `yaml:"addr"`
 }

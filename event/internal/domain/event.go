@@ -8,8 +8,8 @@ import (
 type Event struct {
 	ID          int64
 	Owner       uuid.UUID
-	Members     []uuid.UUID
 	Title       string
 	Description string
+	ChatID      int64
 	Date        time.Time
 }

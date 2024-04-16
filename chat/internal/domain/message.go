@@ -9,6 +9,7 @@ const (
 	MessageTypeChatCreated MessageType = "CHAT_CREATED"
 	MessageTypeMessage     MessageType = "MESSAGE"
 	MessageTypeUserLeft    MessageType = "USER_LEFT"
+	MessageTypeUserJoined  MessageType = "USER_JOINED"
 )
 
 type MessageType string

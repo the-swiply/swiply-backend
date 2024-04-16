@@ -21,3 +21,6 @@ postgres:
   db_name: "event"
   ssl_mode: "disable"
   migrations_folder: "migrations"
+
+chat:
+  addr: "chat:84"

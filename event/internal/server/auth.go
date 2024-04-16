@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/grpc-ecosystem/go-grpc-middleware/util/metautils"
 	"github.com/the-swiply/swiply-backend/pkg/houston/auf"
-	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gopkg.in/yaml.v3"
@@ -80,14 +79,14 @@ func (g *GRPCServer) AuthFuncOverride(ctx context.Context, fullMethodName string
 		if handlerAuthCfg.S2S {
 			ctx, err = s2sAuth(ctx, handlerAuthCfg.Authorized)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("s2s auth failed: %w", err)
 			}
 		}
 
 		if handlerAuthCfg.User {
 			ctx, err = userAuth(ctx)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("user auth failed: %w", err)
 			}
 		}
 	}
@@ -115,7 +114,7 @@ func userAuth(ctx context.Context) (context.Context, error) {
 	if err != nil {
 		return nil, status.Error(codes.PermissionDenied, "invalid id type: uuid expected")
 	}
-	loggy.Info("0-0-0 ", userID)
+
 	return auf.AddUserIDToContext(ctx, userIDParsed), nil
 }
 
