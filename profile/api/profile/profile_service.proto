@@ -38,13 +38,13 @@ service Profile {
 
   rpc GetRecommendations(GetRecommendationsRequest) returns (GetRecommendationsResponse) {
     option (google.api.http) = {
-      get: "/v1/profile/recommendations"
+      get: "/v1/recommendation"
     };
   }
 
   rpc Interaction(InteractionRequest) returns (InteractionResponse) {
     option (google.api.http) = {
-      post: "/v1/profile/interaction"
+      post: "/v1/interaction/create"
       body: "*"
     };
   }
@@ -63,7 +63,19 @@ service Profile {
 
   rpc ListInterests(ListInterestsRequest) returns (ListInterestsResponse) {
     option (google.api.http) = {
-      get: "/v1/profile/interests"
+      get: "/v1/interests"
+    };
+  }
+
+  rpc ListInteractions(ListInteractionsRequest) returns (ListInteractionsResponse) {
+    option (google.api.http) = {
+      get: "/v1/interaction"
+    };
+  }
+
+  rpc ListProfiles(ListProfilesRequest) returns (ListProfilesResponse) {
+    option (google.api.http) = {
+      get: "/v1/profile"
     };
   }
 }
@@ -142,4 +154,20 @@ message LikedMeResponse {
 message ListInterestsRequest {}
 message ListInterestsResponse {
   repeated Interest interests = 1;
+}
+
+// ListInteractions
+message ListInteractionsRequest {
+  google.protobuf.Timestamp after = 1;
+}
+message ListInteractionsResponse {
+  repeated Interaction interactions = 1;
+}
+
+// ListProfiles
+message ListProfilesRequest {
+  google.protobuf.Timestamp updated_after = 1;
+}
+message ListProfilesResponse {
+  repeated UserProfile profiles = 1;
 }

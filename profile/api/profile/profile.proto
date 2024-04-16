@@ -45,3 +45,9 @@ message UserProfile {
   SubscriptionType subscription_type = 8;
   Location location = 9;
 }
+
+message Interaction {
+  string from = 1;
+  string to = 2;
+  InteractionType type = 3;
+}
