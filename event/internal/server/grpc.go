@@ -94,19 +94,48 @@ func (g *GRPCServer) GetEvents(ctx context.Context, req *event.GetEventsRequest)
 	ctx, span := tracy.Start(ctx)
 	defer span.End()
 
-	return nil, nil
-}
-
-func (g *GRPCServer) GetUserEvents(ctx context.Context, _ *event.GetUserEventsRequest) (*event.GetUserEventsResponse, error) {
-	ctx, span := tracy.Start(ctx)
-	defer span.End()
-
-	events, err := g.eventService.GetUserEvents(ctx)
+	events, err := g.eventService.GetEvents(ctx, req.GetLimit(), req.GetOffset())
 	if err != nil {
 		return nil, grut.InternalError("can't get user events", err)
 	}
 
-	return converter.EventsToGetUserEventsResponse(events), nil
+	return converter.EventsToGetEvents(events), nil
+}
+
+func (g *GRPCServer) GetUserOwnEvents(ctx context.Context, _ *event.GetUserOwnEventsRequest) (*event.GetUserOwnEventsResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
+	events, err := g.eventService.GetUserOwnEvents(ctx)
+	if err != nil {
+		return nil, grut.InternalError("can't get user events", err)
+	}
+
+	return converter.EventsToGetUserOwnEvents(events), nil
+}
+
+func (g *GRPCServer) GetUserMembershipEvents(ctx context.Context, req *event.GetUserMembershipEventsRequest) (*event.GetUserMembershipEventsResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
+	events, err := g.eventService.GetUserMembershipEvents(ctx)
+	if err != nil {
+		return nil, grut.InternalError("can't get user events", err)
+	}
+
+	return converter.EventsToGetUserMembershipEventsResponse(events), nil
+}
+
+func (g *GRPCServer) GetEventMembers(ctx context.Context, req *event.GetEventMembersRequest) (*event.GetEventMembersResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
+	members, err := g.eventService.GetEventMembers(ctx, req.GetEventId())
+	if err != nil {
+		return nil, grut.InternalError("can't get user events", err)
+	}
+
+	return converter.UserEventStatusToPB(members), nil
 }
 
 func (g *GRPCServer) JoinEvent(ctx context.Context, req *event.JoinEventRequest) (*event.JoinEventResponse, error) {

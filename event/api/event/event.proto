@@ -28,11 +28,24 @@ service Event {
     };
   }
 
-  rpc GetUserEvents(GetUserEventsRequest) returns (GetUserEventsResponse){
+  rpc GetUserOwnEvents(GetUserOwnEventsRequest) returns (GetUserOwnEventsResponse){
     option (google.api.http) = {
       get: "/v1/events/my"
     };
   }
+
+  rpc GetUserMembershipEvents(GetUserMembershipEventsRequest) returns (GetUserMembershipEventsResponse){
+    option (google.api.http) = {
+      get: "/v1/events/membership"
+    };
+  }
+
+  rpc GetEventMembers(GetEventMembersRequest) returns (GetEventMembersResponse){
+    option (google.api.http) = {
+      get: "/v1/events/membership"
+    };
+  }
+
 
   rpc JoinEvent(JoinEventRequest) returns (JoinEventResponse){
     option (google.api.http) = {
@@ -49,10 +62,10 @@ service Event {
 
 message EventModel {
   int64 event_id = 1;
-  repeated string members = 2;
-  string title = 3;
-  string description = 4;
-  repeated bytes photos = 5;
+  string title = 2;
+  string description = 3;
+  repeated bytes photos = 4;
+  int64 chat_id = 5;
   google.protobuf.Timestamp date = 6;
 }
 
@@ -82,10 +95,35 @@ message GetEventsResponse{
   repeated EventModel events = 1;
 }
 
-message GetUserEventsRequest {}
+message GetUserMembershipEventsRequest {}
 
-message GetUserEventsResponse{
+message GetUserMembershipEventsResponse {
   repeated EventModel events = 1;
+}
+
+message GetUserOwnEventsRequest {}
+
+message GetUserOwnEventsResponse {
+  repeated EventModel events = 1;
+}
+
+message GetEventMembersRequest {
+  int64 event_id = 1;
+}
+
+enum UserEventStatus {
+  USER_EVENT_STATUS_UNKNOWN = 0;
+  JOIN_REQUEST = 1;
+  MEMBER = 2;
+}
+
+message GetEventMembersResponse {
+  message UserWithEventStatus {
+    string user_id = 1;
+    UserEventStatus status = 2;
+  }
+
+  repeated UserWithEventStatus users_statuses = 1;
 }
 
 message JoinEventRequest {

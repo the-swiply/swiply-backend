@@ -11,7 +11,10 @@ import (
 type EventRepository interface {
 	CreateEvent(ctx context.Context, event domain.Event) (int64, error)
 	UpdateEvent(ctx context.Context, event domain.Event) error
-	GetEvents(ctx context.Context, owner uuid.UUID) ([]domain.Event, error)
+	GetEvents(ctx context.Context, limit, offset int64) ([]domain.Event, error)
+	GetUserOwnEvents(ctx context.Context, owner uuid.UUID) ([]domain.Event, error)
+	GetUserMembershipEvents(ctx context.Context, member uuid.UUID) ([]domain.Event, error)
+	GetEventMembers(ctx context.Context, eventID int64) ([]domain.UserEventStatus, error)
 	GetEventByID(ctx context.Context, id int64) (domain.Event, error)
 	JoinEvent(ctx context.Context, eventID int64, userID uuid.UUID) error
 	AcceptEventJoin(ctx context.Context, eventID int64, owner, userID uuid.UUID) error
@@ -71,10 +74,39 @@ func (e *EventService) UpdateEvent(ctx context.Context, event domain.Event) erro
 	return nil
 }
 
-func (e *EventService) GetUserEvents(ctx context.Context) ([]domain.Event, error) {
+func (e *EventService) GetEvents(ctx context.Context, limit, offset int64) ([]domain.Event, error) {
+	events, err := e.eventRepository.GetEvents(ctx, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return events, nil
+}
+
+func (e *EventService) GetUserOwnEvents(ctx context.Context) ([]domain.Event, error) {
 	userID := auf.ExtractUserIDFromContext[uuid.UUID](ctx)
 
-	events, err := e.eventRepository.GetEvents(ctx, userID)
+	events, err := e.eventRepository.GetUserOwnEvents(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return events, nil
+}
+
+func (e *EventService) GetUserMembershipEvents(ctx context.Context) ([]domain.Event, error) {
+	userID := auf.ExtractUserIDFromContext[uuid.UUID](ctx)
+
+	events, err := e.eventRepository.GetUserMembershipEvents(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return events, nil
+}
+
+func (e *EventService) GetEventMembers(ctx context.Context, eventID int64) ([]domain.UserEventStatus, error) {
+	events, err := e.eventRepository.GetEventMembers(ctx, eventID)
 	if err != nil {
 		return nil, err
 	}

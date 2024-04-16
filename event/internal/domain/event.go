@@ -13,3 +13,9 @@ type Event struct {
 	ChatID      int64
 	Date        time.Time
 }
+
+type UserEventStatus struct {
+	UserID  uuid.UUID
+	EventID int64
+	Status  string
+}

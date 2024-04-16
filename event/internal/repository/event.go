@@ -76,10 +76,10 @@ WHERE id = $5 AND owner = $6`, eventTable)
 	return nil
 }
 
-func (e *EventRepository) GetEvents(ctx context.Context, owner uuid.UUID) ([]domain.Event, error) {
+func (e *EventRepository) GetUserOwnEvents(ctx context.Context, owner uuid.UUID) ([]domain.Event, error) {
 	q := fmt.Sprintf(`SELECT id, owner, title, description, chat_id, date FROM %s 
 WHERE owner = $1
-ORDER BY date DESC`, eventTable)
+ORDER BY id DESC`, eventTable)
 
 	rows, err := e.db.Query(ctx, q, owner)
 	if err != nil {
@@ -88,6 +88,52 @@ ORDER BY date DESC`, eventTable)
 	defer rows.Close()
 
 	return pgx.CollectRows(rows, pgx.RowToStructByName[domain.Event])
+}
+
+func (e *EventRepository) GetEvents(ctx context.Context, limit, offset int64) ([]domain.Event, error) {
+	q := fmt.Sprintf(`SELECT event.id, owner, title, description, chat_id, date
+FROM %s
+JOIN event_user_status ON event.id = event_id
+ORDER BY id DESC
+LIMIT $1 OFFSET $2`, eventTable)
+
+	rows, err := e.db.Query(ctx, q, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return pgx.CollectRows(rows, pgx.RowToStructByName[domain.Event])
+}
+
+func (e *EventRepository) GetUserMembershipEvents(ctx context.Context, member uuid.UUID) ([]domain.Event, error) {
+	q := fmt.Sprintf(`SELECT event.id, owner, title, description, chat_id, date
+FROM %s
+JOIN event_user_status ON event.id = event_id
+WHERE user_id = $1
+ORDER BY id DESC`, eventTable)
+
+	rows, err := e.db.Query(ctx, q, member)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return pgx.CollectRows(rows, pgx.RowToStructByName[domain.Event])
+}
+
+func (e *EventRepository) GetEventMembers(ctx context.Context, eventID int64) ([]domain.UserEventStatus, error) {
+	q := fmt.Sprintf(`SELECT user_id, event_id, status FROM %s 
+WHERE event_id = $1
+ORDER BY event_id DESC`, eventUserStatusTable)
+
+	rows, err := e.db.Query(ctx, q, eventID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return pgx.CollectRows(rows, pgx.RowToStructByName[domain.UserEventStatus])
 }
 
 func (e *EventRepository) GetEventByID(ctx context.Context, id int64) (domain.Event, error) {
