@@ -99,7 +99,7 @@ func (g *GRPCServer) GetEvents(ctx context.Context, req *event.GetEventsRequest)
 		return nil, grut.InternalError("can't get user events", err)
 	}
 
-	return converter.EventsToGetEvents(events), nil
+	return converter.EventsToGetEventsResponse(events), nil
 }
 
 func (g *GRPCServer) GetUserOwnEvents(ctx context.Context, _ *event.GetUserOwnEventsRequest) (*event.GetUserOwnEventsResponse, error) {
@@ -108,19 +108,19 @@ func (g *GRPCServer) GetUserOwnEvents(ctx context.Context, _ *event.GetUserOwnEv
 
 	events, err := g.eventService.GetUserOwnEvents(ctx)
 	if err != nil {
-		return nil, grut.InternalError("can't get user events", err)
+		return nil, grut.InternalError("can't get user own events", err)
 	}
 
 	return converter.EventsToGetUserOwnEvents(events), nil
 }
 
-func (g *GRPCServer) GetUserMembershipEvents(ctx context.Context, req *event.GetUserMembershipEventsRequest) (*event.GetUserMembershipEventsResponse, error) {
+func (g *GRPCServer) GetUserMembershipEvents(ctx context.Context, _ *event.GetUserMembershipEventsRequest) (*event.GetUserMembershipEventsResponse, error) {
 	ctx, span := tracy.Start(ctx)
 	defer span.End()
 
 	events, err := g.eventService.GetUserMembershipEvents(ctx)
 	if err != nil {
-		return nil, grut.InternalError("can't get user events", err)
+		return nil, grut.InternalError("can't get user membership events", err)
 	}
 
 	return converter.EventsToGetUserMembershipEventsResponse(events), nil
@@ -132,7 +132,7 @@ func (g *GRPCServer) GetEventMembers(ctx context.Context, req *event.GetEventMem
 
 	members, err := g.eventService.GetEventMembers(ctx, req.GetEventId())
 	if err != nil {
-		return nil, grut.InternalError("can't get user events", err)
+		return nil, grut.InternalError("can't get event members", err)
 	}
 
 	return converter.UserEventStatusToPB(members), nil

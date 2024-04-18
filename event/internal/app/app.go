@@ -95,15 +95,13 @@ func (a *App) Run(ctx context.Context) error {
 		return fmt.Errorf("can't connect to s3: %w", err)
 	}
 
-	_ = photoRepo
-
 	chatClient, err := rpclients.NewChatClient(a.cfg.Chat.Addr, os.Getenv("S2S_CHAT_TOKEN"))
 	if err != nil {
 		return fmt.Errorf("can't get chat client: %w", err)
 	}
 	defer chatClient.CloseConn()
 
-	eventSvc := service.NewEventService(service.EventConfig{}, eventRepo, chatClient)
+	eventSvc := service.NewEventService(service.EventConfig{}, eventRepo, photoRepo, chatClient)
 
 	errCh := make(chan error, 2)
 

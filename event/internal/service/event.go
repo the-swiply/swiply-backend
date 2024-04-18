@@ -20,6 +20,12 @@ type EventRepository interface {
 	AcceptEventJoin(ctx context.Context, eventID int64, owner, userID uuid.UUID) error
 }
 
+type EventPhotoManager interface {
+	ListPhotos(ctx context.Context, eventID int64) ([]domain.Photo, error)
+	GetPhoto(ctx context.Context, eventID int64, photoID int64) (domain.Photo, error)
+	UploadPhoto(ctx context.Context, eventID int64, photo domain.Photo) error
+}
+
 type ChatClient interface {
 	CreateChat(ctx context.Context, members []uuid.UUID) (int64, error)
 	AddChatMembers(ctx context.Context, chatID int64, members []uuid.UUID) error
@@ -28,13 +34,15 @@ type ChatClient interface {
 type EventService struct {
 	cfg             EventConfig
 	eventRepository EventRepository
+	photoMgr        EventPhotoManager
 	chatClient      ChatClient
 }
 
-func NewEventService(cfg EventConfig, eventRepository EventRepository, chatClient ChatClient) *EventService {
+func NewEventService(cfg EventConfig, eventRepository EventRepository, photoMgr EventPhotoManager, chatClient ChatClient) *EventService {
 	return &EventService{
 		cfg:             cfg,
 		eventRepository: eventRepository,
+		photoMgr:        photoMgr,
 		chatClient:      chatClient,
 	}
 }
@@ -46,6 +54,14 @@ func (e *EventService) CreateEvent(ctx context.Context, event domain.Event) (int
 	eventID, err := e.eventRepository.CreateEvent(ctx, event)
 	if err != nil {
 		return 0, err
+	}
+
+	for i, photo := range event.Photos {
+		photo.ID = int64(i)
+		err = e.photoMgr.UploadPhoto(ctx, eventID, photo)
+		if err != nil {
+			return 0, fmt.Errorf("can't upload photo: %w", err)
+		}
 	}
 
 	chatID, err := e.chatClient.CreateChat(ctx, []uuid.UUID{userID})
@@ -80,6 +96,11 @@ func (e *EventService) GetEvents(ctx context.Context, limit, offset int64) ([]do
 		return nil, err
 	}
 
+	err = e.getPhotosForEvents(ctx, events)
+	if err != nil {
+		return nil, err
+	}
+
 	return events, nil
 }
 
@@ -87,6 +108,11 @@ func (e *EventService) GetUserOwnEvents(ctx context.Context) ([]domain.Event, er
 	userID := auf.ExtractUserIDFromContext[uuid.UUID](ctx)
 
 	events, err := e.eventRepository.GetUserOwnEvents(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = e.getPhotosForEvents(ctx, events)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +128,24 @@ func (e *EventService) GetUserMembershipEvents(ctx context.Context) ([]domain.Ev
 		return nil, err
 	}
 
+	err = e.getPhotosForEvents(ctx, events)
+	if err != nil {
+		return nil, err
+	}
+
 	return events, nil
+}
+
+func (e *EventService) getPhotosForEvents(ctx context.Context, events []domain.Event) error {
+	for i, ev := range events {
+		photos, err := e.photoMgr.ListPhotos(ctx, ev.ID)
+		if err != nil {
+			return fmt.Errorf("can't get photos for event %d: %w", ev.ID, err)
+		}
+		events[i].Photos = photos
+	}
+
+	return nil
 }
 
 func (e *EventService) GetEventMembers(ctx context.Context, eventID int64) ([]domain.UserEventStatus, error) {
