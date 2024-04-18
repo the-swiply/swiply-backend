@@ -5,8 +5,9 @@ type Config struct {
 	GRPC     `yaml:"grpc"`
 	HTTP     `yaml:"http"`
 	Swagger  `yaml:"swagger"`
-	Postgres `yaml:"postgres"`
 	Chat     `yaml:"chat"`
+	Postgres `yaml:"postgres"`
+	S3       `yaml:"s3"`
 }
 
 type Application struct {
@@ -36,4 +37,11 @@ type Postgres struct {
 
 type Chat struct {
 	Addr string `yaml:"addr"`
+}
+
+type S3 struct {
+	Addr       string `yaml:"addr"`
+	BucketName string `yaml:"bucket_name"`
+	AccessKey  string `yaml:"access_key"`
+	Secure     bool   `yaml:"secure"`
 }

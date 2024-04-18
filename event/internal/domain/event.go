@@ -10,6 +10,7 @@ type Event struct {
 	Owner       uuid.UUID
 	Title       string
 	Description string
+	Photos      []Photo
 	ChatID      int64
 	Date        time.Time
 }

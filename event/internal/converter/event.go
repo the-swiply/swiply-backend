@@ -8,9 +8,17 @@ import (
 )
 
 func EventFromCreateEventRequest(req *event.CreateEventRequest) domain.Event {
+	photos := make([]domain.Photo, 0, len(req.GetPhotos()))
+	for _, phContent := range req.GetPhotos() {
+		photos = append(photos, domain.Photo{
+			Content: phContent,
+		})
+	}
+
 	return domain.Event{
 		Title:       req.GetTitle(),
 		Description: req.GetDescription(),
+		Photos:      photos,
 		Date:        req.GetDate().AsTime(),
 	}
 }
@@ -24,15 +32,20 @@ func EventFromUpdateEventRequest(req *event.UpdateEventRequest) domain.Event {
 	}
 }
 
-func EventsToGetEvents(events []domain.Event) *event.GetEventsResponse {
+func EventsToGetEventsResponse(events []domain.Event) *event.GetEventsResponse {
 	res := &event.GetEventsResponse{Events: make([]*event.EventModel, 0, len(events))}
 	for _, ev := range events {
-		// TODO: add photos
+		photoContents := make([][]byte, 0, len(ev.Photos))
+		for _, ph := range ev.Photos {
+			photoContents = append(photoContents, ph.Content)
+		}
+
 		res.Events = append(res.Events, &event.EventModel{
 			EventId:     ev.ID,
 			Title:       ev.Title,
 			Description: ev.Description,
 			ChatId:      ev.ChatID,
+			Photos:      photoContents,
 			Date:        timestamppb.New(ev.Date),
 		})
 	}
@@ -43,11 +56,16 @@ func EventsToGetEvents(events []domain.Event) *event.GetEventsResponse {
 func EventsToGetUserMembershipEventsResponse(events []domain.Event) *event.GetUserMembershipEventsResponse {
 	res := &event.GetUserMembershipEventsResponse{Events: make([]*event.EventModel, 0, len(events))}
 	for _, ev := range events {
-		// TODO: add photos
+		photoContents := make([][]byte, 0, len(ev.Photos))
+		for _, ph := range ev.Photos {
+			photoContents = append(photoContents, ph.Content)
+		}
+
 		res.Events = append(res.Events, &event.EventModel{
 			EventId:     ev.ID,
 			Title:       ev.Title,
 			Description: ev.Description,
+			Photos:      photoContents,
 			ChatId:      ev.ChatID,
 			Date:        timestamppb.New(ev.Date),
 		})
@@ -59,11 +77,16 @@ func EventsToGetUserMembershipEventsResponse(events []domain.Event) *event.GetUs
 func EventsToGetUserOwnEvents(events []domain.Event) *event.GetUserOwnEventsResponse {
 	res := &event.GetUserOwnEventsResponse{Events: make([]*event.EventModel, 0, len(events))}
 	for _, ev := range events {
-		// TODO: add photos
+		photoContents := make([][]byte, 0, len(ev.Photos))
+		for _, ph := range ev.Photos {
+			photoContents = append(photoContents, ph.Content)
+		}
+
 		res.Events = append(res.Events, &event.EventModel{
 			EventId:     ev.ID,
 			Title:       ev.Title,
 			Description: ev.Description,
+			Photos:      photoContents,
 			ChatId:      ev.ChatID,
 			Date:        timestamppb.New(ev.Date),
 		})
