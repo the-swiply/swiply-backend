@@ -77,7 +77,7 @@ WHERE id = $5 AND owner = $6`, eventTable)
 }
 
 func (e *EventRepository) GetUserOwnEvents(ctx context.Context, owner uuid.UUID) ([]domain.Event, error) {
-	q := fmt.Sprintf(`SELECT id, owner, title, description, chat_id, date FROM %s 
+	q := fmt.Sprintf(`SELECT id, owner, title, description, NULL AS photos, chat_id, date FROM %s 
 WHERE owner = $1
 ORDER BY id DESC`, eventTable)
 
@@ -91,7 +91,7 @@ ORDER BY id DESC`, eventTable)
 }
 
 func (e *EventRepository) GetEvents(ctx context.Context, limit, offset int64) ([]domain.Event, error) {
-	q := fmt.Sprintf(`SELECT event.id, owner, title, description, chat_id, date
+	q := fmt.Sprintf(`SELECT event.id, owner, title, description, NULL AS photos, chat_id, date
 FROM %s
 JOIN event_user_status ON event.id = event_id
 ORDER BY id DESC
@@ -107,7 +107,7 @@ LIMIT $1 OFFSET $2`, eventTable)
 }
 
 func (e *EventRepository) GetUserMembershipEvents(ctx context.Context, member uuid.UUID) ([]domain.Event, error) {
-	q := fmt.Sprintf(`SELECT event.id, owner, title, description, chat_id, date
+	q := fmt.Sprintf(`SELECT event.id, owner, title, description, NULL AS photos, chat_id, date
 FROM %s
 JOIN event_user_status ON event.id = event_id
 WHERE user_id = $1
