@@ -151,6 +151,32 @@ services:
     ports:
       - 5445:5432
 
+  backoffice:
+    container_name: backoffice-service
+    build:
+      context: .
+      dockerfile: backoffice/Dockerfile
+    restart: on-failure
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - 18070:8000
+    env_file:
+      - backoffice/dev.env
+    depends_on:
+      - backoffice-postgres
+      - vault
+
+  backoffice-postgres:
+    image: postgres:16.0
+    container_name: backoffice-postgres
+    restart: on-failure
+    env_file:
+      - backoffice-infra/postgres/dev.env
+    volumes:
+      - backoffice_postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5420:5432
+
   minio:
     image: bitnami/minio
     container_name: minio
@@ -235,6 +261,7 @@ volumes:
   recommendation_postgres_data:
   recommendation_redis_data:
   event_postgres_data:
+  backoffice_postgres_data:
 
   prometheus_data:
   minio_data:
