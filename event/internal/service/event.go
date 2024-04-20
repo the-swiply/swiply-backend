@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/the-swiply/swiply-backend/event/internal/domain"
 	"github.com/the-swiply/swiply-backend/pkg/houston/auf"
+	"github.com/the-swiply/swiply-backend/pkg/houston/dobby"
 )
 
 type EventRepository interface {
@@ -31,17 +32,24 @@ type ChatClient interface {
 	AddChatMembers(ctx context.Context, chatID int64, members []uuid.UUID) error
 }
 
+type Transactor interface {
+	WithinTransaction(ctx context.Context, f func(ctx context.Context) error, opts dobby.TxOptions) error
+}
+
 type EventService struct {
 	cfg             EventConfig
 	eventRepository EventRepository
+	transactor      Transactor
 	photoMgr        EventPhotoManager
 	chatClient      ChatClient
 }
 
-func NewEventService(cfg EventConfig, eventRepository EventRepository, photoMgr EventPhotoManager, chatClient ChatClient) *EventService {
+func NewEventService(cfg EventConfig, eventRepository EventRepository, transactor Transactor,
+	photoMgr EventPhotoManager, chatClient ChatClient) *EventService {
 	return &EventService{
 		cfg:             cfg,
 		eventRepository: eventRepository,
+		transactor:      transactor,
 		photoMgr:        photoMgr,
 		chatClient:      chatClient,
 	}
@@ -51,31 +59,39 @@ func (e *EventService) CreateEvent(ctx context.Context, event domain.Event) (int
 	userID := auf.ExtractUserIDFromContext[uuid.UUID](ctx)
 	event.Owner = userID
 
-	eventID, err := e.eventRepository.CreateEvent(ctx, event)
+	err := e.transactor.WithinTransaction(ctx, func(txCtx context.Context) error {
+		eventID, err := e.eventRepository.CreateEvent(txCtx, event)
+		if err != nil {
+			return err
+		}
+
+		for i, photo := range event.Photos {
+			photo.ID = int64(i)
+			err = e.photoMgr.UploadPhoto(txCtx, eventID, photo)
+			if err != nil {
+				return fmt.Errorf("can't upload photo: %w", err)
+			}
+		}
+
+		chatID, err := e.chatClient.CreateChat(txCtx, []uuid.UUID{userID})
+		if err != nil {
+			return fmt.Errorf("can't create chat: %w", err)
+		}
+
+		event.ChatID = chatID
+		err = e.eventRepository.UpdateEvent(txCtx, event)
+		if err != nil {
+			return fmt.Errorf("can't set chat it for event: %w", err)
+		}
+		event.ID = eventID
+
+		return nil
+	}, dobby.TxOptions{})
 	if err != nil {
 		return 0, err
 	}
 
-	for i, photo := range event.Photos {
-		photo.ID = int64(i)
-		err = e.photoMgr.UploadPhoto(ctx, eventID, photo)
-		if err != nil {
-			return 0, fmt.Errorf("can't upload photo: %w", err)
-		}
-	}
-
-	chatID, err := e.chatClient.CreateChat(ctx, []uuid.UUID{userID})
-	if err != nil {
-		return 0, fmt.Errorf("can't create chat: %w", err)
-	}
-
-	event.ChatID = chatID
-	err = e.eventRepository.UpdateEvent(ctx, event)
-	if err != nil {
-		return 0, fmt.Errorf("can't set chat it for event: %w", err)
-	}
-
-	return eventID, nil
+	return event.ID, nil
 }
 
 func (e *EventService) UpdateEvent(ctx context.Context, event domain.Event) error {
@@ -171,20 +187,24 @@ func (e *EventService) JoinEvent(ctx context.Context, eventID int64) error {
 func (e *EventService) AcceptEventJoin(ctx context.Context, eventID int64, userIDToAdd uuid.UUID) error {
 	userID := auf.ExtractUserIDFromContext[uuid.UUID](ctx)
 
-	ev, err := e.eventRepository.GetEventByID(ctx, eventID)
-	if err != nil {
-		return err
-	}
+	err := e.transactor.WithinTransaction(ctx, func(txCtx context.Context) error {
+		ev, err := e.eventRepository.GetEventByID(txCtx, eventID)
+		if err != nil {
+			return err
+		}
 
-	err = e.eventRepository.AcceptEventJoin(ctx, eventID, userID, userIDToAdd)
-	if err != nil {
-		return err
-	}
+		err = e.eventRepository.AcceptEventJoin(txCtx, eventID, userID, userIDToAdd)
+		if err != nil {
+			return err
+		}
 
-	err = e.chatClient.AddChatMembers(ctx, ev.ID, []uuid.UUID{userIDToAdd})
-	if err != nil {
-		return fmt.Errorf("can't add user to event's chat: %w", err)
-	}
+		err = e.chatClient.AddChatMembers(txCtx, ev.ID, []uuid.UUID{userIDToAdd})
+		if err != nil {
+			return fmt.Errorf("can't add user to event's chat: %w", err)
+		}
 
-	return nil
+		return nil
+	}, dobby.TxOptions{})
+
+	return err
 }

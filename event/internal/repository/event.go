@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/the-swiply/swiply-backend/event/internal/domain"
+	"github.com/the-swiply/swiply-backend/pkg/houston/dobby"
 )
 
 const (
@@ -28,8 +29,17 @@ func NewEventRepository(db *pgxpool.Pool) *EventRepository {
 	}
 }
 
+func (e *EventRepository) executor(ctx context.Context) dobby.Executor {
+	tx := dobby.ExtractPGXTx(ctx)
+	if tx != nil {
+		return tx
+	}
+
+	return e.db
+}
+
 func (e *EventRepository) CreateEvent(ctx context.Context, event domain.Event) (int64, error) {
-	tx, err := e.db.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := e.executor(ctx).Begin(ctx)
 	if err != nil {
 		return 0, fmt.Errorf("can't begin tx: %w", err)
 	}
@@ -39,7 +49,7 @@ func (e *EventRepository) CreateEvent(ctx context.Context, event domain.Event) (
 VALUES ($1, $2, $3, $4) RETURNING id`, eventTable)
 
 	var id int64
-	row := e.db.QueryRow(ctx, q1, event.Owner, event.Title, event.Description, event.Date)
+	row := tx.QueryRow(ctx, q1, event.Owner, event.Title, event.Description, event.Date)
 
 	err = row.Scan(&id)
 	if err != nil {
@@ -47,7 +57,7 @@ VALUES ($1, $2, $3, $4) RETURNING id`, eventTable)
 	}
 
 	q2 := fmt.Sprintf(`INSERT INTO %s (user_id, event_id, status) VALUES ($1, $2, $3)`, eventUserStatusTable)
-	_, err = e.db.Exec(ctx, q2, event.Owner, id, statusMember)
+	_, err = tx.Exec(ctx, q2, event.Owner, id, statusMember)
 	if err != nil {
 		return 0, fmt.Errorf("can't insert status: %w", err)
 	}
@@ -68,7 +78,7 @@ SET title = $1,
     date = $4
 WHERE id = $5 AND owner = $6`, eventTable)
 
-	_, err := e.db.Exec(ctx, q, event.Title, event.Description, event.ChatID, event.Date, event.ID, event.Owner)
+	_, err := e.executor(ctx).Exec(ctx, q, event.Title, event.Description, event.ChatID, event.Date, event.ID, event.Owner)
 	if err != nil {
 		return fmt.Errorf("can't update event in db: %w", err)
 	}
@@ -157,7 +167,7 @@ func (e *EventRepository) JoinEvent(ctx context.Context, eventID int64, userID u
 	q := fmt.Sprintf(`INSERT INTO %s (user_id, event_id, status) VALUES ($1, $2, $3) ON CONFLICT (user_id, event_id) DO NOTHING`,
 		eventUserStatusTable)
 
-	_, err := e.db.Exec(ctx, q, userID, eventID, statusJoinRequest)
+	_, err := e.executor(ctx).Exec(ctx, q, userID, eventID, statusJoinRequest)
 	if err != nil {
 		return fmt.Errorf("can't update event in db: %w", err)
 	}
@@ -170,7 +180,7 @@ func (e *EventRepository) AcceptEventJoin(ctx context.Context, eventID int64, ow
           WHERE event_id = $3 AND user_id = $2 AND status = $5 AND (SELECT owner FROM %s WHERE id = $3) = $4`,
 		eventUserStatusTable, eventTable)
 
-	_, err := e.db.Exec(ctx, q, statusMember, userID, eventID, owner, statusJoinRequest)
+	_, err := e.executor(ctx).Exec(ctx, q, statusMember, userID, eventID, owner, statusJoinRequest)
 	if err != nil {
 		return fmt.Errorf("can't update event in db: %w", err)
 	}
