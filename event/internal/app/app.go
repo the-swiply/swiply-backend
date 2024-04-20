@@ -75,6 +75,8 @@ func (a *App) Run(ctx context.Context) error {
 
 	eventRepo := repository.NewEventRepository(a.db)
 
+	eventRepoTransactor := dobby.NewPGXTransactor(a.db)
+
 	if os.Getenv("DISABLE_AUTO_MIGRATION") == "" {
 		loggy.Infoln("starting migrations")
 		err = dobby.AutoMigratePostgres(a.db, a.cfg.Postgres.MigrationsFolder)
@@ -101,7 +103,7 @@ func (a *App) Run(ctx context.Context) error {
 	}
 	defer chatClient.CloseConn()
 
-	eventSvc := service.NewEventService(service.EventConfig{}, eventRepo, photoRepo, chatClient)
+	eventSvc := service.NewEventService(service.EventConfig{}, eventRepo, eventRepoTransactor, photoRepo, chatClient)
 
 	errCh := make(chan error, 2)
 
