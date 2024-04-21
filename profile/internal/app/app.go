@@ -95,14 +95,16 @@ func (a *App) Run(ctx context.Context) error {
 	a.s3 = minioClient
 
 	profileRepo := repository.NewProfileRepository(a.db)
-	photoRepo := repository.NewPhotoContentRepository(a.cfg.S3.BucketName, a.s3)
+	photoContentRepo := repository.NewPhotoContentRepository(a.cfg.S3.BucketName, a.s3)
+	photoRepo := repository.NewPhotoRepository(a.db)
 
-	profileSvc := service.NewProfileService(service.ProfileConfig{}, photoRepo, profileRepo)
+	profileSvc := service.NewProfileService(service.ProfileConfig{}, profileRepo)
+	photoSvc := service.NewPhotoService(service.PhotoConfig{}, photoContentRepo, photoRepo)
 
 	errCh := make(chan error, 2)
 
 	go func() {
-		if err = a.runGRPCServer(profileSvc); err != nil {
+		if err = a.runGRPCServer(profileSvc, photoSvc); err != nil {
 			errCh <- fmt.Errorf("can't run grpc server: %w", err)
 		} else {
 			errCh <- nil
@@ -127,8 +129,8 @@ func (a *App) Run(ctx context.Context) error {
 	return nil
 }
 
-func (a *App) runGRPCServer(recSvc *service.ProfileService) error {
-	srv := server.NewGRPCServer(recSvc)
+func (a *App) runGRPCServer(profileSvc *service.ProfileService, photoSvc *service.PhotoService) error {
+	srv := server.NewGRPCServer(profileSvc, photoSvc)
 	a.grpcServer = srv
 
 	listener, err := net.Listen("tcp", a.cfg.GRPC.Addr)

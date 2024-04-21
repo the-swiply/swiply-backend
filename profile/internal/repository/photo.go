@@ -20,8 +20,8 @@ type PhotoRepository struct {
 	db *pgxpool.Pool
 }
 
-func NewPhotoRepository(db *pgxpool.Pool) *ProfileRepository {
-	return &ProfileRepository{db: db}
+func NewPhotoRepository(db *pgxpool.Pool) *PhotoRepository {
+	return &PhotoRepository{db: db}
 }
 
 func (p *PhotoRepository) Reorder(ctx context.Context, userID uuid.UUID, photoIDs []uuid.UUID) error {
