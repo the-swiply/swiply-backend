@@ -6,6 +6,8 @@ import (
 	"github.com/the-swiply/swiply-backend/pkg/houston/config"
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"github.com/the-swiply/swiply-backend/pkg/houston/runner"
+
+	"github.com/the-swiply/swiply-backend/profile/internal/app"
 )
 
 const (

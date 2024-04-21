@@ -10,6 +10,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/encoding/protojson"
+
+	"github.com/the-swiply/swiply-backend/profile/pkg/api/profile"
 )
 
 const (
@@ -59,9 +61,14 @@ func registerGRPCGateway(ctx context.Context, mux *http.ServeMux, grpcAddr strin
 
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 
-	err := profile.RegisterRecommendationHandlerFromEndpoint(ctx, gwMux, grpcAddr, opts)
+	err := profile.RegisterProfileHandlerFromEndpoint(ctx, gwMux, grpcAddr, opts)
 	if err != nil {
-		return fmt.Errorf("can't register handler for grpc endpoint: %w", err)
+		return fmt.Errorf("can't register profile handler for grpc endpoint: %w", err)
+	}
+
+	err = profile.RegisterPhotoHandlerFromEndpoint(ctx, gwMux, grpcAddr, opts)
+	if err != nil {
+		return fmt.Errorf("can't register photo handler for grpc endpoint: %w", err)
 	}
 
 	mux.Handle("/", gwMux)

@@ -1571,7 +1571,7 @@ type ProfilePhoto struct {
 	unknownFields protoimpl.UnknownFields
 
 	Id      string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Content [][]byte `protobuf:"bytes,2,rep,name=content,proto3" json:"content,omitempty"`
+	Content []byte `protobuf:"bytes,2,rep,name=content,proto3" json:"content,omitempty"`
 }
 
 func (x *ProfilePhoto) Reset() {
@@ -1613,7 +1613,7 @@ func (x *ProfilePhoto) GetId() string {
 	return ""
 }
 
-func (x *ProfilePhoto) GetContent() [][]byte {
+func (x *ProfilePhoto) GetContent() []byte {
 	if x != nil {
 		return x.Content
 	}
@@ -1625,7 +1625,7 @@ type CreatePhotoRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Content [][]byte `protobuf:"bytes,1,rep,name=content,proto3" json:"content,omitempty"`
+	Content []byte `protobuf:"bytes,1,rep,name=content,proto3" json:"content,omitempty"`
 }
 
 func (x *CreatePhotoRequest) Reset() {
@@ -1660,7 +1660,7 @@ func (*CreatePhotoRequest) Descriptor() ([]byte, []int) {
 	return file_api_profile_proto_rawDescGZIP(), []int{27}
 }
 
-func (x *CreatePhotoRequest) GetContent() [][]byte {
+func (x *CreatePhotoRequest) GetContent() []byte {
 	if x != nil {
 		return x.Content
 	}

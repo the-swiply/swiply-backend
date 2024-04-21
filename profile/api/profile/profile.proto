@@ -254,11 +254,11 @@ message ListProfilesResponse {
 
 message ProfilePhoto {
   string id = 1;
-  repeated bytes content = 2;
+  bytes content = 2;
 }
 
 message CreatePhotoRequest {
-  repeated bytes content = 1;
+  bytes content = 1;
 }
 message CreatePhotoResponse {
   string id = 1;
@@ -287,6 +287,6 @@ message DeletePhotoResponse {
 }
 
 message ReorderPhotoRequest {
-  repeated string id = 1;
+  repeated string ids = 1;
 }
 message ReorderPhotoResponse {}
