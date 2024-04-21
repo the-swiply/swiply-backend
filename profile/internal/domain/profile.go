@@ -9,7 +9,7 @@ import (
 
 type gender string
 
-func (g *gender) Set(value string) (err error) {
+func (g *gender) Set(value string) error {
 	switch value {
 	case string(GenderUnspecified):
 		*g = GenderUnspecified
@@ -36,7 +36,7 @@ const (
 	SubscriptionTypePrimary     subscriptionType = "PRIMARY"
 )
 
-func (s *subscriptionType) Set(value string) (err error) {
+func (s *subscriptionType) Set(value string) error {
 	switch value {
 	case string(SubscriptionTypeUnspecified):
 		*s = SubscriptionTypeUnspecified

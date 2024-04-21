@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -28,21 +29,19 @@ func NewProfileRepository(db *pgxpool.Pool) *ProfileRepository {
 }
 
 func (p *ProfileRepository) ListInterests(ctx context.Context) ([]dbmodel.Interest, error) {
-	q := fmt.Sprintf(`SELECT id, definition FROM %s WHERE`, interestTable)
+	q := fmt.Sprintf(`SELECT id, definition FROM %s`, interestTable)
 
-	row := p.db.QueryRow(ctx, q)
-
-	var interests []dbmodel.Interest
-	err := row.Scan(&interests)
+	rows, err := p.db.Query(ctx, q)
 	if err != nil {
-		return nil, fmt.Errorf("can't get interests: %w", err)
+		return nil, err
 	}
+	defer rows.Close()
 
-	return interests, nil
+	return pgx.CollectRows(rows, pgx.RowToStructByName[dbmodel.Interest])
 }
 
 func (p *ProfileRepository) GetProfile(ctx context.Context, userID uuid.UUID) (dbmodel.Profile, error) {
-	q := fmt.Sprintf(`SELECT id, email, "name", interests, birth_day, gender, info, subscription, location_lat, location_long FROM %s
+	q := fmt.Sprintf(`SELECT id, email, "name", interests, birth_day, gender, info, subscription, location_lat, location_long, updated_at FROM %s
 WHERE id = $1
 LIMIT 1`, profileTable)
 
@@ -83,24 +82,33 @@ SET "name"        = $1
     subscription  = $6
     location_lat  = $7
 	location_long = $8
-WHERE id = $9`, profileTable)
+	updated_at    = $9
+WHERE id = $10`, profileTable)
 
-	_, err := p.db.Exec(ctx, q, profile.Name, profile.BirthDay, profile.Gender,
-		profile.Interests, profile.Subscription, profile.Lat, profile.Long, profile.ID)
+	_, err := p.db.Exec(ctx, q, profile.Name, profile.BirthDay, profile.Gender, profile.Interests,
+		profile.Subscription, profile.Lat, profile.Long, profile.UpdatedAt, profile.ID)
 	return err
 }
 
-func (p *ProfileRepository) CreateInteraction(ctx context.Context, interaction dbmodel.Interaction) error {
-	q := fmt.Sprintf(`INSERT INTO %s (id, "from", "to", "type")
-VALUES ($1, $2, $3, $4)`, interactionTable)
+func (p *ProfileRepository) CreateInteraction(ctx context.Context, interaction dbmodel.Interaction) (int64, error) {
+	q := fmt.Sprintf(`INSERT INTO %s ("from", "to", "type", created_at)
+VALUES ($1, $2, $3, $4) 
+RETURNING id`, interactionTable)
 
-	_, err := p.db.Exec(ctx, q, interaction.ID, interaction.From, interaction.To, interaction.Type)
-	return err
+	var id int64
+	row := p.db.QueryRow(ctx, q, interaction.From, interaction.To, interaction.Type, interaction.CreatedAt)
+
+	err := row.Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }
 
 func (p *ProfileRepository) LikedProfiles(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error) {
 	q := fmt.Sprintf(`SELECT "to" FROM %s
-WHERE "from" = $1 AND "type" = $2`)
+WHERE "from" = $1 AND "type" = $2`, interactionTable)
 
 	row := p.db.QueryRow(ctx, q, userID)
 
@@ -119,7 +127,7 @@ WHERE "from" = $1 AND "type" = $2`)
 
 func (p *ProfileRepository) LikedMeProfiles(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error) {
 	q := fmt.Sprintf(`SELECT "from" FROM %s
-WHERE "to" = $1 AND "type" = $2`)
+WHERE "to" = $1 AND "type" = $2`, interactionTable)
 
 	row := p.db.QueryRow(ctx, q, userID)
 
@@ -134,4 +142,30 @@ WHERE "to" = $1 AND "type" = $2`)
 	}
 
 	return users, nil
+}
+
+func (p *ProfileRepository) ListInteractions(ctx context.Context, createdAt time.Time) ([]dbmodel.Interaction, error) {
+	q := fmt.Sprintf(`SELECT (id, "from", "to", "type", created_at) FROM %s
+WHERE $1 < created_at`, interactionTable)
+
+	rows, err := p.db.Query(ctx, q, createdAt)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return pgx.CollectRows(rows, pgx.RowToStructByName[dbmodel.Interaction])
+}
+
+func (p *ProfileRepository) ListProfiles(ctx context.Context, updatedAt time.Time) ([]dbmodel.Profile, error) {
+	q := fmt.Sprintf(`SELECT id, email, "name", interests, birth_day, gender, info, subscription, location_lat, location_long, updated_at FROM %s
+WHERE $1 < updated_at`, profileTable)
+
+	rows, err := p.db.Query(ctx, q, updatedAt)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return pgx.CollectRows(rows, pgx.RowToStructByName[dbmodel.Profile])
 }

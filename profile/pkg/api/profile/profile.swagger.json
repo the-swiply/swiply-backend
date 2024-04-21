@@ -1,0 +1,893 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "api/profile.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Profile"
+    },
+    {
+      "name": "Photo"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/interaction": {
+      "get": {
+        "operationId": "Profile_ListInteractions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileListInteractionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/v1/interaction/create": {
+      "post": {
+        "operationId": "Profile_Interaction",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileInteractionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/profileInteractionRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/v1/interests": {
+      "get": {
+        "operationId": "Profile_ListInterests",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileListInterestsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/v1/photo/create": {
+      "post": {
+        "operationId": "Photo_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileCreatePhotoResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/profileCreatePhotoRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Photo"
+        ]
+      }
+    },
+    "/v1/photo/delete": {
+      "post": {
+        "operationId": "Photo_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileDeletePhotoResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/profileDeletePhotoRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Photo"
+        ]
+      }
+    },
+    "/v1/photo/reorder": {
+      "post": {
+        "operationId": "Photo_Reorder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileReorderPhotoResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/profileReorderPhotoRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Photo"
+        ]
+      }
+    },
+    "/v1/photo/{profileId}": {
+      "get": {
+        "operationId": "Photo_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileListPhotoResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Photo"
+        ]
+      }
+    },
+    "/v1/photo/{profileId}/{photoId}": {
+      "get": {
+        "operationId": "Photo_Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileGetPhotoResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "photoId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Photo"
+        ]
+      }
+    },
+    "/v1/profile": {
+      "get": {
+        "operationId": "Profile_ListProfiles",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileListProfilesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "updatedAfter",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/v1/profile/create": {
+      "post": {
+        "operationId": "Profile_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileCreateProfileResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/profileCreateProfileRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/v1/profile/liked": {
+      "get": {
+        "operationId": "Profile_Liked",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileLikedResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/v1/profile/liked-me": {
+      "get": {
+        "operationId": "Profile_LikedMe",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileLikedMeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/v1/profile/update": {
+      "post": {
+        "operationId": "Profile_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileUpdateProfileResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/profileUpdateProfileRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/v1/profile/who-am-i": {
+      "get": {
+        "operationId": "Profile_WhoAmI",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileWhoAmIResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/v1/profile/{id}": {
+      "get": {
+        "operationId": "Profile_Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileGetProfileResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/v1/recommendation": {
+      "get": {
+        "operationId": "Profile_GetRecommendations",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileGetRecommendationsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Profile"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "profileCreatePhotoRequest": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "byte"
+          }
+        }
+      }
+    },
+    "profileCreatePhotoResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "profileCreateProfileRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "interests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/profileInterest"
+          }
+        },
+        "birthDay": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "gender": {
+          "$ref": "#/definitions/profileGender"
+        },
+        "info": {
+          "type": "string"
+        },
+        "subscriptionType": {
+          "$ref": "#/definitions/profileSubscriptionType"
+        },
+        "location": {
+          "$ref": "#/definitions/swiplyprofileLocation"
+        }
+      },
+      "title": "Create"
+    },
+    "profileCreateProfileResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "profileDeletePhotoRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "profileDeletePhotoResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "profileGender": {
+      "type": "string",
+      "enum": [
+        "GENDER_UNSPECIFIED",
+        "MALE",
+        "FEMALE"
+      ],
+      "default": "GENDER_UNSPECIFIED"
+    },
+    "profileGetPhotoResponse": {
+      "type": "object",
+      "properties": {
+        "photo": {
+          "$ref": "#/definitions/profileProfilePhoto"
+        }
+      }
+    },
+    "profileGetProfileResponse": {
+      "type": "object",
+      "properties": {
+        "userProfile": {
+          "$ref": "#/definitions/profileUserProfile"
+        }
+      }
+    },
+    "profileGetRecommendationsResponse": {
+      "type": "object",
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "profileInteraction": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/profileInteractionType"
+        }
+      }
+    },
+    "profileInteractionRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/profileInteractionType"
+        }
+      },
+      "title": "Interaction"
+    },
+    "profileInteractionResponse": {
+      "type": "object"
+    },
+    "profileInteractionType": {
+      "type": "string",
+      "enum": [
+        "INTERACTION_TYPE_UNSPECIFIED",
+        "LIKE",
+        "DISLIKE"
+      ],
+      "default": "INTERACTION_TYPE_UNSPECIFIED"
+    },
+    "profileInterest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "definition": {
+          "type": "string"
+        }
+      }
+    },
+    "profileLikedMeResponse": {
+      "type": "object",
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "profileLikedResponse": {
+      "type": "object",
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "profileListInteractionsResponse": {
+      "type": "object",
+      "properties": {
+        "interactions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/profileInteraction"
+          }
+        }
+      }
+    },
+    "profileListInterestsResponse": {
+      "type": "object",
+      "properties": {
+        "interests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/profileInterest"
+          }
+        }
+      }
+    },
+    "profileListPhotoResponse": {
+      "type": "object",
+      "properties": {
+        "photos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/profileProfilePhoto"
+          }
+        }
+      }
+    },
+    "profileListProfilesResponse": {
+      "type": "object",
+      "properties": {
+        "profiles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/profileUserProfile"
+          }
+        }
+      }
+    },
+    "profileProfilePhoto": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "byte"
+          }
+        }
+      }
+    },
+    "profileReorderPhotoRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "profileReorderPhotoResponse": {
+      "type": "object"
+    },
+    "profileSubscriptionType": {
+      "type": "string",
+      "enum": [
+        "SUBSCRIPTION_TYPE_UNSPECIFIED",
+        "STANDARD",
+        "PRIMARY"
+      ],
+      "default": "SUBSCRIPTION_TYPE_UNSPECIFIED"
+    },
+    "profileUpdateProfileRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "interests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/profileInterest"
+          }
+        },
+        "birthDay": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "gender": {
+          "$ref": "#/definitions/profileGender"
+        },
+        "info": {
+          "type": "string"
+        },
+        "subscriptionType": {
+          "$ref": "#/definitions/profileSubscriptionType"
+        },
+        "location": {
+          "$ref": "#/definitions/swiplyprofileLocation"
+        }
+      },
+      "title": "Update"
+    },
+    "profileUpdateProfileResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "profileUserProfile": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "interests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/profileInterest"
+          }
+        },
+        "birthDay": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "gender": {
+          "$ref": "#/definitions/profileGender"
+        },
+        "info": {
+          "type": "string"
+        },
+        "subscriptionType": {
+          "$ref": "#/definitions/profileSubscriptionType"
+        },
+        "location": {
+          "$ref": "#/definitions/swiplyprofileLocation"
+        }
+      }
+    },
+    "profileWhoAmIResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "swiplyprofileLocation": {
+      "type": "object",
+      "properties": {
+        "lat": {
+          "type": "number",
+          "format": "double"
+        },
+        "long": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    }
+  }
+}

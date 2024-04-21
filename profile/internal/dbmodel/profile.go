@@ -22,4 +22,5 @@ type Profile struct {
 	Long         float64
 	Info         string
 	Subscription string
+	UpdatedAt    time.Time
 }

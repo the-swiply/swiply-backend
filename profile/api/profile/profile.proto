@@ -213,8 +213,8 @@ message GetRecommendationsResponse {
 
 // Interaction
 message InteractionRequest {
-  string id = 2;
-  InteractionType type = 3;
+  string id = 1;
+  InteractionType type = 2;
 }
 message InteractionResponse {}
 

@@ -1,6 +1,8 @@
 package converter
 
 import (
+	"time"
+
 	"github.com/the-swiply/swiply-backend/profile/internal/dbmodel"
 	"github.com/the-swiply/swiply-backend/profile/internal/domain"
 )
@@ -51,5 +53,6 @@ func ProfileFromDomainToDBModel(profile domain.Profile) dbmodel.Profile {
 		Long:         profile.Location.Long,
 		Info:         profile.Info,
 		Subscription: string(profile.Subscription),
+		UpdatedAt:    time.Now().UTC(),
 	}
 }

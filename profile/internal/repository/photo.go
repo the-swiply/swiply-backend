@@ -33,7 +33,7 @@ WHERE id = $2`, photoTable)
 	return err
 }
 
-func (p *PhotoRepository) Get(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error) {
+func (p *PhotoRepository) List(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error) {
 	q := fmt.Sprintf(`SELECT photo_ids FROM %s WHERE id = $1`, photoTable)
 
 	row := p.db.QueryRow(ctx, q, userID)
@@ -68,7 +68,7 @@ WHERE id = $2`, photoTable)
 	return err
 }
 
-func (p *PhotoRepository) Create(ctx context.Context, userID, photoIDs []uuid.UUID) error {
+func (p *PhotoRepository) Create(ctx context.Context, userID uuid.UUID, photoIDs []uuid.UUID) error {
 	q := fmt.Sprintf(`INSERT INTO %s (id, photo_ids)
 VALUES ($1, $2)`)
 

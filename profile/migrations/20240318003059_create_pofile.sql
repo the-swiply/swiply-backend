@@ -20,17 +20,19 @@ CREATE TABLE IF NOT EXISTS profile
     info          text,
     subscription  subscription_type,
     location_lat  double precision,
-    location_long double precision
+    location_long double precision,
+    updated_at    timestamp
 );
 
 CREATE TYPE interaction_type AS ENUM ('LIKE', 'DISLIKE');
 
 CREATE TABLE IF NOT EXISTS interaction
 (
-    id     bigserial            PRIMARY KEY,
-    "from" uuid                 REFERENCES profile (id),
-    "to"   uuid                 REFERENCES profile (id),
-    "type" interaction_type
+    id         bigserial            PRIMARY KEY,
+    "from"     uuid                 REFERENCES profile (id),
+    "to"       uuid                 REFERENCES profile (id),
+    "type"     interaction_type,
+    created_at timestamp
 );
 
 CREATE TABLE IF NOT EXISTS photo
@@ -41,12 +43,16 @@ CREATE TABLE IF NOT EXISTS photo
 
 CREATE INDEX IF NOT EXISTS idx_interaction_from ON interaction ("from");
 CREATE INDEX IF NOT EXISTS idx_interaction_to ON interaction ("to");
+CREATE INDEX IF NOT EXISTS idx_interaction_created_at ON interaction (created_at);
+CREATE INDEX IF NOT EXISTS idx_profile_updated_at ON profile (updated_at);
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
 DROP INDEX IF EXISTS idx_interaction_to;
 DROP INDEX IF EXISTS idx_interaction_from;
+DROP INDEX IF EXISTS idx_interaction_created_at;
+DROP INDEX IF EXISTS idx_profile_updated_at;
 
 DROP TABLE IF EXISTS photo;
 DROP TABLE IF EXISTS interaction;
