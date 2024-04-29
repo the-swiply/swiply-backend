@@ -1,0 +1,63 @@
+/swiply.profile.Profile/Create:
+  user: true
+  s2s: false
+
+/swiply.profile.Profile/Update:
+  user: true
+  s2s: false
+
+/swiply.profile.Profile/Get:
+  user: false
+  s2s: false
+
+/swiply.profile.Profile/WhoAmI:
+  user: true
+  s2s: false
+
+/swiply.profile.Profile/GetRecommendations:
+  user: true
+  s2s: false
+
+/swiply.profile.Profile/Liked:
+  user: true
+  s2s: false
+
+/swiply.profile.Profile/LikedMe:
+  user: true
+  s2s: false
+
+/swiply.profile.Profile/ListInterests:
+  user: false
+  s2s: false
+
+/swiply.profile.Profile/ListInteractions:
+  user: false
+  s2s: true
+  authorized:
+    - backoffice
+
+/swiply.profile.Profile/ListProfiles:
+  user: false
+  s2s: true
+  authorized:
+    - backoffice
+
+/swiply.profile.Photo/Create:
+  user: true
+  s2s: false
+
+/swiply.profile.Photo/Get:
+  user: false
+  s2s: false
+
+/swiply.profile.Photo/List:
+  user: false
+  s2s: false
+
+/swiply.profile.Photo/Delete:
+  user: true
+  s2s: false
+
+/swiply.profile.Photo/Reorder:
+  user: true
+  s2s: false
