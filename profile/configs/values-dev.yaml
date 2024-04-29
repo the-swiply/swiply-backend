@@ -18,7 +18,7 @@ postgres:
   username: "profile-owner"
   host: "profile-postgres"
   port: "5432"
-  db_name: "chat"
+  db_name: "profile"
   ssl_mode: "disable"
   migrations_folder: "migrations"
 

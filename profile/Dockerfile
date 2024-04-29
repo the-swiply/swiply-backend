@@ -22,7 +22,7 @@ FROM alpine:3.19.0
 
 RUN apk update
 
-ARG BASE_PATH=chat
+ARG BASE_PATH=profile
 
 COPY $BASE_PATH/configs configs
 COPY $BASE_PATH/third_party third_party

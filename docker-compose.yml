@@ -1,205 +1,222 @@
 services:
-  user:
-    container_name: user-service
+#  user:
+#    container_name: user-service
+#    build:
+#      context: .
+#      dockerfile: user/Dockerfile
+#    restart: on-failure
+#    env_file:
+#      - user/dev.env
+#    depends_on:
+#      - jaeger
+#      - otel-collector
+#      - prometheus
+#      - vault
+#      - user-redis
+#    ports:
+#      - 8481:84
+#      - 18081:80
+#
+#  user-redis:
+#    image: redis:7.2
+#    container_name: user-redis
+#    restart: on-failure
+#    env_file:
+#      - user-infra/redis/dev.env
+#    ports:
+#      - 6381:6379
+#    command: bash -c "redis-server --requirepass $$REDIS_PASSWORD"
+#    volumes:
+#      - user_redis_data:/data
+#
+#  chat:
+#    container_name: chat-service
+#    build:
+#      context: .
+#      dockerfile: chat/Dockerfile
+#    restart: on-failure
+#    env_file:
+#      - chat/dev.env
+#    depends_on:
+#      - jaeger
+#      - otel-collector
+#      - prometheus
+#      - vault
+#      - chat-postgres
+#      - chat-redis
+#    ports:
+#      - 18082:80
+#
+#  chat-postgres:
+#    image: postgres:16.0
+#    container_name: chat-postgres
+#    restart: on-failure
+#    env_file:
+#      - chat-infra/postgres/dev.env
+#    volumes:
+#      - chat_postgres_data:/var/lib/postgresql/data
+#    ports:
+#      - 5442:5432
+#
+#  chat-redis:
+#    image: redis:7.2
+#    container_name: chat-redis
+#    restart: on-failure
+#    env_file:
+#      - chat-infra/redis/dev.env
+#    command: bash -c "redis-server --requirepass $$REDIS_PASSWORD"
+#    volumes:
+#      - chat_redis_data:/data
+#    ports:
+#      - 6382:6379
+#
+#  recommendation:
+#    container_name: recommendation-service
+#    build:
+#      context: .
+#      dockerfile: recommendation/Dockerfile
+#    restart: on-failure
+#    env_file:
+#      - recommendation/dev.env
+#    depends_on:
+#      - jaeger
+#      - otel-collector
+#      - prometheus
+#      - vault
+#      - recommendation-postgres
+#      - recommendation-redis
+#    ports:
+#      - 18083:80
+#
+#  recommendation-postgres:
+#    image: postgres:16.0
+#    container_name: recommendation-postgres
+#    restart: on-failure
+#    env_file:
+#      - recommendation-infra/postgres/dev.env
+#    volumes:
+#      - recommendation_postgres_data:/var/lib/postgresql/data
+#    ports:
+#      - 5443:5432
+#
+#  recommendation-redis:
+#    image: redis:7.2
+#    container_name: recommendation-redis
+#    restart: on-failure
+#    env_file:
+#      - recommendation-infra/redis/dev.env
+#    command: bash -c "redis-server --requirepass $$REDIS_PASSWORD"
+#    volumes:
+#      - recommendation_redis_data:/data
+#    ports:
+#      - 6383:6379
+#
+#  oracle:
+#    container_name: oracle-service
+#    build:
+#      context: .
+#      dockerfile: oracle/Dockerfile
+#    restart: on-failure
+#    env_file:
+#      - oracle/dev.env
+#    ports:
+#      - 18084:80
+#
+#  event:
+#    container_name: event-service
+#    build:
+#      context: .
+#      dockerfile: event/Dockerfile
+#    restart: on-failure
+#    env_file:
+#      - event/dev.env
+#    depends_on:
+#      - jaeger
+#      - otel-collector
+#      - prometheus
+#      - vault
+#      - event-postgres
+#      - minio
+#    ports:
+#      - 18085:80
+#
+#  event-postgres:
+#    image: postgres:16.0
+#    container_name: event-postgres
+#    restart: on-failure
+#    env_file:
+#      - event-infra/postgres/dev.env
+#    volumes:
+#      - event_postgres_data:/var/lib/postgresql/data
+#    ports:
+#      - 5445:5432
+#
+#  backoffice:
+#    container_name: backoffice-service
+#    build:
+#      context: .
+#      dockerfile: backoffice/Dockerfile
+#    restart: on-failure
+#    command: python manage.py runserver 0.0.0.0:8000
+#    ports:
+#      - 18070:8000
+#    env_file:
+#      - backoffice/dev.env
+#    depends_on:
+#      - backoffice-postgres
+#      - vault
+#
+#  backoffice-postgres:
+#    image: postgres:16.0
+#    container_name: backoffice-postgres
+#    restart: on-failure
+#    env_file:
+#      - backoffice-infra/postgres/dev.env
+#    volumes:
+#      - backoffice_postgres_data:/var/lib/postgresql/data
+#    ports:
+#      - 5420:5432
+
+  profile:
+    container_name: profile-service
     build:
       context: .
-      dockerfile: user/Dockerfile
+      dockerfile: profile/Dockerfile
     restart: on-failure
     env_file:
-      - user/dev.env
+      - profile/dev.env
     depends_on:
       - jaeger
       - otel-collector
       - prometheus
       - vault
-      - user-redis
+      - profile-postgres
     ports:
-      - 8481:84
-      - 18081:80
+      - 18086:80
 
-  user-redis:
-    image: redis:7.2
-    container_name: user-redis
-    restart: on-failure
-    env_file:
-      - user-infra/redis/dev.env
-    ports:
-      - 6381:6379
-    command: bash -c "redis-server --requirepass $$REDIS_PASSWORD"
-    volumes:
-      - user_redis_data:/data
-
-  chat:
-    container_name: chat-service
-    build:
-      context: .
-      dockerfile: chat/Dockerfile
-    restart: on-failure
-    env_file:
-      - chat/dev.env
-    depends_on:
-      - jaeger
-      - otel-collector
-      - prometheus
-      - vault
-      - chat-postgres
-      - chat-redis
-    ports:
-      - 18082:80
-
-  chat-postgres:
+  profile-postgres:
     image: postgres:16.0
-    container_name: chat-postgres
+    container_name: profile-postgres
     restart: on-failure
     env_file:
-      - chat-infra/postgres/dev.env
+      - profile-infra/postgres/dev.env
     volumes:
-      - chat_postgres_data:/var/lib/postgresql/data
+      - profile_postgres_data:/var/lib/postgresql/data
     ports:
-      - 5442:5432
+      - 5410:5432
 
-  chat-redis:
-    image: redis:7.2
-    container_name: chat-redis
-    restart: on-failure
-    env_file:
-      - chat-infra/redis/dev.env
-    command: bash -c "redis-server --requirepass $$REDIS_PASSWORD"
-    volumes:
-      - chat_redis_data:/data
-    ports:
-      - 6382:6379
-
-  oracle:
-    container_name: oracle-service
-    build:
-      context: .
-      dockerfile: oracle/Dockerfile
-    restart: on-failure
-    env_file:
-      - oracle/dev.env
-    ports:
-      - 18084:80
-
-  recommendation:
-    container_name: recommendation-service
-    build:
-      context: .
-      dockerfile: recommendation/Dockerfile
-    restart: on-failure
-    env_file:
-      - recommendation/dev.env
-    depends_on:
-      - jaeger
-      - otel-collector
-      - prometheus
-      - vault
-      - recommendation-postgres
-      - recommendation-redis
-    ports:
-      - 18083:80
-
-  recommendation-postgres:
-    image: postgres:16.0
-    container_name: recommendation-postgres
-    restart: on-failure
-    env_file:
-      - recommendation-infra/postgres/dev.env
-    volumes:
-      - recommendation_postgres_data:/var/lib/postgresql/data
-    ports:
-      - 5443:5432
-
-  recommendation-redis:
-    image: redis:7.2
-    container_name: recommendation-redis
-    restart: on-failure
-    env_file:
-      - recommendation-infra/redis/dev.env
-    command: bash -c "redis-server --requirepass $$REDIS_PASSWORD"
-    volumes:
-      - recommendation_redis_data:/data
-    ports:
-      - 6383:6379
-
-  oracle:
-    container_name: oracle-service
-    build:
-      context: .
-      dockerfile: oracle/Dockerfile
-    restart: on-failure
-    env_file:
-      - oracle/dev.env
-    ports:
-      - 18084:80
-
-  event:
-    container_name: event-service
-    build:
-      context: .
-      dockerfile: event/Dockerfile
-    restart: on-failure
-    env_file:
-      - event/dev.env
-    depends_on:
-      - jaeger
-      - otel-collector
-      - prometheus
-      - vault
-      - event-postgres
-      - minio
-    ports:
-      - 18085:80
-
-  event-postgres:
-    image: postgres:16.0
-    container_name: event-postgres
-    restart: on-failure
-    env_file:
-      - event-infra/postgres/dev.env
-    volumes:
-      - event_postgres_data:/var/lib/postgresql/data
-    ports:
-      - 5445:5432
-
-  backoffice:
-    container_name: backoffice-service
-    build:
-      context: .
-      dockerfile: backoffice/Dockerfile
-    restart: on-failure
-    command: python manage.py runserver 0.0.0.0:8000
-    ports:
-      - 18070:8000
-    env_file:
-      - backoffice/dev.env
-    depends_on:
-      - backoffice-postgres
-      - vault
-
-  backoffice-postgres:
-    image: postgres:16.0
-    container_name: backoffice-postgres
-    restart: on-failure
-    env_file:
-      - backoffice-infra/postgres/dev.env
-    volumes:
-      - backoffice_postgres_data:/var/lib/postgresql/data
-    ports:
-      - 5420:5432
-
-  minio:
-    image: bitnami/minio
-    container_name: minio
-    restart: on-failure
-    ports:
-      - 9000:9000
-      - 9090:9090
-    volumes:
-      - minio_data:/data
-    env_file:
-      - minio/dev.env
-
+#  minio:
+#    image: bitnami/minio
+#    container_name: minio
+#    restart: on-failure
+#    ports:
+#      - 9000:9000
+#      - 9090:9090
+#    volumes:
+#      - minio_data:/data
+#    env_file:
+#      - minio/dev.env
+#
   vault:
     image: vault:1.13.0
     container_name: vault
@@ -273,6 +290,7 @@ volumes:
   recommendation_redis_data:
   event_postgres_data:
   backoffice_postgres_data:
+  profile_postgres_data:
 
   prometheus_data:
   minio_data:
