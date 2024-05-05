@@ -34,12 +34,13 @@
   user: false
   s2s: true
   authorized:
-    - backoffice
+    - recommendation
 
 /swiply.profile.Profile/ListProfiles:
   user: false
   s2s: true
   authorized:
+    - recommendation
     - backoffice
 
 /swiply.profile.Photo/Create:

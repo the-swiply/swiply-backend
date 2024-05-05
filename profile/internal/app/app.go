@@ -62,9 +62,6 @@ func (a *App) Run(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("can't parse auth config: %w", err)
 	}
-	if err != nil {
-		return fmt.Errorf("can't parse auth config: %w", err)
-	}
 
 	db, err := dobby.NewPGXPool(ctx, dobby.PGXConfig{
 		Username: a.cfg.Postgres.Username,

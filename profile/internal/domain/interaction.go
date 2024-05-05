@@ -2,7 +2,6 @@ package domain
 
 import (
 	"errors"
-
 	"github.com/google/uuid"
 )
 
@@ -16,9 +15,11 @@ func (i *interactionType) Set(value string) error {
 		*i = InteractionTypeLike
 	case string(InteractionTypeDislike):
 		*i = InteractionTypeDislike
+	default:
+		return errors.New("unknown interaction")
 	}
 
-	return errors.New("unknown interaction")
+	return nil
 }
 
 const (

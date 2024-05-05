@@ -75,7 +75,7 @@ func ParseAuthorizationConfig(cfgPath string) error {
 	return nil
 }
 
-func (g *GRPCServer) AuthFuncOverride(ctx context.Context, fullMethodName string) (context.Context, error) {
+func authFuncOverride(ctx context.Context, fullMethodName string) (context.Context, error) {
 	var err error
 	if handlerAuthCfg, hasAuthCfg := authCfg[fullMethodName]; hasAuthCfg {
 		if handlerAuthCfg.S2S {
@@ -94,6 +94,14 @@ func (g *GRPCServer) AuthFuncOverride(ctx context.Context, fullMethodName string
 	}
 
 	return ctx, nil
+}
+
+func (p *profileServer) AuthFuncOverride(ctx context.Context, fullMethodName string) (context.Context, error) {
+	return authFuncOverride(ctx, fullMethodName)
+}
+
+func (p *photoServer) AuthFuncOverride(ctx context.Context, fullMethodName string) (context.Context, error) {
+	return authFuncOverride(ctx, fullMethodName)
 }
 
 func userAuth(ctx context.Context) (context.Context, error) {

@@ -193,6 +193,7 @@ services:
       - profile-postgres
     ports:
       - 18086:80
+      - 84:84
 
   profile-postgres:
     image: postgres:16.0

@@ -2,14 +2,15 @@ package server
 
 import (
 	"context"
-
-	"github.com/google/uuid"
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
-	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"google.golang.org/grpc/reflection"
+
+	"github.com/google/uuid"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/the-swiply/swiply-backend/pkg/houston/auf"
 	"github.com/the-swiply/swiply-backend/pkg/houston/grut"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -281,7 +282,7 @@ func (p *photoServer) Delete(ctx context.Context, req *profile.DeletePhotoReques
 
 func (p *photoServer) Reorder(ctx context.Context, req *profile.ReorderPhotoRequest) (*profile.ReorderPhotoResponse, error) {
 	var photoIDs []uuid.UUID
-	for _, photoID := range req.Id {
+	for _, photoID := range req.Ids {
 		photo, err := uuid.Parse(photoID)
 		if err != nil {
 			return nil, status.Error(codes.InvalidArgument, "photo id must have uuid format")
@@ -314,8 +315,9 @@ func NewGRPCServer(profileService *service.ProfileService, photoService *service
 		)),
 	}
 	srv.Server = grpc.NewServer(opts...)
+	reflection.RegisterV1(srv.Server)
 	profile.RegisterProfileServer(srv.Server, srv.profileServer)
-	profile.RegisterPhotoServer(srv.Server, srv.photoServer)
+	//profile.RegisterPhotoServer(srv.Server, srv.photoServer)
 
 	return srv
 }
