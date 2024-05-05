@@ -1,0 +1,3 @@
+/swiply.recommendation.Recommendation/GetRecommendations:
+  user: true
+  s2s: false

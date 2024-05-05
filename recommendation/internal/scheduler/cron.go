@@ -69,7 +69,7 @@ func (r *RedisCron) RunScheduler() error {
 		return fmt.Errorf("can't register statistic update task: %w", err)
 	}
 
-	_, err = r.scheduler.Register(r.cfg.StatisticUpdateCron, asynq.NewTask(typeTriggerOracleLearn, nil,
+	_, err = r.scheduler.Register(r.cfg.TriggerOracleLearnCron, asynq.NewTask(typeTriggerOracleLearn, nil,
 		asynq.Unique(triggerOracleLearnTimeout),
 		asynq.MaxRetry(2),
 		asynq.Timeout(triggerOracleLearnTimeout),
@@ -117,7 +117,7 @@ type statisticUpdateHandler struct {
 
 func (s *statisticUpdateHandler) ProcessTask(ctx context.Context, _ *asynq.Task) error {
 	loggy.Infoln("start updating statistics")
-	err := s.dpService.UpdateStatistic(ctx)
+	err := s.dpService.PrepareRecommendationData(ctx)
 	if err != nil {
 		err := fmt.Errorf("can't update statistics: %w", err)
 		loggy.Errorln(err)
@@ -141,7 +141,7 @@ func (s *triggerOracleLearnHandler) ProcessTask(ctx context.Context, _ *asynq.Ta
 		loggy.Errorln(err)
 		return err
 	}
-	loggy.Infoln("ok")
+	loggy.Infoln("oracle data updated")
 
 	return nil
 }

@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS oracle_prediction
     user_id        uuid,
     recommendation uuid,
     score          double precision
-    );
+);
 
 CREATE INDEX IF NOT EXISTS idx_oracle_prediction_user_id ON oracle_prediction (user_id);
 CREATE INDEX IF NOT EXISTS idx_oracle_prediction_score ON oracle_prediction (score);
