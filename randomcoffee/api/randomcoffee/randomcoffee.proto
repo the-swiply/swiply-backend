@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+option go_package = "github.com/the-swiply/profile/pkg/api/randomcoffee";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+package swiply.randomcoffee;
+
+service RandomCoffee {
+  rpc Create(CreateMeetingRequest) returns (CreateMeetingResponse);
+  rpc Delete(DeleteMeetingRequest) returns (DeleteMeetingResponse);
+  rpc Update(UpdateMeetingRequest) returns (UpdateMeetingResponse);
+  rpc List(ListMeetingsRequest) returns (ListMeetingsResponse);
+  rpc Get(GetMeetingRequest) returns (GetMeetingResponse);
+}
+
+enum MeetingStatus {
+  MEETING_STATUS_UNSPECIFIED = 0;
+  AWAITING_SCHEDULE = 1;
+  SCHEDULING = 2;
+  SCHEDULED = 3;
+}
+
+message Meeting {
+  string id = 1;
+  string owner_id = 2;
+  string member_id = 3;
+  google.protobuf.Timestamp start = 4;
+  google.protobuf.Timestamp end = 5;
+  int64 organization_id = 6;
+  MeetingStatus status = 7;
+}
+
+message CreateMeetingRequest {
+  google.protobuf.Timestamp start = 1;
+  google.protobuf.Timestamp end = 2;
+  int64 organization_id = 3;
+}
+
+message CreateMeetingResponse {
+  Meeting meeting = 1;
+}
+
+message DeleteMeetingRequest {
+  string id = 1;
+}
+
+message DeleteMeetingResponse {}
+
+message UpdateMeetingRequest {
+  string id = 1;
+  google.protobuf.Timestamp start = 2;
+  google.protobuf.Timestamp end = 3;
+  int64 organization_id = 4;
+}
+
+message UpdateMeetingResponse {}
+
+message ListMeetingsRequest {}
+
+message ListMeetingsResponse {
+  repeated Meeting meetings = 1;
+}
+
+message GetMeetingRequest {
+  string id = 1;
+}
+
+message GetMeetingResponse {
+  Meeting meeting = 1;
+}
