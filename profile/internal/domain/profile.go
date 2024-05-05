@@ -17,9 +17,11 @@ func (g *gender) Set(value string) error {
 		*g = GenderMale
 	case string(GenderFemale):
 		*g = GenderFemale
+	default:
+		return errors.New("unknown gender")
 	}
 
-	return errors.New("unknown gender")
+	return nil
 }
 
 const (
@@ -44,9 +46,11 @@ func (s *subscriptionType) Set(value string) error {
 		*s = SubscriptionTypeStandard
 	case string(SubscriptionTypePrimary):
 		*s = SubscriptionTypePrimary
+	default:
+		return errors.New("unknown subscription type")
 	}
 
-	return errors.New("unknown subscription type")
+	return nil
 }
 
 type Location struct {

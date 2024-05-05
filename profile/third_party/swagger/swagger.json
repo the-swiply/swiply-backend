@@ -494,11 +494,8 @@
       "type": "object",
       "properties": {
         "content": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "byte"
-          }
+          "type": "string",
+          "format": "byte"
         }
       }
     },
@@ -732,18 +729,15 @@
           "type": "string"
         },
         "content": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "byte"
-          }
+          "type": "string",
+          "format": "byte"
         }
       }
     },
     "profileReorderPhotoRequest": {
       "type": "object",
       "properties": {
-        "id": {
+        "ids": {
           "type": "array",
           "items": {
             "type": "string"

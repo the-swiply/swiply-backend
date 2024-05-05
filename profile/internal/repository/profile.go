@@ -145,7 +145,7 @@ WHERE "to" = $1 AND "type" = $2`, interactionTable)
 }
 
 func (p *ProfileRepository) ListInteractions(ctx context.Context, createdAt time.Time) ([]dbmodel.Interaction, error) {
-	q := fmt.Sprintf(`SELECT (id, "from", "to", "type", created_at) FROM %s
+	q := fmt.Sprintf(`SELECT id, "from", "to", "type", created_at FROM %s
 WHERE $1 < created_at`, interactionTable)
 
 	rows, err := p.db.Query(ctx, q, createdAt)
