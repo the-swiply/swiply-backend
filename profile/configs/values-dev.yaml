@@ -23,6 +23,6 @@ postgres:
   migrations_folder: "migrations"
 
 s3:
-  addr: "storage.yandexcloud.net"
+  addr: "localhost:9000"
   bucket_name: "swiply"
-  access_key: YCAJED9kjBxxO8bHOrkON7TL1
+  access_key: 9a301bda16acb36efcf08cb73ad60ef8
