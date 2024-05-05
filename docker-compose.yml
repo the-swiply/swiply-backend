@@ -191,6 +191,7 @@ services:
       - prometheus
       - vault
       - profile-postgres
+      - minio
     ports:
       - 18086:80
 
