@@ -1,8 +1,8 @@
 app:
   name: "recommendation"
   graceful_shutdown_timeout_seconds: 10
-  statistic_update_cron: "0 */1 * * *" # Every hour
-  trigger_oracle_learn_cron: "0 */2 * * *" # Every 2nd hour.
+  statistic_update_cron: "*/5 * * * *" # Every 5 minutes
+  trigger_oracle_learn_cron: "*/12 * * * *" # Every 12 minutes
   freeze_hours_for_recommendation: 24
 
 jaeger:
@@ -30,3 +30,6 @@ redis:
 
 oracle:
   addr: "oracle:84"
+
+profile:
+  addr: "profile:84"

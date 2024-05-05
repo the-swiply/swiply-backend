@@ -6,14 +6,18 @@ import (
 )
 
 type Profile struct {
-	ID        uuid.UUID
-	UpdatedAt time.Time
+	ID               uuid.UUID
+	Interests        []int64
+	BirthDay         time.Time
+	Gender           string
+	Info             string
+	SubscriptionType string
+	LocationLat      float64
+	LocationLon      float64
 }
 
 type Interaction struct {
-	ID        uuid.UUID
-	From      uuid.UUID
-	To        uuid.UUID
-	Positive  bool
-	UpdatedAt time.Time
+	From     uuid.UUID
+	To       uuid.UUID
+	Positive bool
 }

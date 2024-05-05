@@ -6,12 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-)
-
-const (
-	profileTable     = "profile"
-	interactionTable = "interaction"
-	recHistoryTable  = "recommendation_history"
+	"time"
 )
 
 type RecommendationRepository struct {
@@ -58,7 +53,8 @@ AND dttm >= now() - interval '%dh')
 SELECT user_id FROM statistic AS st
 LEFT JOIN excluded ON excluded.id = st.user_id
 WHERE excluded.id IS NULL
-AND mod(st.like_ratio - (SELECT like_ratio FROM statistic WHERE st.user_id = $2)) < $3
+AND abs(st.like_ratio - (SELECT like_ratio FROM statistic WHERE st.user_id = $2)) < $3
+AND st.user_id != $2
 ORDER BY random()
 LIMIT %d`, recHistoryTable, excludeLastHours, limit)
 
@@ -80,7 +76,9 @@ AND dttm >= now() - interval '%dh')
 SELECT user_id
 FROM oracle_prediction AS pred
          LEFT JOIN excluded ON excluded.id = pred.user_id
-WHERE excluded.id IS NULL
+WHERE excluded.id IS NULL 
+AND user_id = $1
+AND recommendation != $1
 ORDER BY score
 LIMIT %d`, recHistoryTable, excludeLastHours, limit)
 
@@ -102,6 +100,7 @@ AND dttm >= now() - interval '%dh')
 SELECT user_id FROM statistic AS st
 LEFT JOIN excluded ON excluded.id = st.user_id
 WHERE excluded.id IS NULL
+AND user_id != $1
 ORDER BY random()
 LIMIT %d`, recHistoryTable, excludeLastHours, limit)
 
@@ -112,4 +111,29 @@ LIMIT %d`, recHistoryTable, excludeLastHours, limit)
 	defer rows.Close()
 
 	return pgx.CollectRows(rows, pgx.RowTo[uuid.UUID])
+}
+
+func (e *RecommendationRepository) SaveUserRecommendationHistory(ctx context.Context, userID uuid.UUID, recommended []uuid.UUID) error {
+	if len(recommended) == 0 {
+		return nil
+	}
+
+	now := time.Now()
+
+	q := sq.Insert(recHistoryTable).Columns("id", "user_id", "recommendation", "dttm")
+	for _, recommendation := range recommended {
+		q = q.Values(uuid.New(), userID, recommendation, now)
+	}
+
+	sql, args, err := q.ToSql()
+	if err != nil {
+		return fmt.Errorf("can't prepare sql: %w", err)
+	}
+
+	_, err = e.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("can't execute insert: %w", err)
+	}
+
+	return nil
 }

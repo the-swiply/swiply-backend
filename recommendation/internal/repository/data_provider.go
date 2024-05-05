@@ -3,19 +3,25 @@ package repository
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/the-swiply/swiply-backend/pkg/houston/dobby"
 	"github.com/the-swiply/swiply-backend/recommendation/internal/domain"
 	"time"
 )
 
-const (
-	updateInfoTable = "update_info"
-	statisticsTable = "statistics"
-)
-
 type DataProviderRepository struct {
 	db *pgxpool.Pool
+}
+
+func (d *DataProviderRepository) executor(ctx context.Context) dobby.Executor {
+	tx := dobby.ExtractPGXTx(ctx)
+	if tx != nil {
+		return tx
+	}
+
+	return d.db
 }
 
 func NewDataProviderRepository(db *pgxpool.Pool) *DataProviderRepository {
@@ -23,6 +29,7 @@ func NewDataProviderRepository(db *pgxpool.Pool) *DataProviderRepository {
 		db: db,
 	}
 }
+
 func (d *DataProviderRepository) GetLastProfileUpdate(ctx context.Context) (time.Time, error) {
 	return d.getLastUpdate(ctx, "profile")
 }
@@ -33,7 +40,7 @@ func (d *DataProviderRepository) GetLastInteractionUpdate(ctx context.Context) (
 
 func (d *DataProviderRepository) getLastUpdate(ctx context.Context, table string) (time.Time, error) {
 	q := fmt.Sprintf(`SELECT last_update FROM %s WHERE entity = $1`, updateInfoTable)
-	row := d.db.QueryRow(ctx, q, table)
+	row := d.executor(ctx).QueryRow(ctx, q, table)
 
 	var lastUpdate time.Time
 	err := row.Scan(&lastUpdate)
@@ -54,7 +61,7 @@ func (d *DataProviderRepository) UpdateLastInteractionUpdate(ctx context.Context
 
 func (d *DataProviderRepository) setLastUpdate(ctx context.Context, table string, ts time.Time) error {
 	q := fmt.Sprintf(`UPDATE %s SET last_update = $1 WHERE entity = $2`, updateInfoTable)
-	_, err := d.db.Exec(ctx, q, ts, table)
+	_, err := d.executor(ctx).Exec(ctx, q, ts, table)
 	if err != nil {
 		return fmt.Errorf("can't exec query: %w", err)
 	}
@@ -63,74 +70,75 @@ func (d *DataProviderRepository) setLastUpdate(ctx context.Context, table string
 }
 
 func (d *DataProviderRepository) UpsertProfiles(ctx context.Context, profiles []domain.Profile) error {
-	q := fmt.Sprintf(`INSERT INTO %s (id, updated_at)
-VALUES (@id, @updated_at)
+	q := fmt.Sprintf(`INSERT INTO %s (id, interests, birthday, gender, info,
+                subscription_type, location_lat, location_lon, updated_at)
+VALUES (@id, @interests, @birthday, @gender, @info,
+                @subscription_type, @location_lat, @location_lon, @updated_at)
 ON CONFLICT(id) 
 DO UPDATE SET
 id = @id,
-from = @from,
-to = @to,
-positive = @positive,
+interests = @interests,
+birthday = @birthday,
+gender = @gender,
+info = @info,
+subscription_type = @subscription_type,
+location_lat = @location_lat,
+location_lon = @location_lon,
 updated_at = @updated_at`, profileTable)
 
+	now := time.Now()
 	batch := &pgx.Batch{}
 	for _, profile := range profiles {
 		args := pgx.NamedArgs{
-			"id":         profile.ID,
-			"updated_at": profile.UpdatedAt,
+			"id":                profile.ID,
+			"interests":         profile.Interests,
+			"birthday":          profile.BirthDay,
+			"gender":            profile.Gender,
+			"info":              profile.Info,
+			"subscription_type": profile.SubscriptionType,
+			"location_lat":      profile.LocationLat,
+			"location_lon":      profile.LocationLon,
+			"updated_at":        now,
 		}
 
 		batch.Queue(q, args)
 	}
 
-	results := d.db.SendBatch(ctx, batch)
+	results := d.executor(ctx).SendBatch(ctx, batch)
 	defer results.Close()
 
 	for range profiles {
 		_, err := results.Exec()
 		if err != nil {
-			return fmt.Errorf("unable to upsert profile row: %w", err)
+			return fmt.Errorf("can't upsert profile row: %w", err)
 		}
 	}
 
 	return results.Close()
 }
 
-func (d *DataProviderRepository) UpsertInteractions(ctx context.Context, interactions []domain.Interaction) error {
-	q := fmt.Sprintf(`INSERT INTO %s (id, from, to, positive, updated_at)
-VALUES (@id, @from, @to, @positive, @updated_at)
-ON CONFLICT(id) 
-DO UPDATE SET
-id = @id,
-from = @from,
-to = @to,
-positive = @positive,
-updated_at = @updated_at`, interactionTable)
+func (d *DataProviderRepository) AddInteractions(ctx context.Context, interactions []domain.Interaction) error {
+	if len(interactions) == 0 {
+		return nil
+	}
 
-	batch := &pgx.Batch{}
+	now := time.Now()
+	q := sq.Insert(interactionTable).Columns("id", "\"from\"", "\"to\"", "positive", "updated_at")
 	for _, interaction := range interactions {
-		args := pgx.NamedArgs{
-			"id":         interaction.ID,
-			"from":       interaction.From,
-			"to":         interaction.To,
-			"positive":   interaction.Positive,
-			"updated_at": interaction.UpdatedAt,
-		}
-
-		batch.Queue(q, args)
+		q = q.Values(uuid.New(), interaction.From, interaction.To, interaction.Positive, now)
 	}
 
-	results := d.db.SendBatch(ctx, batch)
-	defer results.Close()
-
-	for range interactions {
-		_, err := results.Exec()
-		if err != nil {
-			return fmt.Errorf("unable to upsert interaction row: %w", err)
-		}
+	sql, args, err := q.ToSql()
+	if err != nil {
+		return fmt.Errorf("can't prepare sql: %w", err)
 	}
 
-	return results.Close()
+	_, err = d.executor(ctx).Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("can't execute insert: %w", err)
+	}
+
+	return nil
 }
 
 func (d *DataProviderRepository) CalculateRatings(ctx context.Context) (map[string]float64, error) {
@@ -142,10 +150,10 @@ func (d *DataProviderRepository) CalculateRatings(ctx context.Context) (map[stri
      alll AS (SELECT count(1) AS cnt, "to"
               FROM %s
               GROUP BY "to")
-SELECT positives.cnt / alll.cnt::double precision
-FROM positives JOIN alll  ON positives."to" = alll."to"`, interactionTable, interactionTable)
+SELECT alll."to", coalesce(positives.cnt, 0) / alll.cnt::double precision
+FROM positives RIGHT JOIN alll ON positives."to" = alll."to"`, interactionTable, interactionTable)
 
-	rows, err := d.db.Query(ctx, q)
+	rows, err := d.executor(ctx).Query(ctx, q)
 	if err != nil {
 		return nil, err
 	}
@@ -155,12 +163,12 @@ FROM positives JOIN alll  ON positives."to" = alll."to"`, interactionTable, inte
 		userID string
 		rating float64
 	)
-	var ratings map[string]float64
+	ratings := make(map[string]float64, 100)
 
 	for rows.Next() {
 		err = rows.Scan(&userID, &rating)
 		if err != nil {
-			return nil, fmt.Errorf("unable to scan row: %w", err)
+			return nil, fmt.Errorf("can't scan row: %w", err)
 		}
 		ratings[userID] = rating
 	}
@@ -169,16 +177,13 @@ FROM positives JOIN alll  ON positives."to" = alll."to"`, interactionTable, inte
 }
 
 func (d *DataProviderRepository) UpdateStatistics(ctx context.Context, ratings map[string]float64) error {
-	tx, err := d.db.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return fmt.Errorf("can't begin tx: %w", err)
-	}
-	defer tx.Rollback(ctx)
-
-	_, err = tx.Exec(
+	_, err := d.executor(ctx).Exec(
 		ctx,
 		fmt.Sprintf("TRUNCATE TABLE %s", statisticsTable),
 	)
+	if err != nil {
+		return err
+	}
 
 	q := fmt.Sprintf(`INSERT INTO %s (user_id, like_ratio, updated_at)
 VALUES (@user_id, @like_ratio, @updated_at)`, statisticsTable)
@@ -195,19 +200,14 @@ VALUES (@user_id, @like_ratio, @updated_at)`, statisticsTable)
 		batch.Queue(q, args)
 	}
 
-	results := d.db.SendBatch(ctx, batch)
+	results := d.executor(ctx).SendBatch(ctx, batch)
 	defer results.Close()
 
 	for range ratings {
 		_, err := results.Exec()
 		if err != nil {
-			return fmt.Errorf("unable to update statistic row: %w", err)
+			return fmt.Errorf("can't update statistic row: %w", err)
 		}
-	}
-
-	err = tx.Commit(ctx)
-	if err != nil {
-		return fmt.Errorf("can't commit tx: %w", err)
 	}
 
 	return nil

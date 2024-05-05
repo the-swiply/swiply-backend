@@ -67,7 +67,7 @@ func (g *GRPCServer) GetRecommendations(ctx context.Context, req *recommendation
 
 	recommendations, err := g.recService.Recommend(ctx, req.GetLimit())
 	if err != nil {
-		return nil, grut.InternalError("can't create chat", err)
+		return nil, grut.InternalError("can't get recommendations", err)
 	}
 
 	return &recommendation.GetRecommendationsResponse{

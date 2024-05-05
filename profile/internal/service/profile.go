@@ -140,7 +140,7 @@ func (p *ProfileService) ListProfiles(ctx context.Context, updatedAt time.Time) 
 			userInterests = append(userInterests, mp[interest])
 		}
 
-		if pr, err := converter.ProfileFromDBModelToDomain(userInterests, profile); err != nil {
+		if pr, err := converter.ProfileFromDBModelToDomain(userInterests, profile); err == nil {
 			profs = append(profs, pr)
 		}
 	}

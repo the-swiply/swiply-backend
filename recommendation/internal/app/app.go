@@ -61,9 +61,6 @@ func (a *App) Run(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("can't parse auth config: %w", err)
 	}
-	if err != nil {
-		return fmt.Errorf("can't parse auth config: %w", err)
-	}
 
 	db, err := dobby.NewPGXPool(ctx, dobby.PGXConfig{
 		Username: a.cfg.Postgres.Username,
@@ -90,17 +87,22 @@ func (a *App) Run(ctx context.Context) error {
 	recRepo := repository.NewRecommendationRepository(a.db)
 	dpRepo := repository.NewDataProviderRepository(a.db)
 
+	dpRepoTransactor := dobby.NewPGXTransactor(a.db)
+
 	oracleClient, err := rpclients.NewOracleClient(a.cfg.Oracle.Addr)
 	if err != nil {
 		return fmt.Errorf("can't get oracle client: %w", err)
 	}
 	defer oracleClient.CloseConn()
 
-	dpSvc := service.NewDataProviderService(service.DataProviderConfig{}, dpRepo, oracleClient, nil)
-
+	profileClient, err := rpclients.NewProfileClient(a.cfg.Profile.Addr, os.Getenv("S2S_PROFILE_TOKEN"))
 	if err != nil {
-		loggy.Fatal(err)
+		return fmt.Errorf("can't get profile client: %w", err)
 	}
+	defer profileClient.CloseConn()
+
+	dpSvc := service.NewDataProviderService(service.DataProviderConfig{}, dpRepo, dpRepoTransactor, oracleClient, profileClient)
+
 	rdbCron, err := scheduler.NewRedisCron(scheduler.RedisCronConfig{
 		Addr:                   a.cfg.Redis.Addr,
 		Password:               os.Getenv("REDIS_PASSWORD"),
@@ -112,10 +114,6 @@ func (a *App) Run(ctx context.Context) error {
 		return fmt.Errorf("can't init redis cron scheduler: %w", err)
 	}
 	a.redisCron = rdbCron
-
-	if err != nil {
-		return fmt.Errorf("can't register update statistic task")
-	}
 
 	recSvc := service.NewRecommendationService(service.RecommendationConfig{
 		FreezeHoursForRecommendation: a.cfg.App.FreezeHoursForRecommendation,
