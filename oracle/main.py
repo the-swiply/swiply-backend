@@ -1,5 +1,7 @@
 import os
 
+import yaml
+
 from app.db.pg_repo import OracleRepository
 from app.service import oracle
 
@@ -19,7 +21,11 @@ if __name__ == "__main__":
         config.get("postgres").get("ssl_mode"),
     )
 
-    oracle_service = oracle.OracleService(oracle_repo)
+    with open("configs/lfm_v1.yaml", 'r') as f:
+        lfmv1_config = yaml.full_load(f)
+
+    oracle_service = oracle.OracleService(oracle_repo, lfmv1_config)
+    oracle_service.RetrainLFMv1(None, None)
 
     server = grpc.OracleServer(config.get("grpc").get("addr"), oracle_service)
     server.serve()

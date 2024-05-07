@@ -1,0 +1,5 @@
+learning_rate: 0.4
+no_epochs: 100
+no_components: 80
+item_alpha: 0.00001
+user_alpha: 0.00001
