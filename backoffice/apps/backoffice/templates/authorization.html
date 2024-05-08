@@ -1,0 +1,75 @@
+{% load static %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <title>Страница Авторизации</title>
+    <style>
+        body {
+            font-family: "Arial", sans-serif;
+            background-color: #f7f7f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-container {
+            align-items: center;
+            justify-content: center;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            text-align: center; /* Центрирование текста */
+            width: 500px;
+        }
+
+        .button {
+            background-color: #ff69b4;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 300px;
+            font-size: 18px;
+            transition: background-color 0.3s ease; /* Плавное изменение цвета при наведении */
+        }
+
+        .button:hover {
+            background-color: #ff1493;
+        }
+
+        .footer {
+            margin-top: 20px; /* Отступ внизу формы */
+            font-size: 14px;
+            color: #888888;
+        }
+
+        .admin-panel-title {
+            font-size: 24px;
+            font-weight: normal;
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <img src="{% static 'img/logo.svg' %}"
+         style="max-width: 80%; height: auto; margin-bottom: 10px"/>
+    <h2 class="admin-panel-title">Административная панель</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="button">Войти</button>
+    </form>
+</div>
+</body>
+</html>

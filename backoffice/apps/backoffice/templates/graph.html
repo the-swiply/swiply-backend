@@ -1,0 +1,264 @@
+{% extends 'layout.html' %} {% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link
+  href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+  rel="stylesheet"
+/>
+
+<div class="graph-container">
+  <div class="chart-container">
+    <div class="chart-title">Активность пользователей</div>
+    <canvas class="canvas-user" id="userChart"></canvas>
+  </div>
+
+  <div class="chart-container">
+    <div class="chart-title">Лайки</div>
+    <div class="likes-container">
+      <div class="likes-graph">
+        <canvas id="likesChart"></canvas>
+        <div class="stats-container">
+          <div class="stat">
+            <div class="stat-title">Сегодня</div>
+            <div class="stat-value" id="likes-today">--</div>
+          </div>
+          <div class="stat">
+            <div class="stat-title">За неделю</div>
+            <div class="stat-value" id="likes-week">--</div>
+          </div>
+          <div class="stat">
+            <div class="stat-title">За всё время</div>
+            <div class="stat-value" id="likes-all-time">--</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-container">
+    <div class="chart-title">Премиум</div>
+    <div class="premium-container">
+      <div class="premium-chart" id="subscriptions-chart">
+        <div class="chart-subtitle">Подписки</div>
+        <canvas class="premium-canvas" id="subscriptionsCanvas"></canvas>
+      </div>
+      <div class="premium-chart" id="notifications-chart">
+        <div class="chart-subtitle">Random Coffee</div>
+        <canvas class="premium-canvas" id="notificationsCanvas"></canvas>
+      </div>
+      <div class="premium-chart" id="events-chart">
+        <div class="chart-subtitle">Мероприятия</div>
+        <canvas class="premium-canvas" id="eventsCanvas"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  var userData = {
+    "2024-05-01": 100,
+    "2024-05-02": 120,
+    "2024-05-03": 150,
+    "2024-05-04": 130,
+    "2024-05-05": 160,
+    "2024-05-06": 175,
+    "2024-05-07": 180,
+    "2024-05-08": 190,
+    "2024-05-09": 200,
+    "2024-05-10": 220,
+  };
+
+  const likesData = {
+    "2024-05-01": 100,
+    "2024-05-02": 120,
+    "2024-05-03": 70,
+    "2024-05-05": 160,
+    "2024-05-06": 175,
+    "2024-05-07": 180,
+    "2024-05-08": 190,
+    "2024-05-09": 200,
+    "2024-05-10": 220,
+  };
+
+  const subscriptionsData = {
+    "2024-01": 10,
+    "2024-02": 20,
+    "2024-03": 18,
+    "2024-04": 18,
+    "2024-05": 10,
+  };
+
+  const notificationsData = {
+    "2024-01": 5,
+    "2024-02": 15,
+    "2024-03": 10,
+    "2024-04": 18,
+    "2024-05": 10,
+  };
+
+  const eventsData = {
+    "2024-01": 8,
+    "2024-02": 18,
+    "2024-03": 5,
+    "2024-04": 18,
+    "2024-05": 15,
+  };
+
+  // Функция для создания маленьких графиков
+  function createChart(canvasId, data, backgroundColor, borderColor) {
+    const ctx = document.getElementById(canvasId).getContext("2d");
+    const chartData = {
+      labels: Object.keys(data),
+      datasets: [
+        {
+          label: "Количество",
+          data: Object.values(data),
+          backgroundColor: backgroundColor,
+          borderColor: borderColor,
+          borderWidth: 1,
+          tension: 0.4,
+        },
+      ],
+    };
+    new Chart(ctx, {
+      type: "line",
+      data: chartData,
+      options: {
+        scales: {
+          yAxes: [
+            {
+              ticks: {
+                beginAtZero: false,
+              },
+            },
+          ],
+        },
+        plugins: {
+          legend: {
+            display: false,
+          },
+          title: {
+            display: false,
+          },
+        },
+      },
+    });
+  }
+
+  createChart(
+    "subscriptionsCanvas",
+    subscriptionsData,
+    "rgba(255, 92, 0, 0.5)",
+    "rgba(255, 92, 0, 1)"
+  );
+  createChart(
+    "notificationsCanvas",
+    notificationsData,
+    "rgba(70, 182, 67, 0.5)",
+    "rgba(70, 182, 67, 1)"
+  );
+  createChart(
+    "eventsCanvas",
+    eventsData,
+    "rgba(168, 108, 205, 0.5)",
+    "rgba(168, 108, 205, 1)"
+  );
+
+  // График пользователей
+  var labels = Object.keys(userData);
+  var data = Object.values(userData);
+
+  var ctx = document.getElementById("userChart").getContext("2d");
+  var userChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: "Количество новых пользователей",
+          data: data,
+          fill: false,
+          borderColor: "#ff69b4",
+          tension: 0.4,
+          borderWidth: 3,
+          pointBackgroundColor: "#ff69b4",
+          pointBorderColor: "#fff",
+          pointHoverBackgroundColor: "#fff",
+          pointHoverBorderColor: "r#ff69b4",
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+        },
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+        title: {
+          display: false,
+        },
+      },
+      interaction: {
+        mode: "index",
+        intersect: false,
+      },
+      hover: {
+        mode: "nearest",
+        intersect: true,
+      },
+    },
+  });
+
+  // График лайков или метчей)
+  const ctxLikes = document.getElementById("likesChart").getContext("2d");
+  const likesChart = new Chart(ctxLikes, {
+    type: "bar",
+    data: {
+      labels: Object.keys(likesData),
+      datasets: [
+        {
+          label: "Количество лайков",
+          data: Object.values(likesData),
+          backgroundColor: "rgba(52, 152, 219, 0.2)",
+          borderColor: "rgba(52, 152, 219, 1)",
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+        },
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+      animation: {
+        duration: 800,
+        easing: "easeOutBounce",
+      },
+    },
+  });
+
+  // Ну вот хочется передать сюда)
+  function updateStats() {
+    const likesToday = 0;
+    const likesWeek = 34;
+    const likesAllTime = 0;
+
+    document.getElementById("likes-today").textContent = likesToday;
+    document.getElementById("likes-week").textContent = likesWeek;
+    document.getElementById("likes-all-time").textContent = likesAllTime;
+  }
+
+  updateStats();
+</script>
+
+{% endblock %}
