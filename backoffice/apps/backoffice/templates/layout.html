@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  </head>
+  <body>
+    <div class="sidebar">
+      <div>
+        <img
+          src="{% static 'img/logo.svg' %}"
+          style="
+            max-width: 70%;
+            height: auto;
+            margin-left: calc(20% - 10px);
+            margin-bottom: 15px;
+            margin-top: 15px;
+          "
+        />
+        <a href="/profiles">Профили</a>
+        <a href="/graph">Графики</a>
+        <a href="{% url 'logout' %}">Выход</a>
+      </div>
+    </div>
+
+    <div class="content">
+      <div id="graph">
+        {% block content %}
+        <h1>График</h1>
+        {% endblock %}
+      </div>
+    </div>
+  </body>
+</html>

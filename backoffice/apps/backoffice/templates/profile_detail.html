@@ -1,0 +1,51 @@
+{% extends 'layout.html' %} {% block content %}
+
+    <div class="back-arrow" onclick="window.history.back()">←</div>
+
+    <div class="user-container">
+        <div class="user-header">
+            <img src="data:image/png;base64,{{ photos.0.content }}" class="user-photo" alt="Фото профиля отсутствует"/>
+            <h3>{{ user.name }}</h3>
+            <p>Подписка: {{ user.subscription_type }}</p>
+            <p>ID: {{ user.id }}</p>
+        </div>
+        <div class="user-data">
+            <div>
+                <h3>Основная почта:</h3>
+                <p>{{ user.email }}</p>
+            </div>
+            <div>
+                <h3>Дата рождения:</h3>
+                <p>{{ user.birth_day }}</p>
+            </div>
+            <div>
+                <h3>Пол:</h3>
+                <p>{{ user.gender }}</p>
+            </div>
+        </div>
+        <div class="user-info">
+            <h3>Описание:</h3>
+            <p>{{ user.info }}</p>
+
+            <h3>Интересы:</h3>
+            <ul class="interests-list">
+                {% for interest in user.interests %}
+                    <li>{{ interest.definition }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="user-info">
+            <h3>Все Фотографии:</h3>
+            <ul class="photos-list">
+                {% for photo in photos %}
+                    <li><img src="data:image/png;base64,{{ photo.content }}"/></li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% if user.isBlocked %}
+            <button class="unblock-button">Разблокировать</button>
+        {% else %}
+            <button class="block-button">Заблокировать</button>
+        {% endif %}
+    </div>
+{% endblock %}

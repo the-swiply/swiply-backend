@@ -70,7 +70,7 @@ WHERE id = $2`, photoTable)
 
 func (p *PhotoRepository) Create(ctx context.Context, userID uuid.UUID, photoIDs []uuid.UUID) error {
 	q := fmt.Sprintf(`INSERT INTO %s (id, photo_ids)
-VALUES ($1, $2)`)
+VALUES ($1, $2)`, photoTable)
 
 	_, err := p.db.Exec(ctx, q, userID, photoIDs)
 	return err

@@ -13,6 +13,7 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY $BASE_PATH/manage.py manage.py
 COPY $BASE_PATH/config config
 COPY $BASE_PATH/static static
+COPY $BASE_PATH/media media
 COPY $BASE_PATH/apps apps
 
 

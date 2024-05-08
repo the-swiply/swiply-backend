@@ -1,0 +1,102 @@
+{% extends 'layout.html' %} {% block content %}
+<div class="search-wrapper">
+  <div class="search-box">
+    <input
+      type="text"
+      id="searchInput"
+      onkeyup="searchProfiles()"
+      class="search-input"
+      placeholder="Введите запрос..."
+    />
+    <div class="filter-button">
+      Фильтры
+      <div class="filter-menu">
+        <a href="#" onclick="showAll()">Все</a>
+        <a href="#" onclick="showPremium()">С премиумом</a>
+        <a href="#">Заблокированые</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="profileContainer">
+  <ul class="profile-list">
+    {% for profile in profiles %}
+    <div class="profile" onclick="window.location.href='{% url 'profile_detail' slug=profile.id %}'">
+      <li class="profile-details">
+        <h2 class="profile-name">{{ profile.name }}</h2>
+        <h3 class="profile-id">ID: {{profile.id}}</h3>
+        <p>Почта: {{profile.email}}</p>
+        <p>Дата рождения: {{profile.birth_day}}</p>
+        <p id="subscription">Подписка: {% if profile.subscription_type == "PRIMARY" %}Премиум{% else %}Базовая{% endif %}</p>
+      </li>
+    </div>
+    {% empty %}
+    <li>No users yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<script>
+  function searchProfiles() {
+      var input, filter, container, profiles, name, i;
+      input = document.getElementById('searchInput');
+      filter = input.value.toUpperCase();
+      container = document.getElementById('profileContainer');
+      profiles = container.getElementsByClassName('profile');
+      for (i = 0; i < profiles.length; i++) {
+          name = profiles[i].getElementsByClassName("profile-details")[0].getElementsByTagName("h3")[0];
+          id = profiles[i].getElementsByClassName("profile-details")[0].getElementsByTagName("h2")[0];
+          if (name.innerHTML.toUpperCase().indexOf(filter) > -1 || id.innerHTML.toUpperCase().indexOf(filter) > -1) {
+              profiles[i].style.display = "";
+          } else {
+              profiles[i].style.display = "none";
+          }
+      }
+  }
+
+  document.querySelector('.filter-button').addEventListener('click', function() {
+      var filterMenu = document.querySelector('.filter-menu');
+      filterMenu.style.display = filterMenu.style.display === 'block' ? 'none' : 'block';
+  });
+
+  window.onclick = function(event) {
+      if (!event.target.matches('.filter-button')) {
+      var dropdowns = document.getElementsByClassName("filter-menu");
+      var i;
+      for (i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.style.display === 'block') {
+              openDropdown.style.display = 'none';
+          }
+      }
+      }
+  }
+
+  function onFilterTap() {
+      var container, profiles;
+      container = document.getElementById('profileContainer');
+      profiles = container.getElementsByClassName('profile');
+      for (i = 0; i < profiles.length; i++) {
+          profiles[i].style.display = "none";
+      }
+  }
+
+  function showPremium() {
+      var container, profiles;
+      container = document.getElementById('profileContainer');
+      profiles = container.getElementsByClassName('profile');
+      filter = "Премиум"
+      for (i = 0; i < profiles.length; i++) {
+          subscription = profiles[i].getElementsByClassName("profile-details").getElementById("subscription");
+          if (subscription.innerHTML.indexOf(filter) > -1) {
+              profiles[i].style.display = "";
+          } else {
+              profiles[i].style.display = "none";
+          }
+
+      }
+  }
+</script>
+
+{% endblock %}
