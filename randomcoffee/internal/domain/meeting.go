@@ -7,6 +7,8 @@ import (
 	"github.com/google/uuid"
 )
 
+type MeetingStatus = meetingStatus
+
 type meetingStatus string
 
 func (m *meetingStatus) Set(value string) error {
