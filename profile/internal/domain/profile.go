@@ -59,13 +59,18 @@ type Location struct {
 }
 
 type Profile struct {
-	ID           uuid.UUID
-	Email        string
-	Name         string
-	Interests    []Interest
-	BirthDay     time.Time
-	Gender       gender
-	Info         string
-	Subscription subscriptionType
-	Location     Location
+	ID            uuid.UUID
+	Email         string
+	Name          string
+	City          string
+	Work          string
+	Education     string
+	IsBlocked     bool
+	Interests     []Interest
+	BirthDay      time.Time
+	Gender        gender
+	Info          string
+	Subscription  subscriptionType
+	Location      Location
+	Organizations []UserOrganization
 }

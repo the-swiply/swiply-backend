@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
@@ -98,10 +99,6 @@ func (p *profileServer) WhoAmI(ctx context.Context, _ *profile.WhoAmIRequest) (*
 	return &profile.WhoAmIResponse{
 		Id: auf.ExtractUserIDFromContext[uuid.UUID](ctx).String(),
 	}, nil
-}
-
-func (p *profileServer) GetRecommendations(ctx context.Context, req *profile.GetRecommendationsRequest) (*profile.GetRecommendationsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "need implementation")
 }
 
 func (p *profileServer) Interaction(ctx context.Context, req *profile.InteractionRequest) (*profile.InteractionResponse, error) {

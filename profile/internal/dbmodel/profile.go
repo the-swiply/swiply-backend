@@ -15,6 +15,10 @@ type Profile struct {
 	ID           uuid.UUID
 	Email        string
 	Name         string
+	City         string
+	Work         string
+	Education    string
+	IsBlocked    bool `db:"is_blocked"`
 	Interests    []int64
 	BirthDay     time.Time
 	Gender       string

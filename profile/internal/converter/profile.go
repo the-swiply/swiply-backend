@@ -11,16 +11,26 @@ import (
 	"github.com/the-swiply/swiply-backend/profile/pkg/api/profile"
 )
 
-func ProfileFromDBModelToDomain(interests []dbmodel.Interest, profile dbmodel.Profile) (domain.Profile, error) {
+func ProfileFromDBModelToDomain(interests []dbmodel.Interest, organizations []dbmodel.UserOrganization,
+	profile dbmodel.Profile) (domain.Profile, error) {
 	var intrs []domain.Interest
 	for _, intr := range interests {
 		intrs = append(intrs, InterestFromDBModelToDomain(intr))
+	}
+
+	var orgs []domain.UserOrganization
+	for _, org := range organizations {
+		orgs = append(orgs, UserOrganizationFromDBModelToDomain(org))
 	}
 
 	p := domain.Profile{
 		ID:        profile.ID,
 		Email:     profile.Email,
 		Name:      profile.Name,
+		City:      profile.City,
+		Work:      profile.Work,
+		Education: profile.Education,
+		IsBlocked: profile.IsBlocked,
 		Interests: intrs,
 		BirthDay:  profile.BirthDay,
 		Info:      profile.Info,
@@ -28,6 +38,7 @@ func ProfileFromDBModelToDomain(interests []dbmodel.Interest, profile dbmodel.Pr
 			Lat:  profile.Lat,
 			Long: profile.Long,
 		},
+		Organizations: orgs,
 	}
 
 	if err := p.Gender.Set(profile.Gender); err != nil {
@@ -50,6 +61,10 @@ func ProfileFromDomainToDBModel(profile domain.Profile) dbmodel.Profile {
 		ID:           profile.ID,
 		Email:        profile.Email,
 		Name:         profile.Name,
+		City:         profile.City,
+		Work:         profile.Work,
+		Education:    profile.Education,
+		IsBlocked:    profile.IsBlocked,
 		Interests:    interests,
 		BirthDay:     profile.BirthDay,
 		Gender:       string(profile.Gender),
