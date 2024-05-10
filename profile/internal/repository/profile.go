@@ -134,7 +134,7 @@ WHERE "from" = $1 AND "type" = $2`, interactionTable)
 
 func (p *ProfileRepository) LikedMeProfiles(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error) {
 	q := fmt.Sprintf(`SELECT "from" FROM %s
-WHERE "to" = $1 AND "type" = $2`, interactionTable)
+WHERE "to" = $1 AND "type" = $2 AND "from" NOT IN (SELECT "to" FROM %s WHERE "from" = $1)`, interactionTable, interactionTable)
 
 	row := p.db.QueryRow(ctx, q, userID, domain.InteractionTypeLike)
 
