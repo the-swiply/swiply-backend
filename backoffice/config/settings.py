@@ -132,6 +132,6 @@ CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 
 if DEBUG:
-    PROFILE_URL = 'http://localhost:18086'
+    PROFILE_URL = 'http://profile:80'
 else:
     PROFILE_URL = os.environ.get('PROFILE_URL')

@@ -71,32 +71,3 @@ class AuthorizationView(View):
 
 def graph(request):
     return render(request, 'graph.html')
-
-# profiles = [
-#     Profile(
-#         id=456,
-#         email="user1@example.com",
-#         name='John Doe Marshel',
-#         birthdate="1980-01-01",
-#         gender="Male",
-#         city="New York",
-#         subscription="Premium",
-#         description="Love doung something",
-#         work="Sberbank",
-#         education="HSE",
-#         interests=["sport", "play gitar"],
-#         isBlocked=False
-#     ),
-#     Profile(
-#         id=234,
-#         email="user2@example.com",
-#         name=' Jane Smith',
-#         birthdate="1995-05-15",
-#         gender="Female",
-#         city="Los Angeles",
-#         subscription="Basic",
-#         description="Love dance",
-#         interests="music",
-#         isBlocked=False
-#     )
-# ]
