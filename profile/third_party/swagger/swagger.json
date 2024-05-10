@@ -200,7 +200,7 @@
         ]
       }
     },
-    "/v1/photo/{profileId}": {
+    "/v1/photo/{profile_id}": {
       "get": {
         "operationId": "Photo_List",
         "responses": {
@@ -219,7 +219,7 @@
         },
         "parameters": [
           {
-            "name": "profileId",
+            "name": "profile_id",
             "in": "path",
             "required": true,
             "type": "string"
@@ -230,7 +230,7 @@
         ]
       }
     },
-    "/v1/photo/{profileId}/{photoId}": {
+    "/v1/photo/{profile_id}/{photo_id}": {
       "get": {
         "operationId": "Photo_Get",
         "responses": {
@@ -249,13 +249,13 @@
         },
         "parameters": [
           {
-            "name": "profileId",
+            "name": "profile_id",
             "in": "path",
             "required": true,
             "type": "string"
           },
           {
-            "name": "photoId",
+            "name": "photo_id",
             "in": "path",
             "required": true,
             "type": "string"
@@ -285,11 +285,75 @@
         },
         "parameters": [
           {
-            "name": "updatedAfter",
+            "name": "updated_after",
             "in": "query",
             "required": false,
             "type": "string",
             "format": "date-time"
+          }
+        ],
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/v1/profile/add-user-organization": {
+      "post": {
+        "operationId": "Profile_AddUserOrganization",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileAddUserOrganizationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/profileAddUserOrganizationRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/v1/profile/change-availability": {
+      "post": {
+        "operationId": "Profile_ChangeAvailability",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileChangeAvailabilityResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/profileChangeAvailabilityRequest"
+            }
           }
         ],
         "tags": [
@@ -373,6 +437,92 @@
         ]
       }
     },
+    "/v1/profile/list-matches": {
+      "get": {
+        "operationId": "Profile_ListMatches",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileListMatchesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/v1/profile/remove-user-organization": {
+      "post": {
+        "operationId": "Profile_RemoveUserOrganization",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileRemoveUserOrganizationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/profileRemoveUserOrganizationRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/v1/profile/send-authorization-code": {
+      "post": {
+        "operationId": "Profile_SendAuthorizationCode",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileSendAuthorizationCodeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/profileSendAuthorizationCodeRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
     "/v1/profile/update": {
       "post": {
         "operationId": "Profile_Update",
@@ -397,6 +547,38 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/profileUpdateProfileRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
+    "/v1/profile/validate-organization": {
+      "post": {
+        "operationId": "Profile_ValidateOrganization",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/profileValidateOrganizationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/profileValidateOrganizationRequest"
             }
           }
         ],
@@ -456,40 +638,41 @@
           "Profile"
         ]
       }
-    },
-    "/v1/recommendation": {
-      "get": {
-        "operationId": "Profile_GetRecommendations",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/profileGetRecommendationsResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          }
-        ],
-        "tags": [
-          "Profile"
-        ]
-      }
     }
   },
   "definitions": {
+    "profileAddUserOrganizationRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        }
+      },
+      "title": "AddUserOrganization"
+    },
+    "profileAddUserOrganizationResponse": {
+      "type": "object",
+      "properties": {
+        "organization": {
+          "$ref": "#/definitions/profileUserOrganization"
+        }
+      }
+    },
+    "profileChangeAvailabilityRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "is_blocked": {
+          "type": "boolean"
+        }
+      },
+      "title": "ChangeAvailability"
+    },
+    "profileChangeAvailabilityResponse": {
+      "type": "object"
+    },
     "profileCreatePhotoRequest": {
       "type": "object",
       "properties": {
@@ -523,7 +706,7 @@
             "$ref": "#/definitions/profileInterest"
           }
         },
-        "birthDay": {
+        "birth_day": {
           "type": "string",
           "format": "date-time"
         },
@@ -533,11 +716,20 @@
         "info": {
           "type": "string"
         },
-        "subscriptionType": {
+        "subscription_type": {
           "$ref": "#/definitions/profileSubscriptionType"
         },
         "location": {
           "$ref": "#/definitions/swiplyprofileLocation"
+        },
+        "city": {
+          "type": "string"
+        },
+        "work": {
+          "type": "string"
+        },
+        "education": {
+          "type": "string"
         }
       },
       "title": "Create"
@@ -586,19 +778,8 @@
     "profileGetProfileResponse": {
       "type": "object",
       "properties": {
-        "userProfile": {
+        "user_profile": {
           "$ref": "#/definitions/profileUserProfile"
-        }
-      }
-    },
-    "profileGetRecommendationsResponse": {
-      "type": "object",
-      "properties": {
-        "ids": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
         }
       }
     },
@@ -698,6 +879,17 @@
         }
       }
     },
+    "profileListMatchesResponse": {
+      "type": "object",
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "profileListPhotoResponse": {
       "type": "object",
       "properties": {
@@ -734,6 +926,18 @@
         }
       }
     },
+    "profileRemoveUserOrganizationRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "title": "RemoveUserOrganization"
+    },
+    "profileRemoveUserOrganizationResponse": {
+      "type": "object"
+    },
     "profileReorderPhotoRequest": {
       "type": "object",
       "properties": {
@@ -746,6 +950,18 @@
       }
     },
     "profileReorderPhotoResponse": {
+      "type": "object"
+    },
+    "profileSendAuthorizationCodeRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        }
+      },
+      "title": "SendAuthorizationCode"
+    },
+    "profileSendAuthorizationCodeResponse": {
       "type": "object"
     },
     "profileSubscriptionType": {
@@ -770,7 +986,7 @@
             "$ref": "#/definitions/profileInterest"
           }
         },
-        "birthDay": {
+        "birth_day": {
           "type": "string",
           "format": "date-time"
         },
@@ -780,11 +996,20 @@
         "info": {
           "type": "string"
         },
-        "subscriptionType": {
+        "subscription_type": {
           "$ref": "#/definitions/profileSubscriptionType"
         },
         "location": {
           "$ref": "#/definitions/swiplyprofileLocation"
+        },
+        "city": {
+          "type": "string"
+        },
+        "work": {
+          "type": "string"
+        },
+        "education": {
+          "type": "string"
         }
       },
       "title": "Update"
@@ -794,6 +1019,28 @@
       "properties": {
         "id": {
           "type": "string"
+        }
+      }
+    },
+    "profileUserOrganization": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "is_valid": {
+          "type": "boolean"
+        },
+        "organization_id": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -816,7 +1063,7 @@
             "$ref": "#/definitions/profileInterest"
           }
         },
-        "birthDay": {
+        "birth_day": {
           "type": "string",
           "format": "date-time"
         },
@@ -826,13 +1073,48 @@
         "info": {
           "type": "string"
         },
-        "subscriptionType": {
+        "subscription_type": {
           "$ref": "#/definitions/profileSubscriptionType"
         },
         "location": {
           "$ref": "#/definitions/swiplyprofileLocation"
+        },
+        "city": {
+          "type": "string"
+        },
+        "work": {
+          "type": "string"
+        },
+        "education": {
+          "type": "string"
+        },
+        "is_blocked": {
+          "type": "boolean"
+        },
+        "organizations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/profileUserOrganization"
+          }
         }
       }
+    },
+    "profileValidateOrganizationRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "code": {
+          "type": "string"
+        }
+      },
+      "title": "ValidateOrganization"
+    },
+    "profileValidateOrganizationResponse": {
+      "type": "object"
     },
     "profileWhoAmIResponse": {
       "type": "object",

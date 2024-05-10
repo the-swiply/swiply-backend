@@ -93,6 +93,10 @@ func ProfileFromDomainToProto(prof domain.Profile) *profile.UserProfile {
 		userProfile.Interests = append(userProfile.Interests, InterestFromDomainToProto(interest))
 	}
 
+	for _, org := range prof.Organizations {
+		userProfile.Organizations = append(userProfile.Organizations, UserOrganizationFromDomainToProto(org))
+	}
+
 	switch prof.Gender {
 	case domain.GenderUnspecified:
 		userProfile.Gender = profile.Gender_GENDER_UNSPECIFIED

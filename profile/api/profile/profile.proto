@@ -316,7 +316,7 @@ message AddUserOrganizationResponse {
 
 // RemoveUserOrganization
 message RemoveUserOrganizationRequest {
-  string id = 1;
+  int64 id = 1;
 }
 
 message RemoveUserOrganizationResponse {}
