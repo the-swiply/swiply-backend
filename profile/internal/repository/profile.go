@@ -117,7 +117,7 @@ func (p *ProfileRepository) LikedProfiles(ctx context.Context, userID uuid.UUID)
 	q := fmt.Sprintf(`SELECT "to" FROM %s
 WHERE "from" = $1 AND "type" = $2`, interactionTable)
 
-	row := p.db.QueryRow(ctx, q, userID)
+	row := p.db.QueryRow(ctx, q, userID, domain.InteractionTypeLike)
 
 	var users []uuid.UUID
 	err := row.Scan(&users)
@@ -136,7 +136,7 @@ func (p *ProfileRepository) LikedMeProfiles(ctx context.Context, userID uuid.UUI
 	q := fmt.Sprintf(`SELECT "from" FROM %s
 WHERE "to" = $1 AND "type" = $2`, interactionTable)
 
-	row := p.db.QueryRow(ctx, q, userID)
+	row := p.db.QueryRow(ctx, q, userID, domain.InteractionTypeLike)
 
 	var users []uuid.UUID
 	err := row.Scan(&users)
@@ -275,10 +275,10 @@ WHERE id = $1 and profile_id = $2`, userOrganizationTable)
 
 func (p *ProfileRepository) ListMatches(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error) {
 	q := fmt.Sprintf(`SELECT "to" FROM %s
-WHERE "from" = $1 AND "to" IN (SELECT "from" FROM %s
-WHERE "to" = $1)`, interactionTable, interactionTable)
+WHERE "from" = $1 AND "type" = $2 "to" IN (SELECT "from" FROM %s
+WHERE "to" = $1 AND "type" = $2)`, interactionTable, interactionTable)
 
-	row := p.db.QueryRow(ctx, q, userID)
+	row := p.db.QueryRow(ctx, q, userID, domain.InteractionTypeLike)
 
 	var users []uuid.UUID
 	err := row.Scan(&users)
