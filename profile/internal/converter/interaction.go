@@ -36,11 +36,11 @@ func InteractionFromDomainToDBModel(interaction domain.Interaction) dbmodel.Inte
 
 func InteractionFromProtoToDomain(interaction *profile.Interaction) domain.Interaction {
 	inter := domain.Interaction{
-		From: uuid.MustParse(interaction.From),
-		To:   uuid.MustParse(interaction.To),
+		From: uuid.MustParse(interaction.GetFrom()),
+		To:   uuid.MustParse(interaction.GetTo()),
 	}
 
-	switch interaction.Type {
+	switch interaction.GetType() {
 	case profile.InteractionType_INTERACTION_TYPE_UNSPECIFIED:
 		inter.Type = domain.InteractionTypeUnspecified
 	case profile.InteractionType_LIKE:

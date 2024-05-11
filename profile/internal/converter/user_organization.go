@@ -28,10 +28,10 @@ func UserOrganizationFromDomainToProto(org domain.UserOrganization) *profile.Use
 
 func UserOrganizationFromProtoToDomain(org *profile.UserOrganization) domain.UserOrganization {
 	return domain.UserOrganization{
-		ID:             org.Id,
-		Name:           org.Name,
-		OrganizationID: org.OrganizationId,
-		Email:          org.Email,
-		IsValid:        org.IsValid,
+		ID:             org.GetId(),
+		Name:           org.GetName(),
+		OrganizationID: org.GetOrganizationId(),
+		Email:          org.GetEmail(),
+		IsValid:        org.GetIsValid(),
 	}
 }

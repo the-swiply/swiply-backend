@@ -29,7 +29,7 @@ func InterestFromDomainToProto(interest domain.Interest) *profile.Interest {
 
 func InterestFromProtoToDomain(interest *profile.Interest) domain.Interest {
 	return domain.Interest{
-		ID:         interest.Id,
-		Definition: interest.Definition,
+		ID:         interest.GetId(),
+		Definition: interest.GetDefinition(),
 	}
 }

@@ -24,8 +24,8 @@ func PhotoFromDomainToDBModel(photo domain.Photo) dbmodel.Photo {
 
 func PhotoFromProtoToDomain(photo *profile.ProfilePhoto) domain.Photo {
 	return domain.Photo{
-		ID:      uuid.MustParse(photo.Id),
-		Content: photo.Content,
+		ID:      uuid.MustParse(photo.GetId()),
+		Content: photo.GetContent(),
 	}
 }
 
