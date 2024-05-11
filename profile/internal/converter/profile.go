@@ -87,6 +87,10 @@ func ProfileFromDomainToProto(prof domain.Profile) *profile.UserProfile {
 			Lat:  prof.Location.Lat,
 			Long: prof.Location.Long,
 		},
+		City:      prof.City,
+		Work:      prof.Work,
+		Education: prof.Education,
+		IsBlocked: prof.IsBlocked,
 	}
 
 	for _, interest := range prof.Interests {
@@ -120,11 +124,15 @@ func ProfileFromDomainToProto(prof domain.Profile) *profile.UserProfile {
 
 func ProfileFromProtoToDomain(userProfile *profile.UserProfile) domain.Profile {
 	prof := domain.Profile{
-		ID:       uuid.MustParse(userProfile.Id),
-		Email:    userProfile.Email,
-		Name:     userProfile.Name,
-		BirthDay: userProfile.BirthDay.AsTime(),
-		Info:     userProfile.Info,
+		ID:        uuid.MustParse(userProfile.Id),
+		Email:     userProfile.Email,
+		Name:      userProfile.Name,
+		City:      userProfile.City,
+		Work:      userProfile.Work,
+		Education: userProfile.Education,
+		IsBlocked: userProfile.IsBlocked,
+		BirthDay:  userProfile.BirthDay.AsTime(),
+		Info:      userProfile.Info,
 		Location: domain.Location{
 			Lat:  userProfile.Location.Lat,
 			Long: userProfile.Location.Long,
@@ -133,6 +141,10 @@ func ProfileFromProtoToDomain(userProfile *profile.UserProfile) domain.Profile {
 
 	for _, interest := range userProfile.Interests {
 		prof.Interests = append(prof.Interests, InterestFromProtoToDomain(interest))
+	}
+
+	for _, org := range userProfile.Organizations {
+		prof.Organizations = append(prof.Organizations, UserOrganizationFromProtoToDomain(org))
 	}
 
 	switch userProfile.Gender {
