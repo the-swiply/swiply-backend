@@ -11,16 +11,26 @@ import (
 	"github.com/the-swiply/swiply-backend/profile/pkg/api/profile"
 )
 
-func ProfileFromDBModelToDomain(interests []dbmodel.Interest, profile dbmodel.Profile) (domain.Profile, error) {
+func ProfileFromDBModelToDomain(interests []dbmodel.Interest, organizations []dbmodel.UserOrganization,
+	profile dbmodel.Profile) (domain.Profile, error) {
 	var intrs []domain.Interest
 	for _, intr := range interests {
 		intrs = append(intrs, InterestFromDBModelToDomain(intr))
+	}
+
+	var orgs []domain.UserOrganization
+	for _, org := range organizations {
+		orgs = append(orgs, UserOrganizationFromDBModelToDomain(org))
 	}
 
 	p := domain.Profile{
 		ID:        profile.ID,
 		Email:     profile.Email,
 		Name:      profile.Name,
+		City:      profile.City,
+		Work:      profile.Work,
+		Education: profile.Education,
+		IsBlocked: profile.IsBlocked,
 		Interests: intrs,
 		BirthDay:  profile.BirthDay,
 		Info:      profile.Info,
@@ -28,6 +38,7 @@ func ProfileFromDBModelToDomain(interests []dbmodel.Interest, profile dbmodel.Pr
 			Lat:  profile.Lat,
 			Long: profile.Long,
 		},
+		Organizations: orgs,
 	}
 
 	if err := p.Gender.Set(profile.Gender); err != nil {
@@ -50,6 +61,10 @@ func ProfileFromDomainToDBModel(profile domain.Profile) dbmodel.Profile {
 		ID:           profile.ID,
 		Email:        profile.Email,
 		Name:         profile.Name,
+		City:         profile.City,
+		Work:         profile.Work,
+		Education:    profile.Education,
+		IsBlocked:    profile.IsBlocked,
 		Interests:    interests,
 		BirthDay:     profile.BirthDay,
 		Gender:       string(profile.Gender),
@@ -72,10 +87,18 @@ func ProfileFromDomainToProto(prof domain.Profile) *profile.UserProfile {
 			Lat:  prof.Location.Lat,
 			Long: prof.Location.Long,
 		},
+		City:      prof.City,
+		Work:      prof.Work,
+		Education: prof.Education,
+		IsBlocked: prof.IsBlocked,
 	}
 
 	for _, interest := range prof.Interests {
 		userProfile.Interests = append(userProfile.Interests, InterestFromDomainToProto(interest))
+	}
+
+	for _, org := range prof.Organizations {
+		userProfile.Organizations = append(userProfile.Organizations, UserOrganizationFromDomainToProto(org))
 	}
 
 	switch prof.Gender {
@@ -101,11 +124,15 @@ func ProfileFromDomainToProto(prof domain.Profile) *profile.UserProfile {
 
 func ProfileFromProtoToDomain(userProfile *profile.UserProfile) domain.Profile {
 	prof := domain.Profile{
-		ID:       uuid.MustParse(userProfile.Id),
-		Email:    userProfile.Email,
-		Name:     userProfile.Name,
-		BirthDay: userProfile.BirthDay.AsTime(),
-		Info:     userProfile.Info,
+		ID:        uuid.MustParse(userProfile.Id),
+		Email:     userProfile.Email,
+		Name:      userProfile.Name,
+		City:      userProfile.City,
+		Work:      userProfile.Work,
+		Education: userProfile.Education,
+		IsBlocked: userProfile.IsBlocked,
+		BirthDay:  userProfile.BirthDay.AsTime(),
+		Info:      userProfile.Info,
 		Location: domain.Location{
 			Lat:  userProfile.Location.Lat,
 			Long: userProfile.Location.Long,
@@ -114,6 +141,10 @@ func ProfileFromProtoToDomain(userProfile *profile.UserProfile) domain.Profile {
 
 	for _, interest := range userProfile.Interests {
 		prof.Interests = append(prof.Interests, InterestFromProtoToDomain(interest))
+	}
+
+	for _, org := range userProfile.Organizations {
+		prof.Organizations = append(prof.Organizations, UserOrganizationFromProtoToDomain(org))
 	}
 
 	switch userProfile.Gender {

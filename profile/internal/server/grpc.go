@@ -2,6 +2,8 @@ package server
 
 import (
 	"context"
+	"strconv"
+
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
@@ -34,6 +36,72 @@ type GRPCServer struct {
 type profileServer struct {
 	profile.UnimplementedProfileServer
 	service *service.ProfileService
+}
+
+func (p *profileServer) ChangeAvailability(ctx context.Context, req *profile.ChangeAvailabilityRequest) (*profile.ChangeAvailabilityResponse, error) {
+	userID, err := uuid.Parse(req.Id)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "id must have uuid format")
+	}
+
+	if err := p.service.ChangeAvailability(ctx, req.IsBlocked, userID); err != nil {
+		return nil, status.Error(codes.FailedPrecondition, err.Error())
+	}
+	return &profile.ChangeAvailabilityResponse{}, nil
+}
+
+func (p *profileServer) AddUserOrganization(ctx context.Context, req *profile.AddUserOrganizationRequest) (*profile.AddUserOrganizationResponse, error) {
+	org, err := p.service.AddUserOrganization(ctx, auf.ExtractUserIDFromContext[uuid.UUID](ctx), req.Email)
+	if err != nil {
+		return nil, status.Error(codes.FailedPrecondition, err.Error())
+	}
+	return &profile.AddUserOrganizationResponse{
+		Organization: converter.UserOrganizationFromDomainToProto(org),
+	}, nil
+}
+
+func (p *profileServer) RemoveUserOrganization(ctx context.Context, req *profile.RemoveUserOrganizationRequest) (*profile.RemoveUserOrganizationResponse, error) {
+	id, err := strconv.ParseInt(req.Id, 10, 64)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "can't parse org id")
+	}
+
+	if err := p.service.DeleteUserOrganization(ctx, auf.ExtractUserIDFromContext[uuid.UUID](ctx), id); err != nil {
+		return nil, status.Error(codes.FailedPrecondition, err.Error())
+	}
+	return &profile.RemoveUserOrganizationResponse{}, nil
+}
+
+func (p *profileServer) SendAuthorizationCode(ctx context.Context, req *profile.SendAuthorizationCodeRequest) (*profile.SendAuthorizationCodeResponse, error) {
+	if err := p.service.SendAuthorizationCode(ctx, auf.ExtractUserIDFromContext[uuid.UUID](ctx), req.Email); err != nil {
+		return nil, status.Error(codes.FailedPrecondition, err.Error())
+	}
+
+	return &profile.SendAuthorizationCodeResponse{}, nil
+}
+
+func (p *profileServer) ValidateOrganization(ctx context.Context, req *profile.ValidateOrganizationRequest) (*profile.ValidateOrganizationResponse, error) {
+	if err := p.service.ValidateUserOrganization(ctx, auf.ExtractUserIDFromContext[uuid.UUID](ctx), req.Id, req.Code); err != nil {
+		return nil, status.Error(codes.FailedPrecondition, err.Error())
+	}
+
+	return &profile.ValidateOrganizationResponse{}, nil
+}
+
+func (p *profileServer) ListMatches(ctx context.Context, req *profile.ListMatchesRequest) (*profile.ListMatchesResponse, error) {
+	matches, err := p.service.ListMatches(ctx, auf.ExtractUserIDFromContext[uuid.UUID](ctx))
+	if err == domain.ErrEntityIsNotExists {
+		return nil, status.Error(codes.NotFound, err.Error())
+	} else if err != nil {
+		return nil, status.Error(codes.FailedPrecondition, err.Error())
+	}
+
+	resp := &profile.ListMatchesResponse{}
+	for _, match := range matches {
+		resp.Ids = append(resp.Ids, match.String())
+	}
+
+	return resp, nil
 }
 
 func (p *profileServer) Create(ctx context.Context, req *profile.CreateProfileRequest) (*profile.CreateProfileResponse, error) {
@@ -98,10 +166,6 @@ func (p *profileServer) WhoAmI(ctx context.Context, _ *profile.WhoAmIRequest) (*
 	return &profile.WhoAmIResponse{
 		Id: auf.ExtractUserIDFromContext[uuid.UUID](ctx).String(),
 	}, nil
-}
-
-func (p *profileServer) GetRecommendations(ctx context.Context, req *profile.GetRecommendationsRequest) (*profile.GetRecommendationsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "need implementation")
 }
 
 func (p *profileServer) Interaction(ctx context.Context, req *profile.InteractionRequest) (*profile.InteractionResponse, error) {
@@ -317,7 +381,7 @@ func NewGRPCServer(profileService *service.ProfileService, photoService *service
 	srv.Server = grpc.NewServer(opts...)
 	reflection.RegisterV1(srv.Server)
 	profile.RegisterProfileServer(srv.Server, srv.profileServer)
-	//profile.RegisterPhotoServer(srv.Server, srv.photoServer)
+	profile.RegisterPhotoServer(srv.Server, srv.photoServer)
 
 	return srv
 }

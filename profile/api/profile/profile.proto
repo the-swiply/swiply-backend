@@ -34,13 +34,6 @@ service Profile {
     };
   }
 
-
-  rpc GetRecommendations(GetRecommendationsRequest) returns (GetRecommendationsResponse) {
-    option (google.api.http) = {
-      get: "/v1/recommendation"
-    };
-  }
-
   rpc Interaction(InteractionRequest) returns (InteractionResponse) {
     option (google.api.http) = {
       post: "/v1/interaction/create"
@@ -75,6 +68,47 @@ service Profile {
   rpc ListProfiles(ListProfilesRequest) returns (ListProfilesResponse) {
     option (google.api.http) = {
       get: "/v1/profile"
+    };
+  }
+
+  rpc ChangeAvailability(ChangeAvailabilityRequest) returns (ChangeAvailabilityResponse) {
+    option (google.api.http) = {
+      post: "/v1/profile/change-availability"
+      body: "*"
+    };
+  }
+
+  rpc AddUserOrganization(AddUserOrganizationRequest) returns (AddUserOrganizationResponse) {
+    option (google.api.http) = {
+      post: "/v1/profile/add-user-organization"
+      body: "*"
+    };
+  }
+
+  rpc RemoveUserOrganization(RemoveUserOrganizationRequest) returns (RemoveUserOrganizationResponse) {
+    option (google.api.http) = {
+      post: "/v1/profile/remove-user-organization"
+      body: "*"
+    };
+  }
+
+  rpc SendAuthorizationCode(SendAuthorizationCodeRequest) returns (SendAuthorizationCodeResponse) {
+    option (google.api.http) = {
+      post: "/v1/profile/send-authorization-code"
+      body: "*"
+    };
+  }
+
+  rpc ValidateOrganization(ValidateOrganizationRequest) returns (ValidateOrganizationResponse) {
+    option (google.api.http) = {
+      post: "/v1/profile/validate-organization"
+      body: "*"
+    };
+  }
+
+  rpc ListMatches(ListMatchesRequest) returns (ListMatchesResponse) {
+    option (google.api.http) = {
+      get: "/v1/profile/list-matches"
     };
   }
 }
@@ -142,6 +176,14 @@ message Location {
   double long = 2;
 }
 
+message UserOrganization {
+  int64 id = 1;
+  string name = 2;
+  string email = 3;
+  bool is_valid = 4;
+  int64 organization_id = 5;
+}
+
 message UserProfile {
   string id = 1;
   string email = 2;
@@ -152,6 +194,11 @@ message UserProfile {
   string info = 7;
   SubscriptionType subscription_type = 8;
   Location location = 9;
+  string city = 10;
+  string work = 11;
+  string education = 12;
+  bool is_blocked = 13;
+  repeated UserOrganization organizations = 14;
 }
 
 message Interaction {
@@ -170,6 +217,9 @@ message CreateProfileRequest {
   string info = 6;
   SubscriptionType subscription_type = 7;
   Location location = 8;
+  string city = 9;
+  string work = 10;
+  string education = 11;
 }
 message CreateProfileResponse {
   string id = 1;
@@ -184,6 +234,9 @@ message UpdateProfileRequest {
   string info = 5;
   SubscriptionType subscription_type = 6;
   Location location = 7;
+  string city = 8;
+  string work = 9;
+  string education = 10;
 }
 message UpdateProfileResponse {
   string id = 1;
@@ -201,14 +254,6 @@ message GetProfileResponse {
 message WhoAmIRequest {}
 message WhoAmIResponse {
   string id = 1;
-}
-
-// GetRecommendations
-message GetRecommendationsRequest {
-  int64 limit = 1;
-}
-message GetRecommendationsResponse {
-  repeated string ids = 1;
 }
 
 // Interaction
@@ -250,6 +295,52 @@ message ListProfilesRequest {
 }
 message ListProfilesResponse {
   repeated UserProfile profiles = 1;
+}
+
+// ChangeAvailability
+message ChangeAvailabilityRequest {
+  string id = 1;
+  bool is_blocked = 2;
+}
+
+message ChangeAvailabilityResponse {}
+
+// AddUserOrganization
+message AddUserOrganizationRequest {
+  string email = 1;
+}
+
+message AddUserOrganizationResponse {
+  UserOrganization organization = 1;
+}
+
+// RemoveUserOrganization
+message RemoveUserOrganizationRequest {
+  int64 id = 1;
+}
+
+message RemoveUserOrganizationResponse {}
+
+// SendAuthorizationCode
+message SendAuthorizationCodeRequest {
+  string email = 1;
+}
+
+message SendAuthorizationCodeResponse {}
+
+// ValidateOrganization
+message ValidateOrganizationRequest {
+  int64 id = 1;
+  string code = 2;
+}
+
+message ValidateOrganizationResponse{}
+
+// ListMatches
+message ListMatchesRequest {}
+
+message ListMatchesResponse {
+  repeated string ids = 1;
 }
 
 message ProfilePhoto {

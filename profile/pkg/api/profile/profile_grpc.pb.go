@@ -26,13 +26,18 @@ type ProfileClient interface {
 	Update(ctx context.Context, in *UpdateProfileRequest, opts ...grpc.CallOption) (*UpdateProfileResponse, error)
 	Get(ctx context.Context, in *GetProfileRequest, opts ...grpc.CallOption) (*GetProfileResponse, error)
 	WhoAmI(ctx context.Context, in *WhoAmIRequest, opts ...grpc.CallOption) (*WhoAmIResponse, error)
-	GetRecommendations(ctx context.Context, in *GetRecommendationsRequest, opts ...grpc.CallOption) (*GetRecommendationsResponse, error)
 	Interaction(ctx context.Context, in *InteractionRequest, opts ...grpc.CallOption) (*InteractionResponse, error)
 	Liked(ctx context.Context, in *LikedRequest, opts ...grpc.CallOption) (*LikedResponse, error)
 	LikedMe(ctx context.Context, in *LikedMeRequest, opts ...grpc.CallOption) (*LikedMeResponse, error)
 	ListInterests(ctx context.Context, in *ListInterestsRequest, opts ...grpc.CallOption) (*ListInterestsResponse, error)
 	ListInteractions(ctx context.Context, in *ListInteractionsRequest, opts ...grpc.CallOption) (*ListInteractionsResponse, error)
 	ListProfiles(ctx context.Context, in *ListProfilesRequest, opts ...grpc.CallOption) (*ListProfilesResponse, error)
+	ChangeAvailability(ctx context.Context, in *ChangeAvailabilityRequest, opts ...grpc.CallOption) (*ChangeAvailabilityResponse, error)
+	AddUserOrganization(ctx context.Context, in *AddUserOrganizationRequest, opts ...grpc.CallOption) (*AddUserOrganizationResponse, error)
+	RemoveUserOrganization(ctx context.Context, in *RemoveUserOrganizationRequest, opts ...grpc.CallOption) (*RemoveUserOrganizationResponse, error)
+	SendAuthorizationCode(ctx context.Context, in *SendAuthorizationCodeRequest, opts ...grpc.CallOption) (*SendAuthorizationCodeResponse, error)
+	ValidateOrganization(ctx context.Context, in *ValidateOrganizationRequest, opts ...grpc.CallOption) (*ValidateOrganizationResponse, error)
+	ListMatches(ctx context.Context, in *ListMatchesRequest, opts ...grpc.CallOption) (*ListMatchesResponse, error)
 }
 
 type profileClient struct {
@@ -73,15 +78,6 @@ func (c *profileClient) Get(ctx context.Context, in *GetProfileRequest, opts ...
 func (c *profileClient) WhoAmI(ctx context.Context, in *WhoAmIRequest, opts ...grpc.CallOption) (*WhoAmIResponse, error) {
 	out := new(WhoAmIResponse)
 	err := c.cc.Invoke(ctx, "/swiply.profile.Profile/WhoAmI", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *profileClient) GetRecommendations(ctx context.Context, in *GetRecommendationsRequest, opts ...grpc.CallOption) (*GetRecommendationsResponse, error) {
-	out := new(GetRecommendationsResponse)
-	err := c.cc.Invoke(ctx, "/swiply.profile.Profile/GetRecommendations", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -142,6 +138,60 @@ func (c *profileClient) ListProfiles(ctx context.Context, in *ListProfilesReques
 	return out, nil
 }
 
+func (c *profileClient) ChangeAvailability(ctx context.Context, in *ChangeAvailabilityRequest, opts ...grpc.CallOption) (*ChangeAvailabilityResponse, error) {
+	out := new(ChangeAvailabilityResponse)
+	err := c.cc.Invoke(ctx, "/swiply.profile.Profile/ChangeAvailability", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *profileClient) AddUserOrganization(ctx context.Context, in *AddUserOrganizationRequest, opts ...grpc.CallOption) (*AddUserOrganizationResponse, error) {
+	out := new(AddUserOrganizationResponse)
+	err := c.cc.Invoke(ctx, "/swiply.profile.Profile/AddUserOrganization", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *profileClient) RemoveUserOrganization(ctx context.Context, in *RemoveUserOrganizationRequest, opts ...grpc.CallOption) (*RemoveUserOrganizationResponse, error) {
+	out := new(RemoveUserOrganizationResponse)
+	err := c.cc.Invoke(ctx, "/swiply.profile.Profile/RemoveUserOrganization", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *profileClient) SendAuthorizationCode(ctx context.Context, in *SendAuthorizationCodeRequest, opts ...grpc.CallOption) (*SendAuthorizationCodeResponse, error) {
+	out := new(SendAuthorizationCodeResponse)
+	err := c.cc.Invoke(ctx, "/swiply.profile.Profile/SendAuthorizationCode", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *profileClient) ValidateOrganization(ctx context.Context, in *ValidateOrganizationRequest, opts ...grpc.CallOption) (*ValidateOrganizationResponse, error) {
+	out := new(ValidateOrganizationResponse)
+	err := c.cc.Invoke(ctx, "/swiply.profile.Profile/ValidateOrganization", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *profileClient) ListMatches(ctx context.Context, in *ListMatchesRequest, opts ...grpc.CallOption) (*ListMatchesResponse, error) {
+	out := new(ListMatchesResponse)
+	err := c.cc.Invoke(ctx, "/swiply.profile.Profile/ListMatches", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProfileServer is the server API for Profile service.
 // All implementations must embed UnimplementedProfileServer
 // for forward compatibility
@@ -150,13 +200,18 @@ type ProfileServer interface {
 	Update(context.Context, *UpdateProfileRequest) (*UpdateProfileResponse, error)
 	Get(context.Context, *GetProfileRequest) (*GetProfileResponse, error)
 	WhoAmI(context.Context, *WhoAmIRequest) (*WhoAmIResponse, error)
-	GetRecommendations(context.Context, *GetRecommendationsRequest) (*GetRecommendationsResponse, error)
 	Interaction(context.Context, *InteractionRequest) (*InteractionResponse, error)
 	Liked(context.Context, *LikedRequest) (*LikedResponse, error)
 	LikedMe(context.Context, *LikedMeRequest) (*LikedMeResponse, error)
 	ListInterests(context.Context, *ListInterestsRequest) (*ListInterestsResponse, error)
 	ListInteractions(context.Context, *ListInteractionsRequest) (*ListInteractionsResponse, error)
 	ListProfiles(context.Context, *ListProfilesRequest) (*ListProfilesResponse, error)
+	ChangeAvailability(context.Context, *ChangeAvailabilityRequest) (*ChangeAvailabilityResponse, error)
+	AddUserOrganization(context.Context, *AddUserOrganizationRequest) (*AddUserOrganizationResponse, error)
+	RemoveUserOrganization(context.Context, *RemoveUserOrganizationRequest) (*RemoveUserOrganizationResponse, error)
+	SendAuthorizationCode(context.Context, *SendAuthorizationCodeRequest) (*SendAuthorizationCodeResponse, error)
+	ValidateOrganization(context.Context, *ValidateOrganizationRequest) (*ValidateOrganizationResponse, error)
+	ListMatches(context.Context, *ListMatchesRequest) (*ListMatchesResponse, error)
 	mustEmbedUnimplementedProfileServer()
 }
 
@@ -176,9 +231,6 @@ func (UnimplementedProfileServer) Get(context.Context, *GetProfileRequest) (*Get
 func (UnimplementedProfileServer) WhoAmI(context.Context, *WhoAmIRequest) (*WhoAmIResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method WhoAmI not implemented")
 }
-func (UnimplementedProfileServer) GetRecommendations(context.Context, *GetRecommendationsRequest) (*GetRecommendationsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRecommendations not implemented")
-}
 func (UnimplementedProfileServer) Interaction(context.Context, *InteractionRequest) (*InteractionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Interaction not implemented")
 }
@@ -196,6 +248,24 @@ func (UnimplementedProfileServer) ListInteractions(context.Context, *ListInterac
 }
 func (UnimplementedProfileServer) ListProfiles(context.Context, *ListProfilesRequest) (*ListProfilesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListProfiles not implemented")
+}
+func (UnimplementedProfileServer) ChangeAvailability(context.Context, *ChangeAvailabilityRequest) (*ChangeAvailabilityResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChangeAvailability not implemented")
+}
+func (UnimplementedProfileServer) AddUserOrganization(context.Context, *AddUserOrganizationRequest) (*AddUserOrganizationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddUserOrganization not implemented")
+}
+func (UnimplementedProfileServer) RemoveUserOrganization(context.Context, *RemoveUserOrganizationRequest) (*RemoveUserOrganizationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveUserOrganization not implemented")
+}
+func (UnimplementedProfileServer) SendAuthorizationCode(context.Context, *SendAuthorizationCodeRequest) (*SendAuthorizationCodeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendAuthorizationCode not implemented")
+}
+func (UnimplementedProfileServer) ValidateOrganization(context.Context, *ValidateOrganizationRequest) (*ValidateOrganizationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateOrganization not implemented")
+}
+func (UnimplementedProfileServer) ListMatches(context.Context, *ListMatchesRequest) (*ListMatchesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMatches not implemented")
 }
 func (UnimplementedProfileServer) mustEmbedUnimplementedProfileServer() {}
 
@@ -278,24 +348,6 @@ func _Profile_WhoAmI_Handler(srv interface{}, ctx context.Context, dec func(inte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ProfileServer).WhoAmI(ctx, req.(*WhoAmIRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Profile_GetRecommendations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRecommendationsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProfileServer).GetRecommendations(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/swiply.profile.Profile/GetRecommendations",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProfileServer).GetRecommendations(ctx, req.(*GetRecommendationsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -408,6 +460,114 @@ func _Profile_ListProfiles_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Profile_ChangeAvailability_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChangeAvailabilityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileServer).ChangeAvailability(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/swiply.profile.Profile/ChangeAvailability",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileServer).ChangeAvailability(ctx, req.(*ChangeAvailabilityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Profile_AddUserOrganization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddUserOrganizationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileServer).AddUserOrganization(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/swiply.profile.Profile/AddUserOrganization",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileServer).AddUserOrganization(ctx, req.(*AddUserOrganizationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Profile_RemoveUserOrganization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveUserOrganizationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileServer).RemoveUserOrganization(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/swiply.profile.Profile/RemoveUserOrganization",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileServer).RemoveUserOrganization(ctx, req.(*RemoveUserOrganizationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Profile_SendAuthorizationCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendAuthorizationCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileServer).SendAuthorizationCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/swiply.profile.Profile/SendAuthorizationCode",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileServer).SendAuthorizationCode(ctx, req.(*SendAuthorizationCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Profile_ValidateOrganization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidateOrganizationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileServer).ValidateOrganization(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/swiply.profile.Profile/ValidateOrganization",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileServer).ValidateOrganization(ctx, req.(*ValidateOrganizationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Profile_ListMatches_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMatchesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileServer).ListMatches(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/swiply.profile.Profile/ListMatches",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileServer).ListMatches(ctx, req.(*ListMatchesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Profile_ServiceDesc is the grpc.ServiceDesc for Profile service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -432,10 +592,6 @@ var Profile_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Profile_WhoAmI_Handler,
 		},
 		{
-			MethodName: "GetRecommendations",
-			Handler:    _Profile_GetRecommendations_Handler,
-		},
-		{
 			MethodName: "Interaction",
 			Handler:    _Profile_Interaction_Handler,
 		},
@@ -458,6 +614,30 @@ var Profile_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListProfiles",
 			Handler:    _Profile_ListProfiles_Handler,
+		},
+		{
+			MethodName: "ChangeAvailability",
+			Handler:    _Profile_ChangeAvailability_Handler,
+		},
+		{
+			MethodName: "AddUserOrganization",
+			Handler:    _Profile_AddUserOrganization_Handler,
+		},
+		{
+			MethodName: "RemoveUserOrganization",
+			Handler:    _Profile_RemoveUserOrganization_Handler,
+		},
+		{
+			MethodName: "SendAuthorizationCode",
+			Handler:    _Profile_SendAuthorizationCode_Handler,
+		},
+		{
+			MethodName: "ValidateOrganization",
+			Handler:    _Profile_ValidateOrganization_Handler,
+		},
+		{
+			MethodName: "ListMatches",
+			Handler:    _Profile_ListMatches_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

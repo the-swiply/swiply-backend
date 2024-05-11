@@ -14,10 +14,6 @@
   user: true
   s2s: false
 
-/swiply.profile.Profile/GetRecommendations:
-  user: true
-  s2s: false
-
 /swiply.profile.Profile/Liked:
   user: true
   s2s: false
@@ -42,6 +38,32 @@
   authorized:
     - recommendation
     - backoffice
+
+/swiply.profile.Profile/ChangeAvailability:
+  user: false
+  s2s: true
+  authorized:
+    - backoffice
+
+/swiply.profile.Profile/AddUserOrganization:
+  user: true
+  s2s: false
+
+/swiply.profile.Profile/RemoveUserOrganization:
+  user: true
+  s2s: false
+
+/swiply.profile.Profile/SendAuthorizationCode:
+  user: true
+  s2s: false
+
+/swiply.profile.Profile/ValidateOrganization:
+  user: true
+  s2s: false
+
+/swiply.profile.Profile/ListMatches:
+  user: true
+  s2s: false
 
 /swiply.profile.Photo/Create:
   user: true

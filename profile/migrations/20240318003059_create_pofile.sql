@@ -6,6 +6,13 @@ CREATE TABLE IF NOT EXISTS interest
     definition text
 );
 
+CREATE TABLE IF NOT EXISTS organization
+(
+    id      bigserial PRIMARY KEY,
+    "name"  text,
+    pattern text
+);
+
 CREATE TYPE subscription_type AS ENUM ('STANDARD', 'PRIMARY');
 CREATE TYPE gender_type AS ENUM ('MALE', 'FEMALE');
 
@@ -14,6 +21,10 @@ CREATE TABLE IF NOT EXISTS profile
     id            uuid               PRIMARY KEY,
     email         text               UNIQUE,
     "name"        text,
+    city          text,
+    "work"        text,
+    education     text,
+    is_blocked    bool,
     interests     bigint[],
     birth_day     timestamp,
     gender        gender_type,
@@ -22,6 +33,16 @@ CREATE TABLE IF NOT EXISTS profile
     location_lat  double precision,
     location_long double precision,
     updated_at    timestamp
+);
+
+CREATE TABLE IF NOT EXISTS user_organization
+(
+    id              bigserial PRIMARY KEY,
+    profile_id      uuid      REFERENCES profile (id),
+    "name"          text,
+    organization_id bigint    REFERENCES organization (id),
+    email           text      UNIQUE,
+    is_valid        bool
 );
 
 CREATE TYPE interaction_type AS ENUM ('LIKE', 'DISLIKE');
@@ -59,10 +80,14 @@ DROP TABLE IF EXISTS interaction;
 
 DROP TYPE IF EXISTS interaction_type;
 
+DROP TABLE IF EXISTS user_organization;
+
 DROP TABLE IF EXISTS profile;
 
 DROP TYPE IF EXISTS gender_type;
 DROP TYPE IF EXISTS subscription_type;
+
+DROP TABLE IF EXISTS organization;
 
 DROP TABLE IF EXISTS interest;
 -- +goose StatementEnd

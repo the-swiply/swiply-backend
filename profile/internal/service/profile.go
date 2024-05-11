@@ -21,6 +21,12 @@ type ProfileRepository interface {
 	LikedMeProfiles(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error)
 	ListInteractions(ctx context.Context, createdAt time.Time) ([]dbmodel.Interaction, error)
 	ListProfiles(ctx context.Context, updatedAt time.Time) ([]dbmodel.Profile, error)
+	ChangeAvailability(ctx context.Context, isBlocked bool, userID uuid.UUID) error
+	CreateUserOrganization(ctx context.Context, profileID uuid.UUID, email string) (dbmodel.UserOrganization, error)
+	DeleteUserOrganization(ctx context.Context, userID uuid.UUID, id int64) error
+	ListUserOrganizations(ctx context.Context, userID uuid.UUID) ([]dbmodel.UserOrganization, error)
+	ValidateUserOrganization(ctx context.Context, userID uuid.UUID, id int64) error
+	ListMatches(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error)
 }
 
 type ProfileService struct {
@@ -54,6 +60,11 @@ func (p *ProfileService) Get(ctx context.Context, userID uuid.UUID) (domain.Prof
 		return domain.Profile{}, err
 	}
 
+	organizations, err := p.repo.ListUserOrganizations(ctx, userID)
+	if err != nil {
+		return domain.Profile{}, err
+	}
+
 	mp := make(map[int64]dbmodel.Interest)
 	for _, interest := range allInterests {
 		mp[interest.ID] = interest
@@ -64,10 +75,8 @@ func (p *ProfileService) Get(ctx context.Context, userID uuid.UUID) (domain.Prof
 		userInterests = append(userInterests, mp[interest])
 	}
 
-	return converter.ProfileFromDBModelToDomain(userInterests, profile)
+	return converter.ProfileFromDBModelToDomain(userInterests, organizations, profile)
 }
-
-func (p *ProfileService) GetRecommendations(ctx context.Context, userID uuid.UUID) {}
 
 func (p *ProfileService) CreateInteraction(ctx context.Context, interaction domain.Interaction) error {
 	_, err := p.repo.CreateInteraction(ctx, converter.InteractionFromDomainToDBModel(interaction))
@@ -140,10 +149,44 @@ func (p *ProfileService) ListProfiles(ctx context.Context, updatedAt time.Time) 
 			userInterests = append(userInterests, mp[interest])
 		}
 
-		if pr, err := converter.ProfileFromDBModelToDomain(userInterests, profile); err == nil {
+		organizations, err := p.repo.ListUserOrganizations(ctx, profile.ID)
+		if err != nil {
+			continue
+		}
+
+		if pr, err := converter.ProfileFromDBModelToDomain(userInterests, organizations, profile); err == nil {
 			profs = append(profs, pr)
 		}
 	}
 
 	return profs, nil
+}
+
+func (p *ProfileService) ChangeAvailability(ctx context.Context, isBlocked bool, userID uuid.UUID) error {
+	return p.repo.ChangeAvailability(ctx, isBlocked, userID)
+}
+
+func (p *ProfileService) AddUserOrganization(ctx context.Context, userID uuid.UUID, email string) (domain.UserOrganization, error) {
+	org, err := p.repo.CreateUserOrganization(ctx, userID, email)
+	if err != nil {
+		return domain.UserOrganization{}, err
+	}
+
+	return converter.UserOrganizationFromDBModelToDomain(org), nil
+}
+
+func (p *ProfileService) DeleteUserOrganization(ctx context.Context, userID uuid.UUID, id int64) error {
+	return p.repo.DeleteUserOrganization(ctx, userID, id)
+}
+
+func (p *ProfileService) SendAuthorizationCode(ctx context.Context, userID uuid.UUID, email string) error {
+	return nil
+}
+
+func (p *ProfileService) ValidateUserOrganization(ctx context.Context, userID uuid.UUID, id int64, code string) error {
+	return p.repo.ValidateUserOrganization(ctx, userID, id)
+}
+
+func (p *ProfileService) ListMatches(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error) {
+	return p.repo.ListMatches(ctx, userID)
 }
