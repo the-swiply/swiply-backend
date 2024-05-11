@@ -1,6 +1,7 @@
 import requests
 from posixpath import join as urljoin
 
+
 class ProfileClient:
     def __init__(self, url, s2s_token):
         self.url = url
@@ -36,3 +37,11 @@ class ProfileClient:
         resp.raise_for_status()
 
         return resp.json()['photos']
+
+    def change_availability(self, id, is_blocked):
+        resp = requests.post(urljoin(self.url, 'v1/profile/change-availability'), json={
+            'id': id,
+            'is_blocked': is_blocked
+        }, headers=self.base_headers)
+
+        resp.raise_for_status()
