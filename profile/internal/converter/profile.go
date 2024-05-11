@@ -124,30 +124,30 @@ func ProfileFromDomainToProto(prof domain.Profile) *profile.UserProfile {
 
 func ProfileFromProtoToDomain(userProfile *profile.UserProfile) domain.Profile {
 	prof := domain.Profile{
-		ID:        uuid.MustParse(userProfile.Id),
-		Email:     userProfile.Email,
-		Name:      userProfile.Name,
-		City:      userProfile.City,
-		Work:      userProfile.Work,
-		Education: userProfile.Education,
-		IsBlocked: userProfile.IsBlocked,
-		BirthDay:  userProfile.BirthDay.AsTime(),
-		Info:      userProfile.Info,
+		ID:        uuid.MustParse(userProfile.GetId()),
+		Email:     userProfile.GetEmail(),
+		Name:      userProfile.GetName(),
+		City:      userProfile.GetCity(),
+		Work:      userProfile.GetWork(),
+		Education: userProfile.GetEducation(),
+		IsBlocked: userProfile.GetIsBlocked(),
+		BirthDay:  userProfile.GetBirthDay().AsTime(),
+		Info:      userProfile.GetInfo(),
 		Location: domain.Location{
-			Lat:  userProfile.Location.Lat,
-			Long: userProfile.Location.Long,
+			Lat:  userProfile.GetLocation().GetLat(),
+			Long: userProfile.GetLocation().GetLong(),
 		},
 	}
 
-	for _, interest := range userProfile.Interests {
+	for _, interest := range userProfile.GetInterests() {
 		prof.Interests = append(prof.Interests, InterestFromProtoToDomain(interest))
 	}
 
-	for _, org := range userProfile.Organizations {
+	for _, org := range userProfile.GetOrganizations() {
 		prof.Organizations = append(prof.Organizations, UserOrganizationFromProtoToDomain(org))
 	}
 
-	switch userProfile.Gender {
+	switch userProfile.GetGender() {
 	case profile.Gender_GENDER_UNSPECIFIED:
 		prof.Gender = domain.GenderUnspecified
 	case profile.Gender_MALE:
@@ -156,7 +156,7 @@ func ProfileFromProtoToDomain(userProfile *profile.UserProfile) domain.Profile {
 		prof.Gender = domain.GenderFemale
 	}
 
-	switch userProfile.SubscriptionType {
+	switch userProfile.GetSubscriptionType() {
 	case profile.SubscriptionType_SUBSCRIPTION_TYPE_UNSPECIFIED:
 		prof.Subscription = domain.SubscriptionTypeUnspecified
 	case profile.SubscriptionType_STANDARD:
