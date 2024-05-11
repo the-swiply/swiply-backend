@@ -8,6 +8,7 @@ import "google/protobuf/timestamp.proto";
 package swiply.chat;
 
 service Chat {
+  // Отправка сообщения в чат
   rpc SendMessage(SendMessageRequest) returns (SendMessageResponse){
     option (google.api.http) = {
       post: "/v1/message/send"
@@ -15,30 +16,35 @@ service Chat {
     };
   }
 
+  // Получение последующих сообщений
   rpc GetNextMessages(GetNextMessagesRequest) returns (GetNextMessagesResponse){
     option (google.api.http) = {
       get: "/v1/message/get-next"
     };
   }
 
+  // Получение предыдущих сообщений
   rpc GetPreviousMessages(GetPreviousMessagesRequest) returns (GetPreviousMessagesResponse){
     option (google.api.http) = {
       get: "/v1/message/get-previous"
     };
   }
 
+  // Получение чатов пользователя
   rpc GetChats(GetChatsRequest) returns (GetChatsResponse){
     option (google.api.http) = {
       get: "/v1/chats"
     };
   }
 
+  // Выход пользователя из чата
   rpc LeaveChat(LeaveChatRequest) returns (LeaveChatResponse){
     option (google.api.http) = {
       post: "/v1/chat/leave/{chat_id}"
     };
   }
 
+  // Создание чата
   rpc CreateChat(CreateChatRequest) returns (CreateChatResponse){
     option (google.api.http) = {
       post: "/v1/chat/create"
@@ -46,6 +52,7 @@ service Chat {
     };
   }
 
+  // Добавление участника в чат
   rpc AddChatMembers(AddChatMembersRequest) returns (AddChatMembersResponse){
     option (google.api.http) = {
       post: "/v1/chat/add-members"
@@ -55,69 +62,93 @@ service Chat {
 }
 
 message SendMessageRequest {
+  // ID чата
   int64 chat_id = 1;
+  // Содержание сообщения
   string content = 2;
 }
 
 message SendMessageResponse {}
 
 message GetNextMessagesRequest {
+  // ID чата
   int64 chat_id = 1;
+  // Порядковый ID сообщения, с которого начинается выдача
   int64 starting_from = 2;
+  // Количество сообщений в выдаче
   int64 limit = 3;
 }
 
 message GetNextMessagesResponse {
+  // Сообщения
   repeated ChatMessage messages = 1;
 }
 
 message GetPreviousMessagesRequest {
+  // ID чата
   int64 chat_id = 1;
+  // Порядковый ID сообщения, с которого начинается выдача
   int64 starting_from = 2;
+  // Количество сообщений в выдаче
   int64 limit = 3;
 }
 
 message GetPreviousMessagesResponse {
+  // Сообщения
   repeated ChatMessage messages = 1;
 }
 
 message GetChatsRequest {}
 
 message GetChatsResponse{
+  // Чаты
   repeated GenericChat chats = 1;
 }
 
 message LeaveChatRequest {
+  // ID чата
   int64 chat_id = 1;
 }
 
 message LeaveChatResponse {}
 
 message CreateChatRequest {
+  // Начальные участники чата
   repeated string members = 1;
 }
 
 message CreateChatResponse {
+  // ID чата
   int64 chat_id = 1;
 }
 
 message AddChatMembersRequest {
+  // ID чата
   int64 chat_id = 1;
+  // Новые участники чата
   repeated string members = 2;
 }
 
 message AddChatMembersResponse{}
 
 message ChatMessage {
+  // ID сообщения
   string id = 1;
+  // ID чата
   int64 chat_id = 2;
+  // ID сообщения в чате
   int64 id_in_chat = 3;
+  // ID отправителя
   string from_id = 4;
+  // Содержание сообщения
   string content = 5;
+  // Временная метка отправки сообщения
   google.protobuf.Timestamp send_time = 6;
 }
 
 message GenericChat {
+  // ID чата
   int64 id = 1;
+  // Участники чата
   repeated string members = 2;
 }

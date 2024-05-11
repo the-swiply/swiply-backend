@@ -16,7 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/v1/event/accept-join/{eventId}": {
+    "/v1/event/accept-join/{event_id}": {
       "post": {
         "operationId": "Event_AcceptEventJoin",
         "responses": {
@@ -35,14 +35,16 @@
         },
         "parameters": [
           {
-            "name": "eventId",
+            "name": "event_id",
+            "description": "ID мероприятия",
             "in": "path",
             "required": true,
             "type": "string",
             "format": "int64"
           },
           {
-            "name": "userId",
+            "name": "user_id",
+            "description": "ID пользователя, добавляемого в участники мероприятия",
             "in": "query",
             "required": false,
             "type": "string"
@@ -85,7 +87,7 @@
         ]
       }
     },
-    "/v1/event/join/{eventId}": {
+    "/v1/event/join/{event_id}": {
       "post": {
         "operationId": "Event_JoinEvent",
         "responses": {
@@ -104,7 +106,40 @@
         },
         "parameters": [
           {
-            "name": "eventId",
+            "name": "event_id",
+            "description": "ID мероприятия",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Event"
+        ]
+      }
+    },
+    "/v1/event/members/{event_id}": {
+      "get": {
+        "operationId": "Event_GetEventMembers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/eventGetEventMembersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "event_id",
+            "description": "ID мероприятия",
             "in": "path",
             "required": true,
             "type": "string",
@@ -148,37 +183,6 @@
         ]
       }
     },
-    "/v1/event/{eventId}/members": {
-      "get": {
-        "operationId": "Event_GetEventMembers",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/eventGetEventMembersResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "eventId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          }
-        ],
-        "tags": [
-          "Event"
-        ]
-      }
-    },
     "/v1/events": {
       "get": {
         "operationId": "Event_GetEvents",
@@ -199,6 +203,7 @@
         "parameters": [
           {
             "name": "limit",
+            "description": "Размер выдачи",
             "in": "query",
             "required": false,
             "type": "string",
@@ -206,6 +211,7 @@
           },
           {
             "name": "offset",
+            "description": "Начальный сдвиг в выдаче",
             "in": "query",
             "required": false,
             "type": "string",
@@ -266,11 +272,13 @@
     "GetEventMembersResponseUserWithEventStatus": {
       "type": "object",
       "properties": {
-        "userId": {
-          "type": "string"
+        "user_id": {
+          "type": "string",
+          "title": "ID пользователя"
         },
         "status": {
-          "$ref": "#/definitions/eventUserEventStatus"
+          "$ref": "#/definitions/eventUserEventStatus",
+          "title": "Статус пользователя в мероприятии"
         }
       }
     },
@@ -281,37 +289,42 @@
       "type": "object",
       "properties": {
         "title": {
-          "type": "string"
+          "type": "string",
+          "title": "Название"
         },
         "description": {
-          "type": "string"
+          "type": "string",
+          "title": "Описание"
         },
         "photos": {
           "type": "array",
           "items": {
             "type": "string",
             "format": "byte"
-          }
+          },
+          "title": "Фотографии"
         },
         "date": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "title": "Дата проведения"
         }
       }
     },
     "eventCreateEventResponse": {
       "type": "object",
       "properties": {
-        "eventId": {
+        "event_id": {
           "type": "string",
-          "format": "int64"
+          "format": "int64",
+          "title": "ID мероприятия"
         }
       }
     },
     "eventEventModel": {
       "type": "object",
       "properties": {
-        "eventId": {
+        "event_id": {
           "type": "string",
           "format": "int64"
         },
@@ -328,7 +341,7 @@
             "format": "byte"
           }
         },
-        "chatId": {
+        "chat_id": {
           "type": "string",
           "format": "int64"
         },
@@ -341,12 +354,13 @@
     "eventGetEventMembersResponse": {
       "type": "object",
       "properties": {
-        "usersStatuses": {
+        "users_statuses": {
           "type": "array",
           "items": {
             "type": "object",
             "$ref": "#/definitions/GetEventMembersResponseUserWithEventStatus"
-          }
+          },
+          "title": "Пользователи и их статусы в мероприятии"
         }
       }
     },
@@ -358,7 +372,8 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/eventEventModel"
-          }
+          },
+          "title": "Мероприятия"
         }
       }
     },
@@ -370,7 +385,8 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/eventEventModel"
-          }
+          },
+          "title": "Мероприятия"
         }
       }
     },
@@ -382,7 +398,8 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/eventEventModel"
-          }
+          },
+          "title": "Мероприятия"
         }
       }
     },
@@ -393,7 +410,8 @@
       "type": "object",
       "properties": {
         "event": {
-          "$ref": "#/definitions/eventEventModel"
+          "$ref": "#/definitions/eventEventModel",
+          "title": "Мероприятие"
         }
       }
     },
@@ -407,7 +425,8 @@
         "JOIN_REQUEST",
         "MEMBER"
       ],
-      "default": "USER_EVENT_STATUS_UNKNOWN"
+      "default": "USER_EVENT_STATUS_UNKNOWN",
+      "title": "- JOIN_REQUEST: Запросил присоединиться к мероприятию\n - MEMBER: Участник мероприятия"
     },
     "protobufAny": {
       "type": "object",

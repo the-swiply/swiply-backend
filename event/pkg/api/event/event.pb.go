@@ -26,8 +26,10 @@ type UserEventStatus int32
 
 const (
 	UserEventStatus_USER_EVENT_STATUS_UNKNOWN UserEventStatus = 0
-	UserEventStatus_JOIN_REQUEST              UserEventStatus = 1
-	UserEventStatus_MEMBER                    UserEventStatus = 2
+	// Запросил присоединиться к мероприятию
+	UserEventStatus_JOIN_REQUEST UserEventStatus = 1
+	// Участник мероприятия
+	UserEventStatus_MEMBER UserEventStatus = 2
 )
 
 // Enum value maps for UserEventStatus.
@@ -163,10 +165,14 @@ type CreateEventRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Title       string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	Description string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	Photos      [][]byte               `protobuf:"bytes,3,rep,name=photos,proto3" json:"photos,omitempty"`
-	Date        *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=date,proto3" json:"date,omitempty"`
+	// Название
+	Title string `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	// Описание
+	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	// Фотографии
+	Photos [][]byte `protobuf:"bytes,3,rep,name=photos,proto3" json:"photos,omitempty"`
+	// Дата проведения
+	Date *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=date,proto3" json:"date,omitempty"`
 }
 
 func (x *CreateEventRequest) Reset() {
@@ -234,6 +240,7 @@ type CreateEventResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// ID мероприятия
 	EventId int64 `protobuf:"varint,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
 }
 
@@ -281,6 +288,7 @@ type UpdateEventRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// Мероприятие
 	Event *EventModel `protobuf:"bytes,1,opt,name=event,proto3" json:"event,omitempty"`
 }
 
@@ -366,7 +374,9 @@ type GetEventsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Limit  int64 `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Размер выдачи
+	Limit int64 `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Начальный сдвиг в выдаче
 	Offset int64 `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
 }
 
@@ -421,6 +431,7 @@ type GetEventsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// Мероприятия
 	Events []*EventModel `protobuf:"bytes,1,rep,name=events,proto3" json:"events,omitempty"`
 }
 
@@ -506,6 +517,7 @@ type GetUserMembershipEventsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// Мероприятия
 	Events []*EventModel `protobuf:"bytes,1,rep,name=events,proto3" json:"events,omitempty"`
 }
 
@@ -591,6 +603,7 @@ type GetUserOwnEventsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// Мероприятия
 	Events []*EventModel `protobuf:"bytes,1,rep,name=events,proto3" json:"events,omitempty"`
 }
 
@@ -638,6 +651,7 @@ type GetEventMembersRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// ID мероприятия
 	EventId int64 `protobuf:"varint,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
 }
 
@@ -685,6 +699,7 @@ type GetEventMembersResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// Пользователи и их статусы в мероприятии
 	UsersStatuses []*GetEventMembersResponse_UserWithEventStatus `protobuf:"bytes,1,rep,name=users_statuses,json=usersStatuses,proto3" json:"users_statuses,omitempty"`
 }
 
@@ -732,6 +747,7 @@ type JoinEventRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// ID мероприятия
 	EventId int64 `protobuf:"varint,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
 }
 
@@ -817,8 +833,10 @@ type AcceptEventJoinRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	EventId int64  `protobuf:"varint,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
-	UserId  string `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// ID мероприятия
+	EventId int64 `protobuf:"varint,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
+	// ID пользователя, добавляемого в участники мероприятия
+	UserId string `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 }
 
 func (x *AcceptEventJoinRequest) Reset() {
@@ -910,7 +928,9 @@ type GetEventMembersResponse_UserWithEventStatus struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId string          `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// ID пользователя
+	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// Статус пользователя в мероприятии
 	Status UserEventStatus `protobuf:"varint,2,opt,name=status,proto3,enum=swiply.event.UserEventStatus" json:"status,omitempty"`
 }
 
@@ -1100,8 +1120,8 @@ var file_api_event_proto_rawDesc = []byte{
 	0x74, 0x1a, 0x25, 0x2e, 0x73, 0x77, 0x69, 0x70, 0x6c, 0x79, 0x2e, 0x65, 0x76, 0x65, 0x6e, 0x74,
 	0x2e, 0x47, 0x65, 0x74, 0x45, 0x76, 0x65, 0x6e, 0x74, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73,
 	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x24, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x1e,
-	0x12, 0x1c, 0x2f, 0x76, 0x31, 0x2f, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x2f, 0x7b, 0x65, 0x76, 0x65,
-	0x6e, 0x74, 0x5f, 0x69, 0x64, 0x7d, 0x2f, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x12, 0x6f,
+	0x12, 0x1c, 0x2f, 0x76, 0x31, 0x2f, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x2f, 0x6d, 0x65, 0x6d, 0x62,
+	0x65, 0x72, 0x73, 0x2f, 0x7b, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x7d, 0x12, 0x6f,
 	0x0a, 0x09, 0x4a, 0x6f, 0x69, 0x6e, 0x45, 0x76, 0x65, 0x6e, 0x74, 0x12, 0x1e, 0x2e, 0x73, 0x77,
 	0x69, 0x70, 0x6c, 0x79, 0x2e, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x2e, 0x4a, 0x6f, 0x69, 0x6e, 0x45,
 	0x76, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x73, 0x77,

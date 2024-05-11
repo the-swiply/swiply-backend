@@ -205,3 +205,35 @@ func (u *UserService) generateTokenPair(id string, fingerprint string) (domain.T
 func (u *UserService) generateUUIDByEmail(email string) uuid.UUID {
 	return uuid.NewSHA1(u.cfg.UUIDNamespace, []byte(email))
 }
+
+func (u *UserService) ValidateAuthCode(ctx context.Context, email, code string) (bool, error) {
+	storedCode, err := u.codeCache.GetAuthCode(ctx, email)
+	if errors.Is(err, domain.ErrEntityIsNotExists) {
+		return false, nil
+	}
+	if err != nil {
+		return false, fmt.Errorf("can't get auth code: %w", err)
+	}
+
+	if storedCode != code {
+		if ok := u.invalidCodeAttempts.addAttempt(email); !ok {
+			err = u.codeCache.DeleteAuthCode(ctx, email)
+			if err != nil {
+				loggy.Errorln("can't delete auth code after too much attempts")
+			}
+
+			return false, nil
+		}
+
+		return false, nil
+	}
+
+	u.invalidCodeAttempts.clearAttempts(email)
+
+	err = u.codeCache.DeleteAuthCode(ctx, email)
+	if err != nil {
+		return false, fmt.Errorf("can't delete auth code: %w", err)
+	}
+
+	return true, nil
+}

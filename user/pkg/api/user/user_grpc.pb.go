@@ -22,9 +22,14 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserClient interface {
+	// Отправка пользователю кода авторизации на электронную почту
 	SendAuthorizationCode(ctx context.Context, in *SendAuthorizationCodeRequest, opts ...grpc.CallOption) (*SendAuthorizationCodeResponse, error)
+	// Авторизация по коду из электронной почты
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	// Обновление Access-токена по Refresh-токену
 	Refresh(ctx context.Context, in *RefreshRequest, opts ...grpc.CallOption) (*RefreshResponse, error)
+	// Валидация кода авторизации без создания токенов доступа
+	ValidateAuthorizationCode(ctx context.Context, in *ValidateAuthorizationCodeRequest, opts ...grpc.CallOption) (*ValidateAuthorizationCodeResponse, error)
 }
 
 type userClient struct {
@@ -62,13 +67,27 @@ func (c *userClient) Refresh(ctx context.Context, in *RefreshRequest, opts ...gr
 	return out, nil
 }
 
+func (c *userClient) ValidateAuthorizationCode(ctx context.Context, in *ValidateAuthorizationCodeRequest, opts ...grpc.CallOption) (*ValidateAuthorizationCodeResponse, error) {
+	out := new(ValidateAuthorizationCodeResponse)
+	err := c.cc.Invoke(ctx, "/swiply.user.User/ValidateAuthorizationCode", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServer is the server API for User service.
 // All implementations must embed UnimplementedUserServer
 // for forward compatibility
 type UserServer interface {
+	// Отправка пользователю кода авторизации на электронную почту
 	SendAuthorizationCode(context.Context, *SendAuthorizationCodeRequest) (*SendAuthorizationCodeResponse, error)
+	// Авторизация по коду из электронной почты
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	// Обновление Access-токена по Refresh-токену
 	Refresh(context.Context, *RefreshRequest) (*RefreshResponse, error)
+	// Валидация кода авторизации без создания токенов доступа
+	ValidateAuthorizationCode(context.Context, *ValidateAuthorizationCodeRequest) (*ValidateAuthorizationCodeResponse, error)
 	mustEmbedUnimplementedUserServer()
 }
 
@@ -84,6 +103,9 @@ func (UnimplementedUserServer) Login(context.Context, *LoginRequest) (*LoginResp
 }
 func (UnimplementedUserServer) Refresh(context.Context, *RefreshRequest) (*RefreshResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Refresh not implemented")
+}
+func (UnimplementedUserServer) ValidateAuthorizationCode(context.Context, *ValidateAuthorizationCodeRequest) (*ValidateAuthorizationCodeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateAuthorizationCode not implemented")
 }
 func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
 
@@ -152,6 +174,24 @@ func _User_Refresh_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _User_ValidateAuthorizationCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidateAuthorizationCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).ValidateAuthorizationCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/swiply.user.User/ValidateAuthorizationCode",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).ValidateAuthorizationCode(ctx, req.(*ValidateAuthorizationCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // User_ServiceDesc is the grpc.ServiceDesc for User service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -170,6 +210,10 @@ var User_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Refresh",
 			Handler:    _User_Refresh_Handler,
+		},
+		{
+			MethodName: "ValidateAuthorizationCode",
+			Handler:    _User_ValidateAuthorizationCode_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
