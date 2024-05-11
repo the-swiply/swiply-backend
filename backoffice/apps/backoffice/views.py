@@ -1,6 +1,7 @@
 import os
 
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.views import View
 from django.contrib.auth import authenticate, login, logout
 
@@ -35,10 +36,38 @@ class ProfileDetailView(View):
 
         profile = self.__profile_client.get_profile_by_id(slug)
         photos = self.__profile_client.get_photos_by_profile_id(slug)
-
         profile['birth_day'] = profile['birth_day'][:-10]
 
         return render(request, 'profile_detail.html', {'user': profile, 'photos': photos})
+
+
+class BlockUserView(View):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.__profile_client = ProfileClient(settings.PROFILE_URL, os.getenv('PROFILE_S2S_TOKEN'))
+
+    def get(self, request, slug):
+        check_auth(request)
+
+        self.__profile_client.change_availability(slug, True)
+
+        return redirect(reverse('profile_detail', kwargs={'slug': slug}))
+
+class UnblockUserView(View):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.__profile_client = ProfileClient(settings.PROFILE_URL, os.getenv('PROFILE_S2S_TOKEN'))
+
+    def get(self, request, slug):
+        check_auth(request)
+
+        self.__profile_client.change_availability(slug, False)
+
+        return redirect(reverse('profile_detail', kwargs={'slug': slug}))
+
+
 
 
 def logout_view(request):

@@ -27,7 +27,7 @@
         <h2 class="profile-name">{{ profile.name }}</h2>
         <h3 class="profile-id">ID: {{profile.id}}</h3>
         <p>Почта: {{profile.email}}</p>
-        <p>Дата рождения: {{profile.birth_day}}</p>
+        <p>Дата рождения: {{profile.birth_day | slice:"0:-10"}}</p>
         <p id="subscription">Подписка: {% if profile.subscription_type == "PRIMARY" %}Премиум{% else %}Базовая{% endif %}</p>
       </li>
     </div>

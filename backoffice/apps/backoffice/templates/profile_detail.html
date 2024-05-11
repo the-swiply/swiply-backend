@@ -20,7 +20,7 @@
             </div>
             <div>
                 <h3>Пол:</h3>
-                <p>{{ user.gender }}</p>
+                <p>{% if user.gender == 'MALE' %}Мужской{% else %}Женский{% endif %}</p>
             </div>
         </div>
         <div class="user-info">
@@ -42,10 +42,14 @@
                 {% endfor %}
             </ul>
         </div>
-        {% if user.isBlocked %}
-            <button class="unblock-button">Разблокировать</button>
+        {% if user.is_blocked %}
+            <button id="block-button" class="block-button"
+                    onclick="location.href='{% url 'unblock-user' slug=user.id %}'">Разблокировать
+            </button>
         {% else %}
-            <button class="block-button">Заблокировать</button>
+            <button id="block-button" class="block-button"
+                    onclick="location.href='{% url 'block-user' slug=user.id %}'">Заблокировать
+            </button>
         {% endif %}
     </div>
 {% endblock %}
