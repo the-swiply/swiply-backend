@@ -18,6 +18,7 @@
   "paths": {
     "/v1/login": {
       "post": {
+        "summary": "Авторизация по коду из электронной почты",
         "operationId": "User_Login",
         "responses": {
           "200": {
@@ -50,6 +51,7 @@
     },
     "/v1/refresh": {
       "post": {
+        "summary": "Обновление Access-токена по Refresh-токену",
         "operationId": "User_Refresh",
         "responses": {
           "200": {
@@ -82,6 +84,7 @@
     },
     "/v1/send-authorization-code": {
       "post": {
+        "summary": "Отправка пользователю кода авторизации на электронную почту",
         "operationId": "User_SendAuthorizationCode",
         "responses": {
           "200": {
@@ -104,6 +107,39 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/userSendAuthorizationCodeRequest"
+            }
+          }
+        ],
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/v1/validate-authorization-code": {
+      "post": {
+        "summary": "Валидация кода авторизации без создания токенов доступа",
+        "operationId": "User_ValidateAuthorizationCode",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/userValidateAuthorizationCodeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/userValidateAuthorizationCodeRequest"
             }
           }
         ],
@@ -146,10 +182,12 @@
       "type": "object",
       "properties": {
         "email": {
-          "type": "string"
+          "type": "string",
+          "title": "Электронная почта пользователя"
         },
         "code": {
-          "type": "string"
+          "type": "string",
+          "title": "Код авторизации"
         }
       }
     },
@@ -157,10 +195,12 @@
       "type": "object",
       "properties": {
         "accessToken": {
-          "type": "string"
+          "type": "string",
+          "title": "Access-токен"
         },
         "refreshToken": {
-          "type": "string"
+          "type": "string",
+          "title": "Refresh-токен"
         }
       }
     },
@@ -168,7 +208,8 @@
       "type": "object",
       "properties": {
         "refreshToken": {
-          "type": "string"
+          "type": "string",
+          "title": "Refresh-токен"
         }
       }
     },
@@ -176,10 +217,12 @@
       "type": "object",
       "properties": {
         "accessToken": {
-          "type": "string"
+          "type": "string",
+          "title": "Access-токен"
         },
         "refreshToken": {
-          "type": "string"
+          "type": "string",
+          "title": "Refresh-токен"
         }
       }
     },
@@ -187,12 +230,35 @@
       "type": "object",
       "properties": {
         "email": {
-          "type": "string"
+          "type": "string",
+          "title": "Электронная почта пользователя"
         }
       }
     },
     "userSendAuthorizationCodeResponse": {
       "type": "object"
+    },
+    "userValidateAuthorizationCodeRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "title": "Электронная почта пользователя"
+        },
+        "code": {
+          "type": "string",
+          "title": "Код авторизации"
+        }
+      }
+    },
+    "userValidateAuthorizationCodeResponse": {
+      "type": "object",
+      "properties": {
+        "is_correct": {
+          "type": "boolean",
+          "title": "Корректен ли код"
+        }
+      }
     }
   }
 }

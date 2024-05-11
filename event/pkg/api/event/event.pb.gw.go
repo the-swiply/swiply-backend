@@ -484,7 +484,7 @@ func RegisterEventHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/swiply.event.Event/GetEventMembers", runtime.WithHTTPPathPattern("/v1/event/{event_id}/members"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/swiply.event.Event/GetEventMembers", runtime.WithHTTPPathPattern("/v1/event/members/{event_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -708,7 +708,7 @@ func RegisterEventHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/swiply.event.Event/GetEventMembers", runtime.WithHTTPPathPattern("/v1/event/{event_id}/members"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/swiply.event.Event/GetEventMembers", runtime.WithHTTPPathPattern("/v1/event/members/{event_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -782,7 +782,7 @@ var (
 
 	pattern_Event_GetUserMembershipEvents_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "events", "membership"}, ""))
 
-	pattern_Event_GetEventMembers_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "event", "event_id", "members"}, ""))
+	pattern_Event_GetEventMembers_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"v1", "event", "members", "event_id"}, ""))
 
 	pattern_Event_JoinEvent_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"v1", "event", "join", "event_id"}, ""))
 

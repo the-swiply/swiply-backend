@@ -7,6 +7,7 @@ import "google/api/annotations.proto";
 package swiply.user;
 
 service User {
+  // Отправка пользователю кода авторизации на электронную почту
   rpc SendAuthorizationCode(SendAuthorizationCodeRequest) returns (SendAuthorizationCodeResponse){
     option (google.api.http) = {
       post: "/v1/send-authorization-code"
@@ -14,6 +15,7 @@ service User {
     };
   }
 
+  // Авторизация по коду из электронной почты
   rpc Login(LoginRequest) returns (LoginResponse){
     option (google.api.http) = {
       post: "/v1/login"
@@ -21,35 +23,64 @@ service User {
     };
   }
 
+  // Обновление Access-токена по Refresh-токену
   rpc Refresh(RefreshRequest) returns (RefreshResponse){
     option (google.api.http) = {
       post: "/v1/refresh"
       body: "*"
     };
   }
+
+  // Валидация кода авторизации без создания токенов доступа
+  rpc ValidateAuthorizationCode(ValidateAuthorizationCodeRequest) returns (ValidateAuthorizationCodeResponse){
+    option (google.api.http) = {
+      post: "/v1/validate-authorization-code"
+      body: "*"
+    };
+  }
 }
 
 message SendAuthorizationCodeRequest {
+  // Электронная почта пользователя
   string email = 1;
 }
 
 message SendAuthorizationCodeResponse {}
 
 message LoginRequest {
+  // Электронная почта пользователя
   string email = 1;
+  // Код авторизации
   string code = 2;
 }
 
 message LoginResponse {
+  // Access-токен
   string accessToken = 1;
+  // Refresh-токен
   string refreshToken = 2;
 }
 
 message RefreshRequest {
+  // Refresh-токен
   string refreshToken = 1;
 }
 
 message RefreshResponse {
+  // Access-токен
   string accessToken = 1;
+  // Refresh-токен
   string refreshToken = 2;
+}
+
+message ValidateAuthorizationCodeRequest {
+  // Электронная почта пользователя
+  string email = 1;
+  // Код авторизации
+  string code = 2;
+}
+
+message ValidateAuthorizationCodeResponse {
+  // Корректен ли код
+  bool is_correct = 1;
 }

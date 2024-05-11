@@ -12,6 +12,7 @@ service Oracle {
 message RetrainLFMv1Request {}
 
 message RetrainLFMv1Response{
+  // Используется в будущих версиях
   string task_id = 1;
 }
 

@@ -22,12 +22,19 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ChatClient interface {
+	// Отправка сообщения в чат
 	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageResponse, error)
+	// Получение последующих сообщений
 	GetNextMessages(ctx context.Context, in *GetNextMessagesRequest, opts ...grpc.CallOption) (*GetNextMessagesResponse, error)
+	// Получение предыдущих сообщений
 	GetPreviousMessages(ctx context.Context, in *GetPreviousMessagesRequest, opts ...grpc.CallOption) (*GetPreviousMessagesResponse, error)
+	// Получение чатов пользователя
 	GetChats(ctx context.Context, in *GetChatsRequest, opts ...grpc.CallOption) (*GetChatsResponse, error)
+	// Выход пользователя из чата
 	LeaveChat(ctx context.Context, in *LeaveChatRequest, opts ...grpc.CallOption) (*LeaveChatResponse, error)
+	// Создание чата
 	CreateChat(ctx context.Context, in *CreateChatRequest, opts ...grpc.CallOption) (*CreateChatResponse, error)
+	// Добавление участника в чат
 	AddChatMembers(ctx context.Context, in *AddChatMembersRequest, opts ...grpc.CallOption) (*AddChatMembersResponse, error)
 }
 
@@ -106,12 +113,19 @@ func (c *chatClient) AddChatMembers(ctx context.Context, in *AddChatMembersReque
 // All implementations must embed UnimplementedChatServer
 // for forward compatibility
 type ChatServer interface {
+	// Отправка сообщения в чат
 	SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error)
+	// Получение последующих сообщений
 	GetNextMessages(context.Context, *GetNextMessagesRequest) (*GetNextMessagesResponse, error)
+	// Получение предыдущих сообщений
 	GetPreviousMessages(context.Context, *GetPreviousMessagesRequest) (*GetPreviousMessagesResponse, error)
+	// Получение чатов пользователя
 	GetChats(context.Context, *GetChatsRequest) (*GetChatsResponse, error)
+	// Выход пользователя из чата
 	LeaveChat(context.Context, *LeaveChatRequest) (*LeaveChatResponse, error)
+	// Создание чата
 	CreateChat(context.Context, *CreateChatRequest) (*CreateChatResponse, error)
+	// Добавление участника в чат
 	AddChatMembers(context.Context, *AddChatMembersRequest) (*AddChatMembersResponse, error)
 	mustEmbedUnimplementedChatServer()
 }

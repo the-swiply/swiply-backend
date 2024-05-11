@@ -27,7 +27,9 @@ type SendMessageRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ChatId  int64  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	// ID чата
+	ChatId int64 `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	// Содержание сообщения
 	Content string `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
 }
 
@@ -120,9 +122,12 @@ type GetNextMessagesRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ChatId       int64 `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	// ID чата
+	ChatId int64 `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	// Порядковый ID сообщения, с которого начинается выдача
 	StartingFrom int64 `protobuf:"varint,2,opt,name=starting_from,json=startingFrom,proto3" json:"starting_from,omitempty"`
-	Limit        int64 `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Количество сообщений в выдаче
+	Limit int64 `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
 }
 
 func (x *GetNextMessagesRequest) Reset() {
@@ -183,6 +188,7 @@ type GetNextMessagesResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// Сообщения
 	Messages []*ChatMessage `protobuf:"bytes,1,rep,name=messages,proto3" json:"messages,omitempty"`
 }
 
@@ -230,9 +236,12 @@ type GetPreviousMessagesRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ChatId       int64 `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	// ID чата
+	ChatId int64 `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	// Порядковый ID сообщения, с которого начинается выдача
 	StartingFrom int64 `protobuf:"varint,2,opt,name=starting_from,json=startingFrom,proto3" json:"starting_from,omitempty"`
-	Limit        int64 `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Количество сообщений в выдаче
+	Limit int64 `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
 }
 
 func (x *GetPreviousMessagesRequest) Reset() {
@@ -293,6 +302,7 @@ type GetPreviousMessagesResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// Сообщения
 	Messages []*ChatMessage `protobuf:"bytes,1,rep,name=messages,proto3" json:"messages,omitempty"`
 }
 
@@ -378,6 +388,7 @@ type GetChatsResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// Чаты
 	Chats []*GenericChat `protobuf:"bytes,1,rep,name=chats,proto3" json:"chats,omitempty"`
 }
 
@@ -425,6 +436,7 @@ type LeaveChatRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// ID чата
 	ChatId int64 `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 }
 
@@ -510,6 +522,7 @@ type CreateChatRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// Начальные участники чата
 	Members []string `protobuf:"bytes,1,rep,name=members,proto3" json:"members,omitempty"`
 }
 
@@ -557,6 +570,7 @@ type CreateChatResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// ID чата
 	ChatId int64 `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 }
 
@@ -604,7 +618,9 @@ type AddChatMembersRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ChatId  int64    `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	// ID чата
+	ChatId int64 `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	// Новые участники чата
 	Members []string `protobuf:"bytes,2,rep,name=members,proto3" json:"members,omitempty"`
 }
 
@@ -697,11 +713,17 @@ type ChatMessage struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id       string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ChatId   int64                  `protobuf:"varint,2,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
-	IdInChat int64                  `protobuf:"varint,3,opt,name=id_in_chat,json=idInChat,proto3" json:"id_in_chat,omitempty"`
-	FromId   string                 `protobuf:"bytes,4,opt,name=from_id,json=fromId,proto3" json:"from_id,omitempty"`
-	Content  string                 `protobuf:"bytes,5,opt,name=content,proto3" json:"content,omitempty"`
+	// ID сообщения
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// ID чата
+	ChatId int64 `protobuf:"varint,2,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	// ID сообщения в чате
+	IdInChat int64 `protobuf:"varint,3,opt,name=id_in_chat,json=idInChat,proto3" json:"id_in_chat,omitempty"`
+	// ID отправителя
+	FromId string `protobuf:"bytes,4,opt,name=from_id,json=fromId,proto3" json:"from_id,omitempty"`
+	// Содержание сообщения
+	Content string `protobuf:"bytes,5,opt,name=content,proto3" json:"content,omitempty"`
+	// Временная метка отправки сообщения
 	SendTime *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=send_time,json=sendTime,proto3" json:"send_time,omitempty"`
 }
 
@@ -784,7 +806,9 @@ type GenericChat struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id      int64    `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// ID чата
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Участники чата
 	Members []string `protobuf:"bytes,2,rep,name=members,proto3" json:"members,omitempty"`
 }
 

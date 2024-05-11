@@ -18,6 +18,7 @@
   "paths": {
     "/v1/chat/add-members": {
       "post": {
+        "summary": "Добавление участника в чат",
         "operationId": "Chat_AddChatMembers",
         "responses": {
           "200": {
@@ -50,6 +51,7 @@
     },
     "/v1/chat/create": {
       "post": {
+        "summary": "Создание чата",
         "operationId": "Chat_CreateChat",
         "responses": {
           "200": {
@@ -80,8 +82,9 @@
         ]
       }
     },
-    "/v1/chat/leave/{chatId}": {
+    "/v1/chat/leave/{chat_id}": {
       "post": {
+        "summary": "Выход пользователя из чата",
         "operationId": "Chat_LeaveChat",
         "responses": {
           "200": {
@@ -99,7 +102,8 @@
         },
         "parameters": [
           {
-            "name": "chatId",
+            "name": "chat_id",
+            "description": "ID чата",
             "in": "path",
             "required": true,
             "type": "string",
@@ -113,6 +117,7 @@
     },
     "/v1/chats": {
       "get": {
+        "summary": "Получение чатов пользователя",
         "operationId": "Chat_GetChats",
         "responses": {
           "200": {
@@ -135,6 +140,7 @@
     },
     "/v1/message/get-next": {
       "get": {
+        "summary": "Получение последующих сообщений",
         "operationId": "Chat_GetNextMessages",
         "responses": {
           "200": {
@@ -152,14 +158,16 @@
         },
         "parameters": [
           {
-            "name": "chatId",
+            "name": "chat_id",
+            "description": "ID чата",
             "in": "query",
             "required": false,
             "type": "string",
             "format": "int64"
           },
           {
-            "name": "startingFrom",
+            "name": "starting_from",
+            "description": "Порядковый ID сообщения, с которого начинается выдача",
             "in": "query",
             "required": false,
             "type": "string",
@@ -167,6 +175,7 @@
           },
           {
             "name": "limit",
+            "description": "Количество сообщений в выдаче",
             "in": "query",
             "required": false,
             "type": "string",
@@ -180,6 +189,7 @@
     },
     "/v1/message/get-previous": {
       "get": {
+        "summary": "Получение предыдущих сообщений",
         "operationId": "Chat_GetPreviousMessages",
         "responses": {
           "200": {
@@ -197,14 +207,16 @@
         },
         "parameters": [
           {
-            "name": "chatId",
+            "name": "chat_id",
+            "description": "ID чата",
             "in": "query",
             "required": false,
             "type": "string",
             "format": "int64"
           },
           {
-            "name": "startingFrom",
+            "name": "starting_from",
+            "description": "Порядковый ID сообщения, с которого начинается выдача",
             "in": "query",
             "required": false,
             "type": "string",
@@ -212,6 +224,7 @@
           },
           {
             "name": "limit",
+            "description": "Количество сообщений в выдаче",
             "in": "query",
             "required": false,
             "type": "string",
@@ -225,6 +238,7 @@
     },
     "/v1/message/send": {
       "post": {
+        "summary": "Отправка сообщения в чат",
         "operationId": "Chat_SendMessage",
         "responses": {
           "200": {
@@ -260,15 +274,17 @@
     "chatAddChatMembersRequest": {
       "type": "object",
       "properties": {
-        "chatId": {
+        "chat_id": {
           "type": "string",
-          "format": "int64"
+          "format": "int64",
+          "title": "ID чата"
         },
         "members": {
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "title": "Новые участники чата"
         }
       }
     },
@@ -279,25 +295,31 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": "string"
-        },
-        "chatId": {
           "type": "string",
-          "format": "int64"
+          "title": "ID сообщения"
         },
-        "idInChat": {
+        "chat_id": {
           "type": "string",
-          "format": "int64"
+          "format": "int64",
+          "title": "ID чата"
         },
-        "fromId": {
-          "type": "string"
+        "id_in_chat": {
+          "type": "string",
+          "format": "int64",
+          "title": "ID сообщения в чате"
+        },
+        "from_id": {
+          "type": "string",
+          "title": "ID отправителя"
         },
         "content": {
-          "type": "string"
-        },
-        "sendTime": {
           "type": "string",
-          "format": "date-time"
+          "title": "Содержание сообщения"
+        },
+        "send_time": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Временная метка отправки сообщения"
         }
       }
     },
@@ -308,16 +330,18 @@
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "title": "Начальные участники чата"
         }
       }
     },
     "chatCreateChatResponse": {
       "type": "object",
       "properties": {
-        "chatId": {
+        "chat_id": {
           "type": "string",
-          "format": "int64"
+          "format": "int64",
+          "title": "ID чата"
         }
       }
     },
@@ -326,13 +350,15 @@
       "properties": {
         "id": {
           "type": "string",
-          "format": "int64"
+          "format": "int64",
+          "title": "ID чата"
         },
         "members": {
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "title": "Участники чата"
         }
       }
     },
@@ -344,7 +370,8 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/chatGenericChat"
-          }
+          },
+          "title": "Чаты"
         }
       }
     },
@@ -356,7 +383,8 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/chatChatMessage"
-          }
+          },
+          "title": "Сообщения"
         }
       }
     },
@@ -368,7 +396,8 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/chatChatMessage"
-          }
+          },
+          "title": "Сообщения"
         }
       }
     },
@@ -378,12 +407,14 @@
     "chatSendMessageRequest": {
       "type": "object",
       "properties": {
-        "chatId": {
+        "chat_id": {
           "type": "string",
-          "format": "int64"
+          "format": "int64",
+          "title": "ID чата"
         },
         "content": {
-          "type": "string"
+          "type": "string",
+          "title": "Содержание сообщения"
         }
       }
     },

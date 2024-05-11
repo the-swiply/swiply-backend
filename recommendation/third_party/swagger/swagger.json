@@ -64,7 +64,8 @@
       "properties": {
         "limit": {
           "type": "string",
-          "format": "int64"
+          "format": "int64",
+          "title": "Размер выдачи"
         }
       }
     },
@@ -75,7 +76,8 @@
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "title": "ID рекомендованных пользователей"
         }
       }
     },

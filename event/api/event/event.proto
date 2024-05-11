@@ -42,7 +42,7 @@ service Event {
 
   rpc GetEventMembers(GetEventMembersRequest) returns (GetEventMembersResponse){
     option (google.api.http) = {
-      get: "/v1/events/membership"
+      get: "/v1/event/members/{event_id}"
     };
   }
 
@@ -70,70 +70,90 @@ message EventModel {
 }
 
 message CreateEventRequest {
+  // Название
   string title = 1;
+  // Описание
   string description = 2;
+  // Фотографии
   repeated bytes photos = 3;
+  // Дата проведения
   google.protobuf.Timestamp date = 4;
 }
 
 message CreateEventResponse {
+  // ID мероприятия
   int64 event_id = 1;
 }
 
 message UpdateEventRequest {
+  // Мероприятие
   EventModel event = 1;
 }
 
 message UpdateEventResponse {}
 
 message GetEventsRequest {
+  // Размер выдачи
   int64 limit = 1;
+  // Начальный сдвиг в выдаче
   int64 offset = 2;
 }
 
 message GetEventsResponse{
+  // Мероприятия
   repeated EventModel events = 1;
 }
 
 message GetUserMembershipEventsRequest {}
 
 message GetUserMembershipEventsResponse {
+  // Мероприятия
   repeated EventModel events = 1;
 }
 
 message GetUserOwnEventsRequest {}
 
 message GetUserOwnEventsResponse {
+  // Мероприятия
   repeated EventModel events = 1;
 }
 
 message GetEventMembersRequest {
+  // ID мероприятия
   int64 event_id = 1;
 }
 
 enum UserEventStatus {
   USER_EVENT_STATUS_UNKNOWN = 0;
+  // Запросил присоединиться к мероприятию
   JOIN_REQUEST = 1;
+  // Участник мероприятия
   MEMBER = 2;
 }
 
 message GetEventMembersResponse {
   message UserWithEventStatus {
+    // ID пользователя
     string user_id = 1;
+    // Статус пользователя в мероприятии
     UserEventStatus status = 2;
   }
 
+  // Пользователи и их статусы в мероприятии
   repeated UserWithEventStatus users_statuses = 1;
 }
 
 message JoinEventRequest {
+  // ID мероприятия
   int64 event_id = 1;
 }
 
 message JoinEventResponse {}
 
 message AcceptEventJoinRequest {
+  // ID мероприятия
   int64 event_id = 1;
+  // ID пользователя, добавляемого в участники мероприятия
   string user_id = 2;
 }
 

@@ -131,3 +131,17 @@ func (g *GRPCServer) Refresh(ctx context.Context, req *user.RefreshRequest) (*us
 		RefreshToken: tokens.RefreshToken,
 	}, nil
 }
+
+func (g *GRPCServer) ValidateAuthorizationCode(ctx context.Context, req *user.ValidateAuthorizationCodeRequest) (*user.ValidateAuthorizationCodeResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
+	ok, err := g.userService.ValidateAuthCode(ctx, req.GetEmail(), req.GetCode())
+	if err != nil {
+		return nil, grut.InternalError("can't send auth code", err)
+	}
+
+	return &user.ValidateAuthorizationCodeResponse{
+		IsCorrect: ok,
+	}, nil
+}
