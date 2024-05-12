@@ -7,6 +7,8 @@ import (
 
 	"github.com/hibiken/asynq"
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
+
+	"github.com/the-swiply/swiply-backend/randomcoffee/internal/service"
 )
 
 const (
@@ -17,12 +19,13 @@ const (
 )
 
 type RedisCron struct {
-	cfg       RedisCronConfig
-	scheduler *asynq.Scheduler
-	server    *asynq.Server
+	cfg                 RedisCronConfig
+	scheduler           *asynq.Scheduler
+	server              *asynq.Server
+	randomCoffeeService *service.RandomCoffeeService
 }
 
-func NewRedisCron(cfg RedisCronConfig) (*RedisCron, error) {
+func NewRedisCron(cfg RedisCronConfig, randomCoffeeService *service.RandomCoffeeService) (*RedisCron, error) {
 	redisConnOpts := asynq.RedisClientOpt{
 		Addr:     cfg.Addr,
 		Password: cfg.Password,
@@ -47,9 +50,10 @@ func NewRedisCron(cfg RedisCronConfig) (*RedisCron, error) {
 	)
 
 	return &RedisCron{
-		cfg:       cfg,
-		scheduler: scheduler,
-		server:    server,
+		cfg:                 cfg,
+		scheduler:           scheduler,
+		server:              server,
+		randomCoffeeService: randomCoffeeService,
 	}, nil
 }
 
@@ -68,7 +72,9 @@ func (r *RedisCron) RunScheduler() error {
 
 func (r *RedisCron) RunServer() error {
 	mux := asynq.NewServeMux()
-	mux.Handle(typeRandomCoffeeTrigger, &randomCoffeeTriggerHandler{})
+	mux.Handle(typeRandomCoffeeTrigger, &randomCoffeeTriggerHandler{
+		randomCoffeeService: r.randomCoffeeService,
+	})
 
 	return r.server.Start(mux)
 }
@@ -92,17 +98,18 @@ func (r *RedisCron) Stop(ctx context.Context) error {
 }
 
 type randomCoffeeTriggerHandler struct {
+	randomCoffeeService *service.RandomCoffeeService
 }
 
-func (s *randomCoffeeTriggerHandler) ProcessTask(ctx context.Context, _ *asynq.Task) error {
-	loggy.Infoln("start updating statistics")
-	//err := s.dpService.UpdateStatistic(ctx)
-	//if err != nil {
-	//	err := fmt.Errorf("can't update statistics: %w", err)
-	//	loggy.Errorln(err)
-	//	return err
-	//}
-	loggy.Infoln("statistics updated")
+func (r *randomCoffeeTriggerHandler) ProcessTask(ctx context.Context, _ *asynq.Task) error {
+	loggy.Infoln("start random coffee task")
+	err := r.randomCoffeeService.Schedule(ctx)
+	if err != nil {
+		err := fmt.Errorf("can't update statistics: %w", err)
+		loggy.Errorln(err)
+		return err
+	}
+	loggy.Infoln("random coffee task completed")
 
 	return nil
 }
