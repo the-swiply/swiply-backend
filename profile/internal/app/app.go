@@ -89,6 +89,9 @@ func (a *App) Run(ctx context.Context) error {
 		Creds:  credentials.NewStaticV4(a.cfg.S3.AccessKey, os.Getenv("PHOTO_STORAGE_SECRET_KEY"), ""),
 		Secure: true,
 	})
+	if err != nil {
+		return fmt.Errorf("can't init minio client: %w", err)
+	}
 	a.s3 = minioClient
 
 	profileRepo := repository.NewProfileRepository(a.db)
