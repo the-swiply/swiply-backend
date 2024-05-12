@@ -92,7 +92,7 @@ func (a *App) Run(ctx context.Context) error {
 	})
 	a.s3 = minioClient
 
-	photoRepo, err := repository.NewPhotoContentRepository(ctx, a.cfg.S3.BucketName, a.s3)
+	photoRepo, err := repository.NewPhotoContentRepository(ctx, a.cfg.S3.BucketName, a.s3, true)
 	if err != nil {
 		return fmt.Errorf("can't connect to s3: %w", err)
 	}
