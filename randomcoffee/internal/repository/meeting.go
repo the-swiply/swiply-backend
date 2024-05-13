@@ -36,22 +36,22 @@ func (m *MeetingRepository) executor(ctx context.Context) dobby.Executor {
 }
 
 func (m *MeetingRepository) Create(ctx context.Context, meeting domain.Meeting) error {
-	q := fmt.Sprintf(`INSERT INTO %s (id, owner_id, member_id, "start", "end", organization_id, status)
-VALUES ($1, $2, $3, $4, $5, $6, $7)`, meetingTable)
+	q := fmt.Sprintf(`INSERT INTO %s (id, owner_id, member_id, "start", "end", organization_id, status, created_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, meetingTable)
 
 	_, err := m.executor(ctx).Exec(ctx, q, meeting.ID, meeting.OwnerID, meeting.MemberID, meeting.Start, meeting.End,
-		meeting.OrganizationID, meeting.Status)
+		meeting.OrganizationID, meeting.Status, meeting.CreatedAt)
 	return err
 }
 
 func (m *MeetingRepository) Get(ctx context.Context, meetingID uuid.UUID) (domain.Meeting, error) {
-	q := fmt.Sprintf(`SELECT id, owner_id, member_id, "start", "end", organization_id, status FROM %s 
+	q := fmt.Sprintf(`SELECT id, owner_id, member_id, "start", "end", organization_id, status, created_at FROM %s 
 WHERE id = $1`, meetingTable)
 
 	var meeting domain.Meeting
 	row := m.executor(ctx).QueryRow(ctx, q, meetingID)
 	err := row.Scan(&meeting.ID, &meeting.OwnerID, &meeting.MemberID, &meeting.Start, &meeting.End,
-		&meeting.OrganizationID, &meeting.Status)
+		&meeting.OrganizationID, &meeting.Status, &meeting.CreatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.Meeting{}, domain.ErrEntityIsNotExists
 	}
@@ -63,7 +63,7 @@ WHERE id = $1`, meetingTable)
 }
 
 func (m *MeetingRepository) List(ctx context.Context, ownerID uuid.UUID) ([]domain.Meeting, error) {
-	q := fmt.Sprintf(`SELECT id, owner_id, member_id, "start", "end", organization_id, status FROM %s 
+	q := fmt.Sprintf(`SELECT id, owner_id, member_id, "start", "end", organization_id, status, created_at FROM %s 
 WHERE owner_id = $1`, meetingTable)
 
 	rows, err := m.executor(ctx).Query(ctx, q, ownerID)
@@ -117,7 +117,7 @@ WHERE id = $2`, meetingTable)
 }
 
 func (m *MeetingRepository) ListRoundMeetings(ctx context.Context, start time.Time) ([]domain.Meeting, error) {
-	q := fmt.Sprintf(`SELECT id, owner_id, member_id, "start", "end", organization_id, status FROM %s 
+	q := fmt.Sprintf(`SELECT id, owner_id, member_id, "start", "end", organization_id, status, created_at FROM %s 
 WHERE "start" >= $1 AND "end" < $2 AND status = $3`, meetingTable)
 
 	rows, err := m.executor(ctx).Query(ctx, q, start, start.Add(24*time.Hour), domain.MeetingStatusAwaitingSchedule)

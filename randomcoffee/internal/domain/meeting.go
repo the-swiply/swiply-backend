@@ -43,4 +43,5 @@ type Meeting struct {
 	End            time.Time
 	OrganizationID int64
 	Status         meetingStatus
+	CreatedAt      time.Time
 }

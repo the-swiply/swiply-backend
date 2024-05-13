@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS meeting
     "start"         timestamp,
     "end"           timestamp,
     organization_id bigint,
-    status          meeting_status
+    status          meeting_status,
+    created_at      timestamp
 );
 
 CREATE INDEX IF NOT EXISTS idx_meeting_owner_id ON meeting (owner_id);
