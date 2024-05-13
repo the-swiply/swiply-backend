@@ -253,7 +253,7 @@ WHERE id = $1 AND profile_id = $2`, userOrganizationTable)
 
 func (p *ProfileRepository) ListUserOrganizations(ctx context.Context, userID uuid.UUID) ([]dbmodel.UserOrganization, error) {
 	q := fmt.Sprintf(`SELECT id, profile_id, "name", organization_id, email, is_valid FROM %s
-WHERE profile_id = $1`, profileTable)
+WHERE profile_id = $1`, userOrganizationTable)
 
 	rows, err := p.db.Query(ctx, q, userID)
 	if err != nil {
