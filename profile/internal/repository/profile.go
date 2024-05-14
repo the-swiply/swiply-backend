@@ -67,12 +67,12 @@ LIMIT 1`, profileTable)
 }
 
 func (p *ProfileRepository) CreateProfile(ctx context.Context, profile dbmodel.Profile) error {
-	q := fmt.Sprintf(`INSERT INTO %s (id, email, "name", city, "work", education, is_blocked, interests, birth_day, gender, info, subscription, location_lat, location_long)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`, profileTable)
+	q := fmt.Sprintf(`INSERT INTO %s (id, email, "name", city, "work", education, is_blocked, interests, birth_day, gender, info, subscription, location_lat, location_long, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`, profileTable)
 
 	_, err := p.db.Exec(ctx, q, profile.ID, profile.Email, profile.Name, profile.City, profile.Work, profile.Education,
 		profile.IsBlocked, profile.Interests, profile.BirthDay, profile.Gender, profile.Info, profile.Subscription,
-		profile.Lat, profile.Long)
+		profile.Lat, profile.Long, profile.UpdatedAt)
 	return err
 }
 
