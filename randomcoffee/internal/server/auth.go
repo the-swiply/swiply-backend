@@ -96,7 +96,7 @@ func authFuncOverride(ctx context.Context, fullMethodName string) (context.Conte
 	return ctx, nil
 }
 
-func (p *GRPCServer) AuthFuncOverride(ctx context.Context, fullMethodName string) (context.Context, error) {
+func (g *GRPCServer) AuthFuncOverride(ctx context.Context, fullMethodName string) (context.Context, error) {
 	return authFuncOverride(ctx, fullMethodName)
 }
 

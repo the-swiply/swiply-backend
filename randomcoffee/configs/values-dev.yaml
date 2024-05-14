@@ -1,0 +1,28 @@
+app:
+  name: "randomcoffee"
+  graceful_shutdown_timeout_seconds: 10
+  random_coffee_trigger_cron: "@midnight" # Every day in midnight
+  meeting_min_interval: 1h
+
+jaeger:
+  addr: "jaeger:4317"
+
+grpc:
+  addr: ":84"
+
+http:
+  addr: ":80"
+
+swagger:
+  path: "third_party/swagger"
+
+postgres:
+  username: "randomcoffee-owner"
+  host: "randomcoffee-postgres"
+  port: "5432"
+  db_name: "randomcoffee"
+  ssl_mode: "disable"
+  migrations_folder: "migrations"
+
+redis:
+  addr: "randomcoffee-redis:6379"

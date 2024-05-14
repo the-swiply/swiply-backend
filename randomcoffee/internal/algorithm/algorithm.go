@@ -69,11 +69,9 @@ func (r *RandomCoffeeAlgorithm) matchUsersInOrganization(meetings []domain.Meeti
 		}
 
 		reservedUsers = append(reservedUsers, resUsers...)
-
-		for i := 0; i < reserved; i++ {
-
-		}
 	}
+
+	return reservedUsers
 }
 
 func groupBy[T any, E comparable](items []T, key func(item T) E) (answer [][]T) {

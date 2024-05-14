@@ -12,12 +12,12 @@ type RandomCoffeeAlgorithm interface {
 }
 
 type RandomCoffeeService struct {
-	config    *RandomCoffeeConfig
+	config    RandomCoffeeConfig
 	algorithm RandomCoffeeAlgorithm
 	repo      MeetingRepository
 }
 
-func NewRandomCoffeeService(config *RandomCoffeeConfig, algorithm RandomCoffeeAlgorithm, repo MeetingRepository) *RandomCoffeeService {
+func NewRandomCoffeeService(config RandomCoffeeConfig, algorithm RandomCoffeeAlgorithm, repo MeetingRepository) *RandomCoffeeService {
 	return &RandomCoffeeService{config: config, algorithm: algorithm, repo: repo}
 }
 

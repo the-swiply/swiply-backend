@@ -4,7 +4,7 @@
 // 	protoc        (unknown)
 // source: api/randomcoffee.proto
 
-package api
+package randomcoffee
 
 import (
 	_ "google.golang.org/genproto/googleapis/api/annotations"

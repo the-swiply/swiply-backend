@@ -21,11 +21,11 @@ type MeetingRepository interface {
 }
 
 type MeetingService struct {
-	config *MeetingConfig
+	config MeetingConfig
 	repo   MeetingRepository
 }
 
-func NewMeetingService(config *MeetingConfig, repo MeetingRepository) *MeetingService {
+func NewMeetingService(config MeetingConfig, repo MeetingRepository) *MeetingService {
 	return &MeetingService{config: config, repo: repo}
 }
 
