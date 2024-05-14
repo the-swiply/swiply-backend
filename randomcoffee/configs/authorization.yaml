@@ -1,0 +1,19 @@
+/swiply.randomcoffee.RandomCoffee/Create:
+  user: true
+  s2s: false
+
+/swiply.randomcoffee.RandomCoffee/Delete:
+  user: true
+  s2s: false
+
+/swiply.randomcoffee.RandomCoffee/Update:
+  user: true
+  s2s: false
+
+/swiply.randomcoffee.RandomCoffee/List:
+  user: true
+  s2s: false
+
+/swiply.randomcoffee.RandomCoffee/Get:
+  user: true
+  s2s: false

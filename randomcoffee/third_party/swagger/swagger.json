@@ -1,0 +1,320 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "api/randomcoffee.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "RandomCoffee"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/meeting/create": {
+      "post": {
+        "operationId": "RandomCoffee_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/randomcoffeeCreateMeetingResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/randomcoffeeCreateMeetingRequest"
+            }
+          }
+        ],
+        "tags": [
+          "RandomCoffee"
+        ]
+      }
+    },
+    "/v1/meeting/delete": {
+      "post": {
+        "operationId": "RandomCoffee_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/randomcoffeeDeleteMeetingResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/randomcoffeeDeleteMeetingRequest"
+            }
+          }
+        ],
+        "tags": [
+          "RandomCoffee"
+        ]
+      }
+    },
+    "/v1/meeting/update": {
+      "post": {
+        "operationId": "RandomCoffee_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/randomcoffeeUpdateMeetingResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/randomcoffeeUpdateMeetingRequest"
+            }
+          }
+        ],
+        "tags": [
+          "RandomCoffee"
+        ]
+      }
+    },
+    "/v1/meeting/{id}": {
+      "get": {
+        "operationId": "RandomCoffee_Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/randomcoffeeGetMeetingResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "RandomCoffee"
+        ]
+      }
+    },
+    "/v1/meetings": {
+      "get": {
+        "operationId": "RandomCoffee_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/randomcoffeeListMeetingsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "RandomCoffee"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "randomcoffeeCreateMeetingRequest": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "organizationId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "randomcoffeeCreateMeetingResponse": {
+      "type": "object",
+      "properties": {
+        "meeting": {
+          "$ref": "#/definitions/randomcoffeeMeeting"
+        }
+      }
+    },
+    "randomcoffeeDeleteMeetingRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "randomcoffeeDeleteMeetingResponse": {
+      "type": "object"
+    },
+    "randomcoffeeGetMeetingResponse": {
+      "type": "object",
+      "properties": {
+        "meeting": {
+          "$ref": "#/definitions/randomcoffeeMeeting"
+        }
+      }
+    },
+    "randomcoffeeListMeetingsResponse": {
+      "type": "object",
+      "properties": {
+        "meetings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/randomcoffeeMeeting"
+          }
+        }
+      }
+    },
+    "randomcoffeeMeeting": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "ownerId": {
+          "type": "string"
+        },
+        "memberId": {
+          "type": "string"
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "organizationId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "status": {
+          "$ref": "#/definitions/randomcoffeeMeetingStatus"
+        },
+        "CreatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "randomcoffeeMeetingStatus": {
+      "type": "string",
+      "enum": [
+        "MEETING_STATUS_UNSPECIFIED",
+        "AWAITING_SCHEDULE",
+        "SCHEDULING",
+        "SCHEDULED"
+      ],
+      "default": "MEETING_STATUS_UNSPECIFIED"
+    },
+    "randomcoffeeUpdateMeetingRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "organizationId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "randomcoffeeUpdateMeetingResponse": {
+      "type": "object"
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}
