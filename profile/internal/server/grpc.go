@@ -138,6 +138,9 @@ func (p *profileServer) Update(ctx context.Context, req *profile.UpdateProfileRe
 		Info:             req.Info,
 		SubscriptionType: req.SubscriptionType,
 		Location:         req.Location,
+		City:             req.City,
+		Work:             req.Work,
+		Education:        req.Education,
 	})
 
 	err := p.service.Update(ctx, prof)
