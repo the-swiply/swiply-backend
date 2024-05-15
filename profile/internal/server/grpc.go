@@ -115,6 +115,9 @@ func (p *profileServer) Create(ctx context.Context, req *profile.CreateProfileRe
 		Info:             req.Info,
 		SubscriptionType: req.SubscriptionType,
 		Location:         req.Location,
+		City:             req.City,
+		Work:             req.Work,
+		Education:        req.Education,
 	})
 
 	err := p.service.Create(ctx, prof)

@@ -38,4 +38,5 @@ type S3 struct {
 	Addr       string `yaml:"addr"`
 	BucketName string `yaml:"bucket_name"`
 	AccessKey  string `yaml:"access_key"`
+	Secure     bool   `yaml:"secure"`
 }

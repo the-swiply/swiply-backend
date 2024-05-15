@@ -22,11 +22,27 @@ type PhotoContentRepository struct {
 	s3         *minio.Client
 }
 
-func NewPhotoContentRepository(bucketName string, s3 *minio.Client) *PhotoContentRepository {
+func NewPhotoContentRepository(ctx context.Context, bucketName string, s3 *minio.Client, createBucketIfNotExists bool) (*PhotoContentRepository, error) {
+	ok, err := s3.BucketExists(ctx, bucketName)
+	if err != nil {
+		return nil, fmt.Errorf("can't check if s3 bucket exists: %w", err)
+	}
+
+	if !ok {
+		if !createBucketIfNotExists {
+			return nil, fmt.Errorf("bucket %s does not exist", bucketName)
+		}
+
+		err = s3.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
+		if err != nil {
+			return nil, fmt.Errorf("can't create bucket %w", err)
+		}
+	}
+
 	return &PhotoContentRepository{
 		bucketName: bucketName,
 		s3:         s3,
-	}
+	}, nil
 }
 
 func (p *PhotoContentRepository) List(ctx context.Context, userID uuid.UUID) ([]dbmodel.Photo, error) {

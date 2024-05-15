@@ -87,7 +87,7 @@ func (a *App) Run(ctx context.Context) error {
 
 	minioClient, err := minio.New(a.cfg.S3.Addr, &minio.Options{
 		Creds:  credentials.NewStaticV4(a.cfg.S3.AccessKey, os.Getenv("PHOTO_STORAGE_SECRET_KEY"), ""),
-		Secure: true,
+		Secure: a.cfg.S3.Secure,
 	})
 	if err != nil {
 		return fmt.Errorf("can't init minio client: %w", err)
@@ -95,7 +95,11 @@ func (a *App) Run(ctx context.Context) error {
 	a.s3 = minioClient
 
 	profileRepo := repository.NewProfileRepository(a.db)
-	photoContentRepo := repository.NewPhotoContentRepository(a.cfg.S3.BucketName, a.s3)
+	photoContentRepo, err := repository.NewPhotoContentRepository(ctx, a.cfg.S3.BucketName, a.s3, true)
+	if err != nil {
+		return fmt.Errorf("can't connect to s3: %w", err)
+	}
+
 	photoRepo := repository.NewPhotoRepository(a.db)
 
 	profileSvc := service.NewProfileService(service.ProfileConfig{}, profileRepo)
