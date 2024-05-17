@@ -1,0 +1,16 @@
+/swiply.notification.Notification/Subscribe:
+  user: true
+  s2s: false
+
+/swiply.notification.Notification/Unsubscribe:
+  user: true
+  s2s: false
+
+/swiply.notification.Notification/Send:
+  user: false
+  s2s: true
+  authorized:
+    - randomcoffee
+    - profile
+    - chat
+    - event
