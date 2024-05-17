@@ -26,3 +26,6 @@ postgres:
 
 redis:
   addr: "randomcoffee-redis:6379"
+
+notification:
+  addr: "notification:84"

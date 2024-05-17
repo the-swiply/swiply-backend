@@ -11,13 +11,15 @@ import (
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-	"github.com/the-swiply/swiply-backend/pkg/houston/auf"
-	"github.com/the-swiply/swiply-backend/pkg/houston/grut"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	"github.com/the-swiply/swiply-backend/pkg/houston/auf"
+	"github.com/the-swiply/swiply-backend/pkg/houston/grut"
+	"github.com/the-swiply/swiply-backend/pkg/houston/tracy"
 
 	"github.com/the-swiply/swiply-backend/randomcoffee/internal/converter"
 	"github.com/the-swiply/swiply-backend/randomcoffee/internal/domain"
@@ -33,6 +35,9 @@ type GRPCServer struct {
 }
 
 func (g *GRPCServer) Create(ctx context.Context, req *randomcoffee.CreateMeetingRequest) (*randomcoffee.CreateMeetingResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	meet := &randomcoffee.Meeting{
 		Id:             uuid.New().String(),
 		OwnerId:        auf.ExtractUserIDFromContext[uuid.UUID](ctx).String(),
@@ -59,6 +64,9 @@ func (g *GRPCServer) Create(ctx context.Context, req *randomcoffee.CreateMeeting
 }
 
 func (g *GRPCServer) Delete(ctx context.Context, req *randomcoffee.DeleteMeetingRequest) (*randomcoffee.DeleteMeetingResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	id, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "can't parse id")
@@ -72,6 +80,9 @@ func (g *GRPCServer) Delete(ctx context.Context, req *randomcoffee.DeleteMeeting
 }
 
 func (g *GRPCServer) Update(ctx context.Context, req *randomcoffee.UpdateMeetingRequest) (*randomcoffee.UpdateMeetingResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	id, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "can't parse id")
@@ -81,7 +92,7 @@ func (g *GRPCServer) Update(ctx context.Context, req *randomcoffee.UpdateMeeting
 		ID:             id,
 		OwnerID:        auf.ExtractUserIDFromContext[uuid.UUID](ctx),
 		Start:          req.Start.AsTime(),
-		End:            req.Start.AsTime(),
+		End:            req.End.AsTime(),
 		OrganizationID: req.OrganizationId,
 	}); err != nil {
 		return nil, status.Error(codes.FailedPrecondition, err.Error())
@@ -91,6 +102,9 @@ func (g *GRPCServer) Update(ctx context.Context, req *randomcoffee.UpdateMeeting
 }
 
 func (g *GRPCServer) List(ctx context.Context, _ *randomcoffee.ListMeetingsRequest) (*randomcoffee.ListMeetingsResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	meetings, err := g.meetingService.List(ctx, auf.ExtractUserIDFromContext[uuid.UUID](ctx))
 	if err != nil {
 		return nil, status.Error(codes.FailedPrecondition, err.Error())
@@ -105,6 +119,9 @@ func (g *GRPCServer) List(ctx context.Context, _ *randomcoffee.ListMeetingsReque
 }
 
 func (g *GRPCServer) Get(ctx context.Context, req *randomcoffee.GetMeetingRequest) (*randomcoffee.GetMeetingResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	id, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "can't parse id")

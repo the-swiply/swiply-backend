@@ -18,11 +18,18 @@ swagger:
 
 postgres:
   username: "randomcoffee-owner"
-  host: "c-basfqk6sdf4fb5nj9pu5r.rw.mdb.yandexcloud.net"
+  host: "c-c9qk6bb4fb5n0j9pu5rr.rw.mdb.yandexcloud.net"
   port: "6432"
   db_name: "randomcoffee"
-  ssl_mode: "disable"
+  ssl_mode: "allow"
   migrations_folder: "migrations"
 
 redis:
-  addr: "c-s9assvgufasdfoif8cuda.rw.mdb.yandexcloud.net:6380"
+  addr: "c-c9qgvgufjkosoif8cuca.rw.mdb.yandexcloud.net:6380"
+  skip_tls_verify: true
+  secure: true
+  db:
+    cron: 8
+
+notification:
+  addr: "notification:84"

@@ -12,6 +12,7 @@ import (
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/the-swiply/swiply-backend/pkg/houston/auf"
 	"github.com/the-swiply/swiply-backend/pkg/houston/grut"
+	"github.com/the-swiply/swiply-backend/pkg/houston/tracy"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -30,6 +31,9 @@ type GRPCServer struct {
 }
 
 func (g *GRPCServer) Subscribe(ctx context.Context, req *notification.SubscribeRequest) (*notification.SubscribeResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	if err := g.notificationService.Subscribe(ctx, domain.Notification{
 		ID:          auf.ExtractUserIDFromContext[uuid.UUID](ctx),
 		DeviceToken: req.DeviceToken,
@@ -41,6 +45,9 @@ func (g *GRPCServer) Subscribe(ctx context.Context, req *notification.SubscribeR
 }
 
 func (g *GRPCServer) Unsubscribe(ctx context.Context, req *notification.UnsubscribeRequest) (*notification.UnsubscribeResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	if err := g.notificationService.Unsubscribe(ctx, auf.ExtractUserIDFromContext[uuid.UUID](ctx)); err != nil {
 		return nil, status.Error(codes.FailedPrecondition, err.Error())
 	}
@@ -49,6 +56,9 @@ func (g *GRPCServer) Unsubscribe(ctx context.Context, req *notification.Unsubscr
 }
 
 func (g *GRPCServer) Send(ctx context.Context, req *notification.SendRequest) (*notification.SendResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	id, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "can't parse id")

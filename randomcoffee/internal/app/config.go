@@ -5,12 +5,13 @@ import (
 )
 
 type Config struct {
-	App      Application `yaml:"app"`
-	GRPC     `yaml:"grpc"`
-	HTTP     `yaml:"http"`
-	Swagger  `yaml:"swagger"`
-	Postgres `yaml:"postgres"`
-	Redis    `yaml:"redis"`
+	App          Application `yaml:"app"`
+	GRPC         `yaml:"grpc"`
+	HTTP         `yaml:"http"`
+	Swagger      `yaml:"swagger"`
+	Postgres     `yaml:"postgres"`
+	Redis        `yaml:"redis"`
+	Notification `yaml:"notification"`
 }
 
 type Application struct {
@@ -41,5 +42,16 @@ type Postgres struct {
 }
 
 type Redis struct {
+	Addr          string  `yaml:"addr"`
+	DB            RedisDB `yaml:"db"`
+	SkipTLSVerify bool    `yaml:"skip_tls_verify"`
+	Secure        bool    `yaml:"secure"`
+}
+
+type RedisDB struct {
+	Cron int64
+}
+
+type Notification struct {
 	Addr string `yaml:"addr"`
 }

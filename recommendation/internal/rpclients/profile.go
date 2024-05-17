@@ -3,14 +3,17 @@ package rpclients
 import (
 	"context"
 	"fmt"
-	"github.com/the-swiply/swiply-backend/recommendation/internal/converter"
-	"github.com/the-swiply/swiply-backend/recommendation/internal/domain"
-	"github.com/the-swiply/swiply-backend/recommendation/internal/pb/profile"
+	"time"
+
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"time"
+
+	"github.com/the-swiply/swiply-backend/recommendation/internal/converter"
+	"github.com/the-swiply/swiply-backend/recommendation/internal/domain"
+	"github.com/the-swiply/swiply-backend/recommendation/internal/pb/profile"
 )
 
 type ProfileClient struct {
@@ -22,7 +25,7 @@ type ProfileClient struct {
 
 func NewProfileClient(addr string, s2sToken string) (*ProfileClient, error) {
 	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithStatsHandler(otelgrpc.NewClientHandler()))
 
 	conn, err := grpc.Dial(addr, opts...)
 	if err != nil {

@@ -19,10 +19,10 @@ chat:
 
 postgres:
   username: "event-owner"
-  host: "c-basfqk6sdf4fb5nj9pu5r.rw.mdb.yandexcloud.net"
+  host: "c-c9qk6bb4fb5n0j9pu5rr.rw.mdb.yandexcloud.net"
   port: "6432"
   db_name: "event"
-  ssl_mode: "disable"
+  ssl_mode: "allow"
   migrations_folder: "migrations"
 
 s3:

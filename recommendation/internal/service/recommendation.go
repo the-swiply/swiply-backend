@@ -3,10 +3,13 @@ package service
 import (
 	"context"
 	"fmt"
+	"math"
+
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/google/uuid"
+
 	"github.com/the-swiply/swiply-backend/pkg/houston/auf"
-	"math"
+	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 )
 
 const (
@@ -47,19 +50,19 @@ func (r *RecommendationService) Recommend(ctx context.Context, count int64) ([]u
 
 	byLikesRecs, err := r.recRepo.GetGetRecommendationsByLikes(ctx, userID, recLimits.byLikes)
 	if err != nil {
-		return nil, fmt.Errorf("can't get recommendations by likes: %w", err)
+		loggy.Errorf("can't get recommendations by likes: %v", err)
 	}
 	notRandomRescSlice = append(notRandomRescSlice, byLikesRecs...)
 
 	byRatingRecs, err := r.recRepo.GetRecommendationsByRating(ctx, userID, defaultMaxRatingDelta, r.cfg.FreezeHoursForRecommendation, recLimits.byLikes)
 	if err != nil {
-		return nil, fmt.Errorf("can't get recommendations by rating: %w", err)
+		loggy.Errorf("can't get recommendations by rating: %v", err)
 	}
 	notRandomRescSlice = append(notRandomRescSlice, byRatingRecs...)
 
 	byOracleRecs, err := r.recRepo.GetRecommendationsByOracle(ctx, userID, r.cfg.FreezeHoursForRecommendation, recLimits.byOracle)
 	if err != nil {
-		return nil, fmt.Errorf("can't get recommendations by oracle: %w", err)
+		loggy.Errorf("can't get recommendations by oracle: %v", err)
 	}
 	notRandomRescSlice = append(notRandomRescSlice, byOracleRecs...)
 

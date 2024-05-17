@@ -27,8 +27,10 @@ type Swagger struct {
 }
 
 type Redis struct {
-	Addr string  `yaml:"addr"`
-	DB   RedisDB `yaml:"db"`
+	Addr          string  `yaml:"addr"`
+	DB            RedisDB `yaml:"db"`
+	SkipTLSVerify bool    `yaml:"skip_tls_verify"`
+	Secure        bool    `yaml:"secure"`
 }
 
 type RedisDB struct {

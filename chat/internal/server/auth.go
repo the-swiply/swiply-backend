@@ -3,15 +3,17 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/grpc-ecosystem/go-grpc-middleware/util/metautils"
-	"github.com/the-swiply/swiply-backend/pkg/houston/auf"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"gopkg.in/yaml.v3"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/google/uuid"
+	"github.com/grpc-ecosystem/go-grpc-middleware/util/metautils"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"gopkg.in/yaml.v3"
+
+	"github.com/the-swiply/swiply-backend/pkg/houston/auf"
 )
 
 const (
@@ -77,18 +79,32 @@ func ParseAuthorizationConfig(cfgPath string) error {
 func (g *GRPCServer) AuthFuncOverride(ctx context.Context, fullMethodName string) (context.Context, error) {
 	var err error
 	if handlerAuthCfg, hasAuthCfg := authCfg[fullMethodName]; hasAuthCfg {
+		requireAnyAuth := handlerAuthCfg.S2S && handlerAuthCfg.User
+
 		if handlerAuthCfg.S2S {
 			ctx, err = s2sAuth(ctx, handlerAuthCfg.Authorized)
-			if err != nil {
+			if err != nil && !requireAnyAuth {
 				return nil, fmt.Errorf("s2s auth failed: %w", err)
+			}
+
+			if err == nil {
+				return ctx, nil
 			}
 		}
 
 		if handlerAuthCfg.User {
 			ctx, err = userAuth(ctx)
-			if err != nil {
+			if err != nil && !requireAnyAuth {
 				return nil, fmt.Errorf("user auth failed: %w", err)
 			}
+
+			if err == nil {
+				return ctx, nil
+			}
+		}
+
+		if err != nil {
+			return nil, err
 		}
 	}
 

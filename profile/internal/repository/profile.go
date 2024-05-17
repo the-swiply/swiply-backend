@@ -117,38 +117,34 @@ func (p *ProfileRepository) LikedProfiles(ctx context.Context, userID uuid.UUID)
 	q := fmt.Sprintf(`SELECT "to" FROM %s
 WHERE "from" = $1 AND "type" = $2`, interactionTable)
 
-	row := p.db.QueryRow(ctx, q, userID, domain.InteractionTypeLike)
-
-	var users []uuid.UUID
-	err := row.Scan(&users)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
-	}
-
+	rows, err := p.db.Query(ctx, q, userID, domain.InteractionTypeLike)
 	if err != nil {
-		return nil, fmt.Errorf("can't get liked profiles: %w", err)
+		return nil, err
 	}
+	defer rows.Close()
 
-	return users, nil
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (uuid.UUID, error) {
+		var id uuid.UUID
+		err := row.Scan(&id)
+		return id, err
+	})
 }
 
 func (p *ProfileRepository) LikedMeProfiles(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error) {
 	q := fmt.Sprintf(`SELECT "from" FROM %s
 WHERE "to" = $1 AND "type" = $2 AND "from" NOT IN (SELECT "to" FROM %s WHERE "from" = $1)`, interactionTable, interactionTable)
 
-	row := p.db.QueryRow(ctx, q, userID, domain.InteractionTypeLike)
-
-	var users []uuid.UUID
-	err := row.Scan(&users)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
-	}
-
+	rows, err := p.db.Query(ctx, q, userID, domain.InteractionTypeLike)
 	if err != nil {
-		return nil, fmt.Errorf("can't get liked me profiles: %w", err)
+		return nil, err
 	}
+	defer rows.Close()
 
-	return users, nil
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (uuid.UUID, error) {
+		var id uuid.UUID
+		err := row.Scan(&id)
+		return id, err
+	})
 }
 
 func (p *ProfileRepository) ListInteractions(ctx context.Context, createdAt time.Time) ([]dbmodel.Interaction, error) {
@@ -243,12 +239,29 @@ func (p *ProfileRepository) DeleteUserOrganization(ctx context.Context, userID u
 	q := fmt.Sprintf(`DELETE FROM %s
 WHERE id = $1 AND profile_id = $2`, userOrganizationTable)
 
-	_, err := p.db.Exec(ctx, q, id, userID, id)
+	_, err := p.db.Exec(ctx, q, id, userID)
 	if err != nil {
 		return fmt.Errorf("can't delete user organization in db: %w", err)
 	}
 
 	return nil
+}
+
+func (p *ProfileRepository) GetUserOrganization(ctx context.Context, userID uuid.UUID, id int64) (dbmodel.UserOrganization, error) {
+	q := fmt.Sprintf(`SELECT id, profile_id, "name", organization_id, email, is_valid FROM %s
+WHERE profile_id = $1 AND id = $2`, userOrganizationTable)
+
+	var org dbmodel.UserOrganization
+	row := p.db.QueryRow(ctx, q, userID, id)
+	err := row.Scan(&org.ID, &org.ProfileID, &org.Name, &org.OrganizationID, &org.Email, &org.IsValid)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return dbmodel.UserOrganization{}, domain.ErrEntityIsNotExists
+	}
+	if err != nil {
+		return dbmodel.UserOrganization{}, fmt.Errorf("can't get user organization: %w", err)
+	}
+
+	return org, nil
 }
 
 func (p *ProfileRepository) ListUserOrganizations(ctx context.Context, userID uuid.UUID) ([]dbmodel.UserOrganization, error) {
@@ -274,20 +287,32 @@ WHERE id = $1 and profile_id = $2`, userOrganizationTable)
 }
 
 func (p *ProfileRepository) ListMatches(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error) {
-	q := fmt.Sprintf(`SELECT "to" FROM %s
-WHERE "from" = $1 AND "type" = $2 "to" IN (SELECT "from" FROM %s
+	q := fmt.Sprintf(`SELECT DISTINCT "to" FROM %s
+WHERE "from" = $1 AND "type" = $2 AND "to" IN (SELECT "from" FROM %s
 WHERE "to" = $1 AND "type" = $2)`, interactionTable, interactionTable)
 
-	row := p.db.QueryRow(ctx, q, userID, domain.InteractionTypeLike)
-
-	var users []uuid.UUID
-	err := row.Scan(&users)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, domain.ErrEntityIsNotExists
-	}
+	rows, err := p.db.Query(ctx, q, userID, domain.InteractionTypeLike)
 	if err != nil {
-		return nil, fmt.Errorf("can't get match users: %w", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (uuid.UUID, error) {
+		var id uuid.UUID
+		err := row.Scan(&id)
+		return id, err
+	})
+}
+
+func (p *ProfileRepository) GetInteraction(ctx context.Context, from, to uuid.UUID) (int, error) {
+	q := fmt.Sprintf(`SELECT COUNT(1) FROM %s
+WHERE "from" = $1 AND "to" = $2 AND "type" = $3`, interactionTable)
+
+	var count int
+	err := p.db.QueryRow(ctx, q, from, to, domain.InteractionTypeLike).Scan(&count)
+	if err != nil {
+		return 0, err
 	}
 
-	return users, nil
+	return count, err
 }

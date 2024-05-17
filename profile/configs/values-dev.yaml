@@ -27,3 +27,9 @@ s3:
   bucket_name: "swiply"
   access_key: 9a301bda16acb36efcf08cb73ad60ef8
   secure: false
+
+user:
+  addr: "user:84"
+
+notification:
+  addr: "notification:84"

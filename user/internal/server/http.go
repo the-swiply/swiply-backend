@@ -3,14 +3,16 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/the-swiply/swiply-backend/user/pkg/api/user"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/protobuf/encoding/protojson"
 	"net/http"
 	"path"
 	"strings"
+
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/encoding/protojson"
+
+	"github.com/the-swiply/swiply-backend/user/pkg/api/user"
 )
 
 const (
@@ -59,6 +61,15 @@ func registerGRPCGateway(ctx context.Context, mux *http.ServeMux, grpcAddr strin
 		switch strings.ToLower(key) {
 		case "sec-ch-ua-platform", "sec-ch-ua":
 			return key, true
+		}
+
+		switch lowerKey := strings.ToLower(key); lowerKey {
+		case "s2s-authorization", "guid:x-request-id":
+			return lowerKey, true
+		}
+
+		if lowerKey := strings.ToLower(key); strings.HasPrefix(lowerKey, "x-") {
+			return lowerKey, true
 		}
 
 		return runtime.DefaultHeaderMatcher(key)

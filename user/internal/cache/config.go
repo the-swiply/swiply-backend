@@ -3,9 +3,11 @@ package cache
 import "time"
 
 type RedisDefaultConfig struct {
-	Addr     string
-	Password string
-	DB       int
+	Addr          string
+	Password      string
+	DB            int
+	SkipTLSVerify bool
+	Secure        bool
 }
 
 type RedisCodesConfig struct {

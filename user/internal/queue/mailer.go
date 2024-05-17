@@ -2,12 +2,15 @@ package queue
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/hibiken/asynq"
+
 	"github.com/the-swiply/swiply-backend/user/internal/domain"
 	"github.com/the-swiply/swiply-backend/user/internal/service"
-	"time"
 )
 
 const (
@@ -24,10 +27,18 @@ type MailerQueue struct {
 }
 
 func NewMailerQueue(cfg MailerConfig, senderService *service.SenderService) *MailerQueue {
+	var tlsConf *tls.Config
+	if cfg.RedisSecure {
+		tlsConf = &tls.Config{
+			InsecureSkipVerify: cfg.RedisSkipTLSVerify,
+		}
+	}
+
 	redisConnOpts := asynq.RedisClientOpt{
-		Addr:     cfg.RedisAddr,
-		Password: cfg.RedisPassword,
-		DB:       cfg.RedisDB,
+		Addr:      cfg.RedisAddr,
+		Password:  cfg.RedisPassword,
+		DB:        cfg.RedisDB,
+		TLSConfig: tlsConf,
 	}
 	server := asynq.NewServer(
 		redisConnOpts,

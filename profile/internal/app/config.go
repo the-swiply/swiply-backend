@@ -1,12 +1,14 @@
 package app
 
 type Config struct {
-	App      Application `yaml:"app"`
-	GRPC     `yaml:"grpc"`
-	HTTP     `yaml:"http"`
-	Swagger  `yaml:"swagger"`
-	Postgres `yaml:"postgres"`
-	S3       `yaml:"s3"`
+	App          Application `yaml:"app"`
+	GRPC         `yaml:"grpc"`
+	HTTP         `yaml:"http"`
+	Swagger      `yaml:"swagger"`
+	Postgres     `yaml:"postgres"`
+	S3           `yaml:"s3"`
+	User         `yaml:"user"`
+	Notification `yaml:"notification"`
 }
 
 type Application struct {
@@ -39,4 +41,12 @@ type S3 struct {
 	BucketName string `yaml:"bucket_name"`
 	AccessKey  string `yaml:"access_key"`
 	Secure     bool   `yaml:"secure"`
+}
+
+type User struct {
+	Addr string `yaml:"addr"`
+}
+
+type Notification struct {
+	Addr string `yaml:"addr"`
 }

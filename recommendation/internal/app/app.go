@@ -4,8 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
+	"net/http"
+	"os"
+
 	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.uber.org/multierr"
+
 	"github.com/the-swiply/swiply-backend/pkg/houston/dobby"
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"github.com/the-swiply/swiply-backend/pkg/houston/runner"
@@ -14,16 +20,10 @@ import (
 	"github.com/the-swiply/swiply-backend/recommendation/internal/scheduler"
 	"github.com/the-swiply/swiply-backend/recommendation/internal/server"
 	"github.com/the-swiply/swiply-backend/recommendation/internal/service"
-	"go.uber.org/multierr"
-	"net"
-	"net/http"
-	"os"
 )
 
 const (
 	authConfigPath = "configs/authorization.yaml"
-
-	cronRedisDB = 0
 )
 
 type App struct {
@@ -106,7 +106,9 @@ func (a *App) Run(ctx context.Context) error {
 	rdbCron, err := scheduler.NewRedisCron(scheduler.RedisCronConfig{
 		Addr:                   a.cfg.Redis.Addr,
 		Password:               os.Getenv("REDIS_PASSWORD"),
-		DB:                     cronRedisDB,
+		DB:                     int(a.cfg.Redis.DB.Cron),
+		SkipTLSVerify:          a.cfg.Redis.SkipTLSVerify,
+		Secure:                 a.cfg.Redis.Secure,
 		StatisticUpdateCron:    a.cfg.App.StatisticUpdateCron,
 		TriggerOracleLearnCron: a.cfg.App.TriggerOracleLearnCron,
 	}, dpSvc)

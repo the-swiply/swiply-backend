@@ -4,8 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"html/template"
+	"net"
+	"net/http"
+	"os"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/hibiken/asynq"
+	"go.uber.org/multierr"
+
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"github.com/the-swiply/swiply-backend/pkg/houston/runner"
 	"github.com/the-swiply/swiply-backend/user/internal/cache"
@@ -13,12 +21,6 @@ import (
 	"github.com/the-swiply/swiply-backend/user/internal/queue"
 	"github.com/the-swiply/swiply-backend/user/internal/server"
 	"github.com/the-swiply/swiply-backend/user/internal/service"
-	"go.uber.org/multierr"
-	"html/template"
-	"net"
-	"net/http"
-	"os"
-	"time"
 )
 
 type App struct {
@@ -53,9 +55,11 @@ func (a *App) Run(ctx context.Context) error {
 
 	rdbCodes, err := cache.NewRedisCodeCache(ctx, cache.RedisCodesConfig{
 		RedisDefaultConfig: cache.RedisDefaultConfig{
-			Addr:     a.cfg.Redis.Addr,
-			Password: os.Getenv("REDIS_PASSWORD"),
-			DB:       int(a.cfg.Redis.DB.Codes),
+			Addr:          a.cfg.Redis.Addr,
+			Password:      os.Getenv("REDIS_PASSWORD"),
+			DB:            int(a.cfg.Redis.DB.Codes),
+			Secure:        a.cfg.Redis.Secure,
+			SkipTLSVerify: a.cfg.Redis.SkipTLSVerify,
 		},
 		AuthCodeTTL: time.Minute * time.Duration(a.cfg.App.AuthCodeTTLMinutes),
 	})
@@ -66,9 +70,11 @@ func (a *App) Run(ctx context.Context) error {
 
 	rdbTokens, err := cache.NewRedisTokenCache(ctx, cache.RedisTokensConfig{
 		RedisDefaultConfig: cache.RedisDefaultConfig{
-			Addr:     a.cfg.Redis.Addr,
-			Password: os.Getenv("REDIS_PASSWORD"),
-			DB:       int(a.cfg.Redis.DB.Tokens),
+			Addr:          a.cfg.Redis.Addr,
+			Password:      os.Getenv("REDIS_PASSWORD"),
+			DB:            int(a.cfg.Redis.DB.Tokens),
+			Secure:        a.cfg.Redis.Secure,
+			SkipTLSVerify: a.cfg.Redis.SkipTLSVerify,
 		},
 		RefreshTokenTTL: time.Duration(a.cfg.App.RefreshTokenTTLHours) * time.Hour,
 	})
@@ -93,6 +99,8 @@ func (a *App) Run(ctx context.Context) error {
 		RedisAddr:            a.cfg.Redis.Addr,
 		RedisPassword:        os.Getenv("REDIS_PASSWORD"),
 		RedisDB:              int(a.cfg.Redis.DB.MailerQueue),
+		RedisSkipTLSVerify:   a.cfg.Redis.SkipTLSVerify,
+		RedisSecure:          a.cfg.Redis.Secure,
 		SendTimeout:          time.Duration(a.cfg.Mailer.SendTimeoutSeconds) * time.Second,
 		AfterSendWorkerPause: time.Duration(a.cfg.Mailer.AfterSendPauseSeconds) * time.Second,
 	}, senderSvc)

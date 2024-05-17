@@ -4,7 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
+	"net/http"
+	"os"
+	"time"
+
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.uber.org/multierr"
+
 	"github.com/the-swiply/swiply-backend/chat/internal/cache"
 	"github.com/the-swiply/swiply-backend/chat/internal/domain"
 	"github.com/the-swiply/swiply-backend/chat/internal/glsync"
@@ -17,11 +24,6 @@ import (
 	"github.com/the-swiply/swiply-backend/pkg/houston/dobby"
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"github.com/the-swiply/swiply-backend/pkg/houston/runner"
-	"go.uber.org/multierr"
-	"net"
-	"net/http"
-	"os"
-	"time"
 )
 
 const (
@@ -95,9 +97,11 @@ func (a *App) Run(ctx context.Context) error {
 	}
 
 	rdbSequence, err := cache.NewRedisSequenceCache(ctx, cache.RedisSequenceConfig{
-		Addr:     a.cfg.Redis.Addr,
-		Password: os.Getenv("REDIS_PASSWORD"),
-		DB:       int(a.cfg.Redis.DB.Sequence),
+		Addr:          a.cfg.Redis.Addr,
+		Password:      os.Getenv("REDIS_PASSWORD"),
+		DB:            int(a.cfg.Redis.DB.Sequence),
+		SkipTLSVerify: a.cfg.Redis.SkipTLSVerify,
+		Secure:        a.cfg.Redis.Secure,
 	})
 	if err != nil {
 		return fmt.Errorf("can't init redis cache: %w", err)
@@ -105,10 +109,12 @@ func (a *App) Run(ctx context.Context) error {
 	a.redisSequenceCache = rdbSequence
 
 	rdbPub, err := pubsub.NewRedisMessagesPublisher(ctx, pubsub.RedisPubSubConfig{
-		Addr:        a.cfg.Redis.Addr,
-		Password:    os.Getenv("REDIS_PASSWORD"),
-		DB:          int(a.cfg.Redis.DB.MessagesPubSub),
-		ChannelName: chatBroadcastChannel,
+		Addr:          a.cfg.Redis.Addr,
+		Password:      os.Getenv("REDIS_PASSWORD"),
+		DB:            int(a.cfg.Redis.DB.MessagesPubSub),
+		SkipTLSVerify: a.cfg.Redis.SkipTLSVerify,
+		Secure:        a.cfg.Redis.Secure,
+		ChannelName:   chatBroadcastChannel,
 	})
 	if err != nil {
 		return fmt.Errorf("can't init redis publisher: %w", err)
@@ -118,6 +124,8 @@ func (a *App) Run(ctx context.Context) error {
 		Addr:           a.cfg.Redis.Addr,
 		Password:       os.Getenv("REDIS_PASSWORD"),
 		DB:             int(a.cfg.Redis.DB.Syncer),
+		SkipTLSVerify:  a.cfg.Redis.SkipTLSVerify,
+		Secure:         a.cfg.Redis.Secure,
 		LockExpiration: time.Millisecond * time.Duration(a.cfg.App.ChatLockExpirationMilliseconds),
 	})
 	if err != nil {
@@ -137,10 +145,12 @@ func (a *App) Run(ctx context.Context) error {
 	a.broadcastWP.Start()
 
 	rdbSub, err := pubsub.NewRedisMessagesSubscriber(ctx, pubsub.RedisPubSubConfig{
-		Addr:        a.cfg.Redis.Addr,
-		Password:    os.Getenv("REDIS_PASSWORD"),
-		DB:          int(a.cfg.Redis.DB.MessagesPubSub),
-		ChannelName: chatBroadcastChannel,
+		Addr:          a.cfg.Redis.Addr,
+		Password:      os.Getenv("REDIS_PASSWORD"),
+		DB:            int(a.cfg.Redis.DB.MessagesPubSub),
+		SkipTLSVerify: a.cfg.Redis.SkipTLSVerify,
+		Secure:        a.cfg.Redis.Secure,
+		ChannelName:   chatBroadcastChannel,
 	}, chatSvc, a.broadcastWP)
 	if err != nil {
 		return fmt.Errorf("can't init redis subscriber: %w", err)

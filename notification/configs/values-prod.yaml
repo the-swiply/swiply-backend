@@ -1,7 +1,7 @@
 app:
   name: "notification"
   graceful_shutdown_timeout_seconds: 10
-  topic: "com.notification.Alert"
+  topic: "Swiply"
 
 jaeger:
   addr: "opentelemetry-collector.otel-collector.svc.cluster.local:4317"
@@ -17,10 +17,10 @@ swagger:
 
 postgres:
   username: "notification-owner"
-  host: "c-basfqk6sdf4fb5nj9pu5r.rw.mdb.yandexcloud.net"
+  host: "c-c9qk6bb4fb5n0j9pu5rr.rw.mdb.yandexcloud.net"
   port: "6432"
   db_name: "notification"
-  ssl_mode: "disable"
+  ssl_mode: "allow"
   migrations_folder: "migrations"
 
 apns:

@@ -19,13 +19,13 @@
   s2s: false
 
 /swiply.chat.Chat/CreateChat:
-  user: false
+  user: true
   s2s: true
   authorized:
     - event
 
 /swiply.chat.Chat/AddChatMembers:
-  user: false
+  user: true
   s2s: true
   authorized:
     - event

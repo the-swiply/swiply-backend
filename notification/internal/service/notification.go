@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/baobabus/go-apns/apns2"
 	"github.com/google/uuid"
@@ -37,12 +36,12 @@ func (n *NotificationService) Unsubscribe(ctx context.Context, userID uuid.UUID)
 func (n *NotificationService) Send(ctx context.Context, userID uuid.UUID, content string) error {
 	notification, err := n.repo.Get(ctx, userID)
 	if err != nil {
-		return fmt.Errorf("can't get notification info: %w", err)
+		return err
 	}
 
 	notif := &apns2.Notification{
 		Recipient: notification.DeviceToken,
-		Header:    &apns2.Header{Topic: n.config.Topic},
+		Header:    &apns2.Header{Topic: n.config.Topic, Priority: apns2.PriorityHigh},
 		Payload:   &apns2.Payload{APS: &apns2.APS{Alert: content}},
 	}
 

@@ -17,12 +17,18 @@ swagger:
   path: "third_party/swagger"
 
 redis:
-  addr: "c-s9assvgufasdfoif8cuda.rw.mdb.yandexcloud.net:6380"
+  addr: "c-c9qgvgufjkosoif8cuca.rw.mdb.yandexcloud.net:6380"
+  secure: true
+  skip_tls_verify: true
+  db:
+    sequence: 4
+    messages_pub_sub: 5
+    syncer: 6
 
 postgres:
   username: "chat-owner"
-  host: "c-basfqk6sdf4fb5nj9pu5r.rw.mdb.yandexcloud.net"
+  host: "c-c9qk6bb4fb5n0j9pu5rr.rw.mdb.yandexcloud.net"
   port: "6432"
   db_name: "chat"
-  ssl_mode: "disable"
+  ssl_mode: "allow"
   migrations_folder: "migrations"

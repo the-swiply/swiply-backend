@@ -1,7 +1,7 @@
 app:
   name: "notification"
   graceful_shutdown_timeout_seconds: 10
-  topic: "com.notification.Alert"
+  topic: "Swiply"
 
 jaeger:
   addr: "jaeger:4317"

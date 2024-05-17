@@ -10,9 +10,12 @@ import (
 
 	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/the-swiply/swiply-backend/pkg/houston/dobby"
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"github.com/the-swiply/swiply-backend/pkg/houston/runner"
+	"github.com/the-swiply/swiply-backend/randomcoffee/internal/clients"
+
 	"go.uber.org/multierr"
 
 	"github.com/the-swiply/swiply-backend/randomcoffee/internal/algorithm"
@@ -24,8 +27,6 @@ import (
 
 const (
 	authConfigPath = "configs/authorization.yaml"
-
-	cronRedisDB = 0
 )
 
 type App struct {
@@ -90,12 +91,20 @@ func (a *App) Run(ctx context.Context) error {
 		Interval: a.cfg.App.MeetingMinInterval,
 	})
 
-	randomCoffeeSvc := service.NewRandomCoffeeService(service.RandomCoffeeConfig{}, algo, meetingRepo)
+	notificationClient, err := clients.NewNotificationClient(a.cfg.Notification.Addr, os.Getenv("S2S_NOTIFICATION_TOKEN"))
+	if err != nil {
+		return fmt.Errorf("can't get notification client: %w", err)
+	}
+	defer notificationClient.CloseConn()
+
+	randomCoffeeSvc := service.NewRandomCoffeeService(service.RandomCoffeeConfig{}, algo, meetingRepo, notificationClient)
 
 	rdbCron, err := scheduler.NewRedisCron(scheduler.RedisCronConfig{
 		Addr:                    a.cfg.Redis.Addr,
 		Password:                os.Getenv("REDIS_PASSWORD"),
-		DB:                      cronRedisDB,
+		DB:                      int(a.cfg.Redis.DB.Cron),
+		SkipTLSVerify:           a.cfg.Redis.SkipTLSVerify,
+		Secure:                  a.cfg.Redis.Secure,
 		RandomCoffeeTriggerCron: a.cfg.App.RandomCoffeeTriggerCron,
 	}, randomCoffeeSvc)
 	if err != nil {
@@ -104,7 +113,7 @@ func (a *App) Run(ctx context.Context) error {
 	a.redisCron = rdbCron
 
 	if err != nil {
-		return fmt.Errorf("can't register update statistic task")
+		return fmt.Errorf("can't register random coffee task")
 	}
 
 	meetingSvc := service.NewMeetingService(service.MeetingConfig{}, meetingRepo)

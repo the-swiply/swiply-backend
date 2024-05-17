@@ -157,9 +157,8 @@ services:
       context: .
       dockerfile: backoffice/Dockerfile
     restart: on-failure
-    command: python manage.py runserver 0.0.0.0:8000
     ports:
-      - 18070:8000
+      - 18070:80
     env_file:
       - backoffice/dev.env
     depends_on:

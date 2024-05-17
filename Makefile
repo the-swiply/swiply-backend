@@ -47,3 +47,39 @@ push-recommendation-image:
 .PHONY: push-oracle-image
 push-oracle-image:
 	DOCKER_DEFAULT_PLATFORM=linux/amd64	docker build -f ./oracle/Dockerfile --tag $(YC_CONTAINER_REGISTRY)/oracle:stable . && docker push cr.yandex/crpf76jp63emqup99s4l/oracle:stable
+
+.PHONY: user-release
+user-release:
+	./release.sh user
+
+.PHONY: profile-release
+profile-release:
+	./release.sh profile
+
+.PHONY: recommendation-release
+recommendation-release:
+	./release.sh recommendation
+
+.PHONY: randomcoffee-release
+randomcoffee-release:
+	./release.sh randomcoffee
+
+.PHONY: oracle-release
+oracle-release:
+	./release.sh oracle
+
+.PHONY: notification-release
+notification-release:
+	./release.sh notification
+
+.PHONY: event-release
+event-release:
+	./release.sh event
+
+.PHONY: chat-release
+chat-release:
+	./release.sh chat
+
+.PHONY: backoffice-release
+backoffice-release:
+	./release.sh backoffice

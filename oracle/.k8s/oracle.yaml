@@ -1,15 +1,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: user
+  name: oracle
   labels:
-    app: user
+    app: oracle
     version: v1
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: user
+      app: oracle
       version: v1
   template:
     metadata:
@@ -18,12 +18,12 @@ spec:
         prometheus.io/path: '/metrics'
         prometheus.io/port: '5000'
       labels:
-        app: user
+        app: oracle
         version: v1
     spec:
       containers:
-        - name: user
-          image: cr.yandex/crpf76jp63emqup99s4l/user:stable
+        - name: oracle
+          image: cr.yandex/crpf76jp63emqup99s4l/oracle:stable
           imagePullPolicy: Always
           ports:
             - name: http
@@ -32,15 +32,15 @@ spec:
               containerPort: 84
           envFrom:
             - secretRef:
-                name: user-secret
+                name: oracle-secret
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: user
+  name: oracle
   labels:
-    app: user
-    service: user
+    app: oracle
+    service: oracle
 spec:
   ports:
     - name: http
@@ -52,4 +52,4 @@ spec:
       port: 84
       targetPort: 84
   selector:
-    app: user
+    app: oracle

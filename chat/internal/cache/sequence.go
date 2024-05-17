@@ -2,9 +2,11 @@ package cache
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
-	"github.com/redis/go-redis/v9"
 	"strconv"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type RedisSequenceCache struct {
@@ -13,10 +15,18 @@ type RedisSequenceCache struct {
 }
 
 func NewRedisSequenceCache(ctx context.Context, cfg RedisSequenceConfig) (*RedisSequenceCache, error) {
+	var tlsConf *tls.Config
+	if cfg.Secure {
+		tlsConf = &tls.Config{
+			InsecureSkipVerify: cfg.SkipTLSVerify,
+		}
+	}
+
 	rc := redis.NewClient(&redis.Options{
-		Addr:     cfg.Addr,
-		Password: cfg.Password,
-		DB:       cfg.DB,
+		Addr:      cfg.Addr,
+		Password:  cfg.Password,
+		DB:        cfg.DB,
+		TLSConfig: tlsConf,
 	})
 
 	_, err := rc.Ping(ctx).Result()

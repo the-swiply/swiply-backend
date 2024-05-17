@@ -11,10 +11,12 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"go.uber.org/multierr"
+
 	"github.com/the-swiply/swiply-backend/pkg/houston/dobby"
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"github.com/the-swiply/swiply-backend/pkg/houston/runner"
-	"go.uber.org/multierr"
+	"github.com/the-swiply/swiply-backend/profile/internal/clients"
 
 	"github.com/the-swiply/swiply-backend/profile/internal/repository"
 	"github.com/the-swiply/swiply-backend/profile/internal/server"
@@ -102,7 +104,19 @@ func (a *App) Run(ctx context.Context) error {
 
 	photoRepo := repository.NewPhotoRepository(a.db)
 
-	profileSvc := service.NewProfileService(service.ProfileConfig{}, profileRepo)
+	userClient, err := clients.NewUserClient(a.cfg.User.Addr)
+	if err != nil {
+		return fmt.Errorf("can't get user client: %w", err)
+	}
+	defer userClient.CloseConn()
+
+	notificationClient, err := clients.NewNotificationClient(a.cfg.Notification.Addr, os.Getenv("S2S_NOTIFICATION_TOKEN"))
+	if err != nil {
+		return fmt.Errorf("can't get notification client: %w", err)
+	}
+	defer notificationClient.CloseConn()
+
+	profileSvc := service.NewProfileService(service.ProfileConfig{}, profileRepo, userClient, notificationClient)
 	photoSvc := service.NewPhotoService(service.PhotoConfig{}, photoContentRepo, photoRepo)
 
 	errCh := make(chan error, 2)

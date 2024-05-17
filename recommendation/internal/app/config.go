@@ -40,7 +40,14 @@ type Postgres struct {
 }
 
 type Redis struct {
-	Addr string `yaml:"addr"`
+	Addr          string  `yaml:"addr"`
+	DB            RedisDB `yaml:"db"`
+	SkipTLSVerify bool    `yaml:"skip_tls_verify"`
+	Secure        bool    `yaml:"secure"`
+}
+
+type RedisDB struct {
+	Cron int64
 }
 
 type Oracle struct {

@@ -4,21 +4,263 @@ metadata:
   name: swiply-vs
 spec:
   hosts:
-    - "*"
+  - "*"
   gateways:
-    - swiply-gateway
+  - swiply-gateway
   http:
-    - match:
-        - port: 80
-      route:
-        - destination:
-            host: user
-            port:
-              number: 80
-    - match:
-        - port: 84
-      route:
-        - destination:
-            host: user
-            port:
-              number: 84
+  - match:
+    - uri:
+        prefix: "/notification/"
+    - uri:
+        prefix: "/notification"
+    rewrite:
+      uri: "/"
+    route:
+    - destination:
+        host: notification
+        port:
+          number: 80
+
+  - match:
+    - headers:
+        authority:
+          exact: notification
+    route:
+    - destination:
+        host: notification
+        port:
+          number: 80
+
+  - match:
+    - uri:
+        prefix: "/swiply.notification.Notification"
+    route:
+    - destination:
+        host: notification
+        port:
+          number: 84
+
+  - match:
+    - uri:
+        prefix: "/user/"
+    - uri:
+        prefix: "/user"
+    rewrite:
+      uri: "/"
+    route:
+    - destination:
+        host: user
+        port:
+          number: 80
+
+  - match:
+    - headers:
+        authority:
+          exact: user
+    route:
+    - destination:
+        host: user
+        port:
+          number: 80
+
+  - match:
+    - uri:
+        prefix: "/swiply.user.User"
+    route:
+    - destination:
+        host: user
+        port:
+          number: 84
+
+  - match:
+    - uri:
+        prefix: "/recommendation/"
+    - uri:
+        prefix: "/recommendation"
+    rewrite:
+      uri: "/"
+    route:
+    - destination:
+        host: recommendation
+        port:
+          number: 80
+
+  - match:
+    - headers:
+        authority:
+          exact: recommendation
+    route:
+    - destination:
+        host: recommendation
+        port:
+          number: 80
+
+  - match:
+    - uri:
+        prefix: "/swiply.recommendation.Recommendation"
+    route:
+    - destination:
+        host: recommendation
+        port:
+          number: 84
+
+  - match:
+    - uri:
+        prefix: "/randomcoffee/"
+    - uri:
+        prefix: "/randomcoffee"
+    rewrite:
+      uri: "/"
+    route:
+    - destination:
+        host: randomcoffee
+        port:
+          number: 80
+
+  - match:
+    - headers:
+        authority:
+          exact: randomcoffee
+    route:
+    - destination:
+        host: randomcoffee
+        port:
+          number: 80
+
+  - match:
+    - uri:
+        prefix: "/swiply.randomcoffee.RandomCoffee"
+    route:
+    - destination:
+        host: randomcoffee
+        port:
+          number: 84
+
+  - match:
+    - uri:
+        prefix: "/profile/"
+    - uri:
+        prefix: "/profile"
+    rewrite:
+      uri: "/"
+    route:
+    - destination:
+        host: profile
+        port:
+          number: 80
+
+  - match:
+    - headers:
+        authority:
+          exact: profile
+    route:
+    - destination:
+        host: profile
+        port:
+          number: 80
+
+  - match:
+    - uri:
+        prefix: "/swiply.profile.Profile"
+    route:
+    - destination:
+        host: profile
+        port:
+          number: 84
+
+  - match:
+    - uri:
+        prefix: "/swiply.profile.Photo"
+    route:
+    - destination:
+        host: profile
+        port:
+          number: 84
+
+  - match:
+    - uri:
+        prefix: "/swiply.oracle.Oracle"
+    route:
+    - destination:
+        host: oracle
+        port:
+          number: 84
+
+  - match:
+    - uri:
+        prefix: "/event/"
+    - uri:
+        prefix: "/event"
+    rewrite:
+      uri: "/"
+    route:
+    - destination:
+        host: event
+        port:
+          number: 80
+
+  - match:
+    - headers:
+        authority:
+          exact: event
+    route:
+    - destination:
+        host: event
+        port:
+          number: 80
+
+  - match:
+    - uri:
+        prefix: "/swiply.event.Event"
+    route:
+    - destination:
+        host: event
+        port:
+          number: 84
+
+  - match:
+    - uri:
+        prefix: "/chat/"
+    - uri:
+        prefix: "/chat"
+    rewrite:
+      uri: "/"
+    route:
+    - destination:
+        host: chat
+        port:
+          number: 80
+
+  - match:
+    - headers:
+        authority:
+          exact: chat
+    route:
+    - destination:
+        host: chat
+        port:
+          number: 80
+
+  - match:
+    - uri:
+        prefix: "/swiply.chat.Chat"
+    route:
+    - destination:
+        host: chat
+        port:
+          number: 84
+
+  - match:
+    - uri:
+        prefix: "/backoffice/"
+    - uri:
+        prefix: "/backoffice"
+    - uri:
+        prefix: "/static/"
+    - uri:
+        prefix: "/media/"
+    route:
+    - destination:
+        host: backoffice
+        port:
+          number: 80

@@ -2,11 +2,14 @@ package scheduler
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
+	"time"
+
 	"github.com/hibiken/asynq"
+
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"github.com/the-swiply/swiply-backend/recommendation/internal/service"
-	"time"
 )
 
 const (
@@ -28,10 +31,17 @@ type RedisCron struct {
 }
 
 func NewRedisCron(cfg RedisCronConfig, dpService *service.DataProviderService) (*RedisCron, error) {
+	var tlsConf *tls.Config
+	if cfg.Secure {
+		tlsConf = &tls.Config{
+			InsecureSkipVerify: cfg.SkipTLSVerify,
+		}
+	}
 	redisConnOpts := asynq.RedisClientOpt{
-		Addr:     cfg.Addr,
-		Password: cfg.Password,
-		DB:       cfg.DB,
+		Addr:      cfg.Addr,
+		Password:  cfg.Password,
+		DB:        cfg.DB,
+		TLSConfig: tlsConf,
 	}
 
 	server := asynq.NewServer(

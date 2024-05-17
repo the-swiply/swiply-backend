@@ -11,10 +11,11 @@ import (
 	"github.com/baobabus/go-apns/apns2"
 	"github.com/baobabus/go-apns/cryptox"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.uber.org/multierr"
+
 	"github.com/the-swiply/swiply-backend/pkg/houston/dobby"
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 	"github.com/the-swiply/swiply-backend/pkg/houston/runner"
-	"go.uber.org/multierr"
 
 	"github.com/the-swiply/swiply-backend/notification/internal/repository"
 	"github.com/the-swiply/swiply-backend/notification/internal/server"
@@ -54,6 +55,7 @@ func (a *App) Run(ctx context.Context) error {
 	}
 
 	server.SetUserJWTSecret(os.Getenv("JWT_SECRET"))
+	server.SetS2SJWTSecret(os.Getenv("S2S_JWT_SECRET"))
 	err = server.ParseAuthorizationConfig(authConfigPath)
 	if err != nil {
 		return fmt.Errorf("can't parse auth config: %w", err)
@@ -87,13 +89,13 @@ func (a *App) Run(ctx context.Context) error {
 	}
 
 	a.apns = &apns2.Client{
-		Gateway: apns2.Gateway.Production,
+		Gateway: apns2.Gateway.Development,
 		Signer: &apns2.JWTSigner{
 			KeyID:      os.Getenv("KEY_ID"),
 			TeamID:     os.Getenv("TEAM_ID"),
 			SigningKey: signingKey,
 		},
-		CommsCfg: apns2.CommsFast,
+		CommsCfg: apns2.CommsDefault,
 		ProcCfg:  apns2.UnlimitedProcConfig,
 	}
 	err = a.apns.Start(nil)

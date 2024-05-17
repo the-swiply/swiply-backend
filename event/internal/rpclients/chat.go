@@ -3,12 +3,15 @@ package rpclients
 import (
 	"context"
 	"fmt"
+
 	"github.com/google/uuid"
-	"github.com/the-swiply/swiply-backend/event/internal/converter"
-	"github.com/the-swiply/swiply-backend/event/internal/pb/chat"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
+
+	"github.com/the-swiply/swiply-backend/event/internal/converter"
+	"github.com/the-swiply/swiply-backend/event/internal/pb/chat"
 )
 
 type ChatClient struct {
@@ -20,7 +23,7 @@ type ChatClient struct {
 
 func NewChatClient(addr string, s2sToken string) (*ChatClient, error) {
 	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithStatsHandler(otelgrpc.NewClientHandler()))
 
 	conn, err := grpc.Dial(addr, opts...)
 	if err != nil {

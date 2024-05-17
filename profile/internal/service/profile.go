@@ -2,10 +2,13 @@ package service
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
 
+	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
+	"github.com/the-swiply/swiply-backend/profile/internal/clients"
 	"github.com/the-swiply/swiply-backend/profile/internal/converter"
 	"github.com/the-swiply/swiply-backend/profile/internal/dbmodel"
 	"github.com/the-swiply/swiply-backend/profile/internal/domain"
@@ -26,18 +29,24 @@ type ProfileRepository interface {
 	DeleteUserOrganization(ctx context.Context, userID uuid.UUID, id int64) error
 	ListUserOrganizations(ctx context.Context, userID uuid.UUID) ([]dbmodel.UserOrganization, error)
 	ValidateUserOrganization(ctx context.Context, userID uuid.UUID, id int64) error
+	GetUserOrganization(ctx context.Context, userID uuid.UUID, id int64) (dbmodel.UserOrganization, error)
 	ListMatches(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error)
+	GetInteraction(ctx context.Context, from, to uuid.UUID) (int, error)
 }
 
 type ProfileService struct {
-	cfg  ProfileConfig
-	repo ProfileRepository
+	cfg                ProfileConfig
+	repo               ProfileRepository
+	userClient         *clients.User
+	notificationClient *clients.Notification
 }
 
-func NewProfileService(cfg ProfileConfig, profileRepository ProfileRepository) *ProfileService {
+func NewProfileService(cfg ProfileConfig, profileRepository ProfileRepository, userClient *clients.User, notification *clients.Notification) *ProfileService {
 	return &ProfileService{
-		cfg:  cfg,
-		repo: profileRepository,
+		cfg:                cfg,
+		repo:               profileRepository,
+		userClient:         userClient,
+		notificationClient: notification,
 	}
 }
 
@@ -80,7 +89,33 @@ func (p *ProfileService) Get(ctx context.Context, userID uuid.UUID) (domain.Prof
 
 func (p *ProfileService) CreateInteraction(ctx context.Context, interaction domain.Interaction) error {
 	_, err := p.repo.CreateInteraction(ctx, converter.InteractionFromDomainToDBModel(interaction))
-	return err
+	if err != nil {
+		return err
+	}
+
+	if interaction.Type == domain.InteractionTypeDislike {
+		return nil
+	}
+
+	count, err := p.repo.GetInteraction(ctx, interaction.To, interaction.From)
+	if err != nil {
+		loggy.Errorf("can't get interaction: %v", err)
+		return nil
+	}
+
+	if count != 0 {
+		err = p.notificationClient.Send(ctx, interaction.From, "У вас новый мэтч!")
+		if err != nil {
+			loggy.Errorf("can't send notification: %v", err)
+		}
+
+		err = p.notificationClient.Send(ctx, interaction.To, "У вас новый мэтч!")
+		if err != nil {
+			loggy.Errorf("can't send notification: %v", err)
+		}
+	}
+
+	return nil
 }
 
 func (p *ProfileService) GetLikedProfiles(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error) {
@@ -179,11 +214,25 @@ func (p *ProfileService) DeleteUserOrganization(ctx context.Context, userID uuid
 	return p.repo.DeleteUserOrganization(ctx, userID, id)
 }
 
-func (p *ProfileService) SendAuthorizationCode(ctx context.Context, userID uuid.UUID, email string) error {
-	return nil
+func (p *ProfileService) SendAuthorizationCode(ctx context.Context, email string) error {
+	return p.userClient.SendAuthorizationCode(ctx, email)
 }
 
 func (p *ProfileService) ValidateUserOrganization(ctx context.Context, userID uuid.UUID, id int64, code string) error {
+	org, err := p.repo.GetUserOrganization(ctx, userID, id)
+	if err != nil {
+		return err
+	}
+
+	valid, err := p.userClient.ValidateAuthorizationCode(ctx, org.Email, code)
+	if err != nil {
+		return err
+	}
+
+	if !valid {
+		return errors.New("invalid code")
+	}
+
 	return p.repo.ValidateUserOrganization(ctx, userID, id)
 }
 

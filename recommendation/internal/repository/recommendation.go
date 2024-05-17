@@ -3,10 +3,11 @@ package repository
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"time"
 )
 
 type RecommendationRepository struct {
@@ -27,7 +28,7 @@ AND positive = false)
 
 SELECT "from"
 FROM %s
-         LEFT JOIN excluded ON excluded.id = %s."from"
+LEFT JOIN excluded ON excluded.id = %s."from"
 WHERE excluded.id IS NULL
 AND "to" = $2
 AND positive = true
@@ -75,7 +76,7 @@ AND dttm >= now() - interval '%dh')
 
 SELECT user_id
 FROM oracle_prediction AS pred
-         LEFT JOIN excluded ON excluded.id = pred.user_id
+LEFT JOIN excluded ON excluded.id = pred.user_id
 WHERE excluded.id IS NULL 
 AND user_id = $1
 AND recommendation != $1
@@ -92,15 +93,15 @@ LIMIT %d`, recHistoryTable, excludeLastHours, limit)
 }
 
 func (e *RecommendationRepository) GetRecommendationsByRandom(ctx context.Context, userID uuid.UUID, excludeLastHours int64, limit int64) ([]uuid.UUID, error) {
-	q := fmt.Sprintf(`WITH excluded AS (SELECT recommendation AS id
+	q := fmt.Sprintf(`WITH excluded AS (SELECT DISTINCT recommendation AS id
 FROM %s
 WHERE user_id = $1
 AND dttm >= now() - interval '%dh')
 
-SELECT user_id FROM statistic AS st
-LEFT JOIN excluded ON excluded.id = st.user_id
+SELECT p.id FROM profile AS p
+LEFT JOIN excluded ON excluded.id = p.id
 WHERE excluded.id IS NULL
-AND user_id != $1
+AND p.id != $1
 ORDER BY random()
 LIMIT %d`, recHistoryTable, excludeLastHours, limit)
 

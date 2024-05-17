@@ -2,14 +2,17 @@ package pubsub
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/redis/go-redis/v9"
+
 	"github.com/the-swiply/swiply-backend/chat/internal/domain"
 	"github.com/the-swiply/swiply-backend/chat/internal/service"
 	"github.com/the-swiply/swiply-backend/chat/internal/workerpool"
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
-	"time"
 )
 
 const (
@@ -28,10 +31,18 @@ type RedisMessagesSubscriber struct {
 
 func NewRedisMessagesSubscriber(ctx context.Context, cfg RedisPubSubConfig, chatService *service.ChatService,
 	workerPool *workerpool.Pool[domain.Message, error]) (*RedisMessagesSubscriber, error) {
+	var tlsConf *tls.Config
+	if cfg.Secure {
+		tlsConf = &tls.Config{
+			InsecureSkipVerify: cfg.SkipTLSVerify,
+		}
+	}
+
 	rc := redis.NewClient(&redis.Options{
-		Addr:     cfg.Addr,
-		Password: cfg.Password,
-		DB:       cfg.DB,
+		Addr:      cfg.Addr,
+		Password:  cfg.Password,
+		DB:        cfg.DB,
+		TLSConfig: tlsConf,
 	})
 
 	_, err := rc.Ping(ctx).Result()

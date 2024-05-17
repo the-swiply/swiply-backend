@@ -58,7 +58,11 @@ func registerGRPCGateway(ctx context.Context, mux *http.ServeMux, grpcAddr strin
 	}), runtime.WithIncomingHeaderMatcher(func(key string) (string, bool) {
 		// Change if custom headers matching is needed.
 		switch lowerKey := strings.ToLower(key); lowerKey {
-		case "s2s-authorization":
+		case "s2s-authorization", "guid:x-request-id":
+			return lowerKey, true
+		}
+
+		if lowerKey := strings.ToLower(key); strings.HasPrefix(lowerKey, "x-") {
 			return lowerKey, true
 		}
 

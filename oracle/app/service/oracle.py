@@ -108,7 +108,8 @@ class OracleService(oracle_pb2_grpc.OracleServicer):
                 list_scores = model.predict(user_id_map[user_id], list(item_id_map.values()))
 
                 for pair, score in zip(item_id_map.keys(), list_scores):
-                    all_scores.append((uuid.uuid4(), user_id, pair, score))
+                    if score >= 5:
+                        all_scores.append((uuid.uuid4(), user_id, pair, score))
 
             self.__repo.update_lfmv1_results(all_scores)
         except Exception as ex:

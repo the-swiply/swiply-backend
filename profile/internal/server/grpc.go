@@ -10,15 +10,18 @@ import (
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"google.golang.org/grpc/reflection"
 
+	"github.com/the-swiply/swiply-backend/pkg/houston/tracy"
+
 	"github.com/google/uuid"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
-	"github.com/the-swiply/swiply-backend/pkg/houston/auf"
-	"github.com/the-swiply/swiply-backend/pkg/houston/grut"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"github.com/the-swiply/swiply-backend/pkg/houston/auf"
+	"github.com/the-swiply/swiply-backend/pkg/houston/grut"
 
 	"github.com/the-swiply/swiply-backend/profile/internal/converter"
 	"github.com/the-swiply/swiply-backend/profile/internal/domain"
@@ -39,6 +42,9 @@ type profileServer struct {
 }
 
 func (p *profileServer) ChangeAvailability(ctx context.Context, req *profile.ChangeAvailabilityRequest) (*profile.ChangeAvailabilityResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	userID, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "id must have uuid format")
@@ -51,6 +57,9 @@ func (p *profileServer) ChangeAvailability(ctx context.Context, req *profile.Cha
 }
 
 func (p *profileServer) AddUserOrganization(ctx context.Context, req *profile.AddUserOrganizationRequest) (*profile.AddUserOrganizationResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	org, err := p.service.AddUserOrganization(ctx, auf.ExtractUserIDFromContext[uuid.UUID](ctx), req.Email)
 	if err != nil {
 		return nil, status.Error(codes.FailedPrecondition, err.Error())
@@ -61,6 +70,9 @@ func (p *profileServer) AddUserOrganization(ctx context.Context, req *profile.Ad
 }
 
 func (p *profileServer) RemoveUserOrganization(ctx context.Context, req *profile.RemoveUserOrganizationRequest) (*profile.RemoveUserOrganizationResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	id, err := strconv.ParseInt(req.Id, 10, 64)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "can't parse org id")
@@ -73,7 +85,10 @@ func (p *profileServer) RemoveUserOrganization(ctx context.Context, req *profile
 }
 
 func (p *profileServer) SendAuthorizationCode(ctx context.Context, req *profile.SendAuthorizationCodeRequest) (*profile.SendAuthorizationCodeResponse, error) {
-	if err := p.service.SendAuthorizationCode(ctx, auf.ExtractUserIDFromContext[uuid.UUID](ctx), req.Email); err != nil {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
+	if err := p.service.SendAuthorizationCode(ctx, req.Email); err != nil {
 		return nil, status.Error(codes.FailedPrecondition, err.Error())
 	}
 
@@ -81,6 +96,9 @@ func (p *profileServer) SendAuthorizationCode(ctx context.Context, req *profile.
 }
 
 func (p *profileServer) ValidateOrganization(ctx context.Context, req *profile.ValidateOrganizationRequest) (*profile.ValidateOrganizationResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	if err := p.service.ValidateUserOrganization(ctx, auf.ExtractUserIDFromContext[uuid.UUID](ctx), req.Id, req.Code); err != nil {
 		return nil, status.Error(codes.FailedPrecondition, err.Error())
 	}
@@ -88,11 +106,12 @@ func (p *profileServer) ValidateOrganization(ctx context.Context, req *profile.V
 	return &profile.ValidateOrganizationResponse{}, nil
 }
 
-func (p *profileServer) ListMatches(ctx context.Context, req *profile.ListMatchesRequest) (*profile.ListMatchesResponse, error) {
+func (p *profileServer) ListMatches(ctx context.Context, _ *profile.ListMatchesRequest) (*profile.ListMatchesResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	matches, err := p.service.ListMatches(ctx, auf.ExtractUserIDFromContext[uuid.UUID](ctx))
-	if err == domain.ErrEntityIsNotExists {
-		return nil, status.Error(codes.NotFound, err.Error())
-	} else if err != nil {
+	if err != nil {
 		return nil, status.Error(codes.FailedPrecondition, err.Error())
 	}
 
@@ -105,6 +124,9 @@ func (p *profileServer) ListMatches(ctx context.Context, req *profile.ListMatche
 }
 
 func (p *profileServer) Create(ctx context.Context, req *profile.CreateProfileRequest) (*profile.CreateProfileResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	prof := converter.ProfileFromProtoToDomain(&profile.UserProfile{
 		Id:               auf.ExtractUserIDFromContext[uuid.UUID](ctx).String(),
 		Email:            req.Email,
@@ -129,6 +151,9 @@ func (p *profileServer) Create(ctx context.Context, req *profile.CreateProfileRe
 }
 
 func (p *profileServer) Update(ctx context.Context, req *profile.UpdateProfileRequest) (*profile.UpdateProfileResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	prof := converter.ProfileFromProtoToDomain(&profile.UserProfile{
 		Id:               auf.ExtractUserIDFromContext[uuid.UUID](ctx).String(),
 		Name:             req.Name,
@@ -152,6 +177,9 @@ func (p *profileServer) Update(ctx context.Context, req *profile.UpdateProfileRe
 }
 
 func (p *profileServer) Get(ctx context.Context, req *profile.GetProfileRequest) (*profile.GetProfileResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	userID, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "id must have uuid format")
@@ -169,12 +197,18 @@ func (p *profileServer) Get(ctx context.Context, req *profile.GetProfileRequest)
 }
 
 func (p *profileServer) WhoAmI(ctx context.Context, _ *profile.WhoAmIRequest) (*profile.WhoAmIResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	return &profile.WhoAmIResponse{
 		Id: auf.ExtractUserIDFromContext[uuid.UUID](ctx).String(),
 	}, nil
 }
 
 func (p *profileServer) Interaction(ctx context.Context, req *profile.InteractionRequest) (*profile.InteractionResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	if err := uuid.Validate(req.Id); err != nil {
 		return nil, status.Error(codes.InvalidArgument, "id must have uuid format")
 	}
@@ -194,6 +228,9 @@ func (p *profileServer) Interaction(ctx context.Context, req *profile.Interactio
 }
 
 func (p *profileServer) Liked(ctx context.Context, _ *profile.LikedRequest) (*profile.LikedResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	userIDs, err := p.service.GetLikedProfiles(ctx, auf.ExtractUserIDFromContext[uuid.UUID](ctx))
 	if err != nil {
 		return nil, status.Error(codes.FailedPrecondition, err.Error())
@@ -208,6 +245,9 @@ func (p *profileServer) Liked(ctx context.Context, _ *profile.LikedRequest) (*pr
 }
 
 func (p *profileServer) LikedMe(ctx context.Context, _ *profile.LikedMeRequest) (*profile.LikedMeResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	prof, err := p.service.Get(ctx, auf.ExtractUserIDFromContext[uuid.UUID](ctx))
 	if err == domain.ErrEntityIsNotExists {
 		return nil, status.Error(codes.NotFound, err.Error())
@@ -233,6 +273,9 @@ func (p *profileServer) LikedMe(ctx context.Context, _ *profile.LikedMeRequest) 
 }
 
 func (p *profileServer) ListInterests(ctx context.Context, _ *profile.ListInterestsRequest) (*profile.ListInterestsResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	interests, err := p.service.ListInterests(ctx)
 	if err != nil {
 		return nil, status.Error(codes.FailedPrecondition, err.Error())
@@ -247,6 +290,9 @@ func (p *profileServer) ListInterests(ctx context.Context, _ *profile.ListIntere
 }
 
 func (p *profileServer) ListInteractions(ctx context.Context, req *profile.ListInteractionsRequest) (*profile.ListInteractionsResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	interactions, err := p.service.ListInteractions(ctx, req.After.AsTime())
 	if err != nil {
 		return nil, status.Error(codes.FailedPrecondition, err.Error())
@@ -261,6 +307,9 @@ func (p *profileServer) ListInteractions(ctx context.Context, req *profile.ListI
 }
 
 func (p *profileServer) ListProfiles(ctx context.Context, req *profile.ListProfilesRequest) (*profile.ListProfilesResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	profs, err := p.service.ListProfiles(ctx, req.UpdatedAfter.AsTime())
 	if err != nil {
 		return nil, status.Error(codes.FailedPrecondition, err.Error())
@@ -280,6 +329,9 @@ type photoServer struct {
 }
 
 func (p *photoServer) Create(ctx context.Context, req *profile.CreatePhotoRequest) (*profile.CreatePhotoResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	photo := converter.PhotoFromProtoToDomain(&profile.ProfilePhoto{
 		Id:      uuid.New().String(),
 		Content: req.Content,
@@ -296,6 +348,9 @@ func (p *photoServer) Create(ctx context.Context, req *profile.CreatePhotoReques
 }
 
 func (p *photoServer) Get(ctx context.Context, req *profile.GetPhotoRequest) (*profile.GetPhotoResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	userID, err := uuid.Parse(req.ProfileId)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "profile id must have uuid format")
@@ -317,6 +372,9 @@ func (p *photoServer) Get(ctx context.Context, req *profile.GetPhotoRequest) (*p
 }
 
 func (p *photoServer) List(ctx context.Context, req *profile.ListPhotoRequest) (*profile.ListPhotoResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	userID, err := uuid.Parse(req.ProfileId)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "profile id must have uuid format")
@@ -338,6 +396,9 @@ func (p *photoServer) List(ctx context.Context, req *profile.ListPhotoRequest) (
 }
 
 func (p *photoServer) Delete(ctx context.Context, req *profile.DeletePhotoRequest) (*profile.DeletePhotoResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	photoID, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "id must have uuid format")
@@ -351,6 +412,9 @@ func (p *photoServer) Delete(ctx context.Context, req *profile.DeletePhotoReques
 }
 
 func (p *photoServer) Reorder(ctx context.Context, req *profile.ReorderPhotoRequest) (*profile.ReorderPhotoResponse, error) {
+	ctx, span := tracy.Start(ctx)
+	defer span.End()
+
 	var photoIDs []uuid.UUID
 	for _, photoID := range req.Ids {
 		photo, err := uuid.Parse(photoID)

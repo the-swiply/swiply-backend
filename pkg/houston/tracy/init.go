@@ -3,17 +3,19 @@ package tracy
 import (
 	"context"
 	"fmt"
-	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
+	"time"
+
+	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
-	"time"
+
+	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 )
 
 const (
@@ -59,7 +61,7 @@ func Init(ctx context.Context, endpoint string, appName string, opts ...trace.Tr
 		sdktrace.WithSpanProcessor(bsp),
 	)
 
-	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
+	otel.SetTextMapPropagator(b3.New(b3.WithInjectEncoding(b3.B3MultipleHeader | b3.B3SingleHeader)))
 	otel.SetTracerProvider(tracerProvider)
 
 	instance = otel.Tracer(tracerName, opts...)

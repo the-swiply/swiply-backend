@@ -6,7 +6,7 @@ type Config struct {
 	HTTP     `yaml:"http"`
 	Swagger  `yaml:"swagger"`
 	Postgres `yaml:"postgres"`
-	APNS     `yaml:"APNS"`
+	APNS     `yaml:"apns"`
 }
 
 type Application struct {

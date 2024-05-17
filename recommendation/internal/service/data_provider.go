@@ -2,10 +2,12 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
+
 	"github.com/the-swiply/swiply-backend/pkg/houston/dobby"
 	"github.com/the-swiply/swiply-backend/recommendation/internal/domain"
-	"time"
 )
 
 type DataProviderRepository interface {
@@ -125,7 +127,13 @@ func (d *DataProviderService) updateStatistics(ctx context.Context) error {
 }
 
 func (d *DataProviderService) UpdateOracleData(ctx context.Context) error {
+	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
+	defer cancel()
+
 	err := d.oracleClient.RetrainLFMv1(ctx)
+	if errors.Is(err, context.DeadlineExceeded) {
+		return nil
+	}
 	if err != nil {
 		return fmt.Errorf("can't retrain model: %w", err)
 	}

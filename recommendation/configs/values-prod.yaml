@@ -1,0 +1,39 @@
+app:
+  name: "recommendation"
+  graceful_shutdown_timeout_seconds: 10
+  statistic_update_cron: "*/5 * * * *" # Every 5 minutes
+  trigger_oracle_learn_cron: "*/12 * * * *" # Every 12 minutes
+  freeze_hours_for_recommendation: 24
+
+jaeger:
+  addr: "opentelemetry-collector.otel-collector.svc.cluster.local:4317"
+
+grpc:
+  addr: ":84"
+
+http:
+  addr: ":80"
+
+swagger:
+  path: "third_party/swagger"
+
+postgres:
+  username: "recommendation-owner"
+  host: "c-c9qk6bb4fb5n0j9pu5rr.rw.mdb.yandexcloud.net"
+  port: "6432"
+  db_name: "recommendation"
+  ssl_mode: "allow"
+  migrations_folder: "migrations"
+
+redis:
+  addr: "c-c9qgvgufjkosoif8cuca.rw.mdb.yandexcloud.net:6380"
+  skip_tls_verify: true
+  secure: true
+  db:
+    cron: 7
+
+oracle:
+  addr: "oracle:84"
+
+profile:
+  addr: "profile:84"

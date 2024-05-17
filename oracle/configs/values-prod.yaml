@@ -3,11 +3,11 @@ app:
   graceful_shutdown_timeout_seconds: 10
 
 grpc:
-  addr: ":84"
+  addr: "0.0.0.0:84"
 
 postgres:
   username: "recommendation-owner"
-  host: "c-basfqk6sdf4fb5nj9pu5r.rw.mdb.yandexcloud.net"
+  host: "c-c9qk6bb4fb5n0j9pu5rr.rw.mdb.yandexcloud.net"
   port: "6432"
   db_name: "recommendation"
-  ssl_mode: "disable"
+  ssl_mode: "allow"

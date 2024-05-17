@@ -2,12 +2,15 @@ package glsync
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
+	"strconv"
+
 	"github.com/go-redsync/redsync/v4"
 	"github.com/go-redsync/redsync/v4/redis/goredis/v9"
 	"github.com/redis/go-redis/v9"
+
 	"github.com/the-swiply/swiply-backend/chat/internal/service"
-	"strconv"
 )
 
 type RedisSyncer struct {
@@ -17,10 +20,18 @@ type RedisSyncer struct {
 }
 
 func NewRedisSyncer(ctx context.Context, cfg RedisSyncerConfig) (*RedisSyncer, error) {
+	var tlsConf *tls.Config
+	if cfg.Secure {
+		tlsConf = &tls.Config{
+			InsecureSkipVerify: cfg.SkipTLSVerify,
+		}
+	}
+
 	rc := redis.NewClient(&redis.Options{
-		Addr:     cfg.Addr,
-		Password: cfg.Password,
-		DB:       cfg.DB,
+		Addr:      cfg.Addr,
+		Password:  cfg.Password,
+		DB:        cfg.DB,
+		TLSConfig: tlsConf,
 	})
 
 	_, err := rc.Ping(ctx).Result()

@@ -2,9 +2,12 @@ package pubsub
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+
 	"github.com/redis/go-redis/v9"
+
 	"github.com/the-swiply/swiply-backend/chat/internal/domain"
 )
 
@@ -14,10 +17,18 @@ type RedisMessagesPublisher struct {
 }
 
 func NewRedisMessagesPublisher(ctx context.Context, cfg RedisPubSubConfig) (*RedisMessagesPublisher, error) {
+	var tlsConf *tls.Config
+	if cfg.Secure {
+		tlsConf = &tls.Config{
+			InsecureSkipVerify: cfg.SkipTLSVerify,
+		}
+	}
+
 	rc := redis.NewClient(&redis.Options{
-		Addr:     cfg.Addr,
-		Password: cfg.Password,
-		DB:       cfg.DB,
+		Addr:      cfg.Addr,
+		Password:  cfg.Password,
+		DB:        cfg.DB,
+		TLSConfig: tlsConf,
 	})
 
 	_, err := rc.Ping(ctx).Result()

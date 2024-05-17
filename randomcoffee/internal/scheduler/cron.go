@@ -2,10 +2,12 @@ package scheduler
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"time"
 
 	"github.com/hibiken/asynq"
+
 	"github.com/the-swiply/swiply-backend/pkg/houston/loggy"
 
 	"github.com/the-swiply/swiply-backend/randomcoffee/internal/service"
@@ -26,10 +28,17 @@ type RedisCron struct {
 }
 
 func NewRedisCron(cfg RedisCronConfig, randomCoffeeService *service.RandomCoffeeService) (*RedisCron, error) {
+	var tlsConf *tls.Config
+	if cfg.Secure {
+		tlsConf = &tls.Config{
+			InsecureSkipVerify: cfg.SkipTLSVerify,
+		}
+	}
 	redisConnOpts := asynq.RedisClientOpt{
-		Addr:     cfg.Addr,
-		Password: cfg.Password,
-		DB:       cfg.DB,
+		Addr:      cfg.Addr,
+		Password:  cfg.Password,
+		DB:        cfg.DB,
+		TLSConfig: tlsConf,
 	}
 
 	server := asynq.NewServer(
@@ -105,7 +114,7 @@ func (r *randomCoffeeTriggerHandler) ProcessTask(ctx context.Context, _ *asynq.T
 	loggy.Infoln("start random coffee task")
 	err := r.randomCoffeeService.Schedule(ctx)
 	if err != nil {
-		err := fmt.Errorf("can't update statistics: %w", err)
+		err := fmt.Errorf("can't schedule meetings: %w", err)
 		loggy.Errorln(err)
 		return err
 	}
