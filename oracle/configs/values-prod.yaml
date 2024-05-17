@@ -1,0 +1,13 @@
+app:
+  name: "oracle"
+  graceful_shutdown_timeout_seconds: 10
+
+grpc:
+  addr: ":84"
+
+postgres:
+  username: "recommendation-owner"
+  host: "c-basfqk6sdf4fb5nj9pu5r.rw.mdb.yandexcloud.net"
+  port: "6432"
+  db_name: "recommendation"
+  ssl_mode: "disable"

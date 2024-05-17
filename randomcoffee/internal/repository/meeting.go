@@ -79,7 +79,7 @@ func (m *MeetingRepository) Update(ctx context.Context, meeting domain.Meeting) 
 	q := fmt.Sprintf(`UPDATE %s
 SET "start" = $1,
     "end" = $2,
-    organization_id = $3,
+    organization_id = $3
 WHERE id = $4 AND owner_id = $5 AND status = $6`, meetingTable)
 
 	_, err := m.executor(ctx).Exec(ctx, q, meeting.Start, meeting.End, meeting.OrganizationID,

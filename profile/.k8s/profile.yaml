@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oracle
+  labels:
+    app: oracle
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: oracle
+      version: v1
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: '/metrics'
+        prometheus.io/port: '5000'
+      labels:
+        app: oracle
+        version: v1
+    spec:
+      containers:
+        - name: oracle
+          image: cr.yandex/crpf76jp63emqup99s4l/oracle:stable
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 80
+            - name: grpc
+              containerPort: 84
+          envFrom:
+            - secretRef:
+                name: oracle-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oracle
+  labels:
+    app: oracle
+    service: oracle
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+    - name: grpc
+      protocol: TCP
+      port: 84
+      targetPort: 84
+  selector:
+    app: oracle

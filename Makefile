@@ -43,3 +43,7 @@ push-chat-image:
 .PHONY: push-recommendation-image
 push-recommendation-image:
 	DOCKER_DEFAULT_PLATFORM=linux/amd64	docker build -f ./recommendation/Dockerfile --tag $(YC_CONTAINER_REGISTRY)/recommendation:stable . && docker push cr.yandex/crpf76jp63emqup99s4l/recommendation:stable
+
+.PHONY: push-oracle-image
+push-oracle-image:
+	DOCKER_DEFAULT_PLATFORM=linux/amd64	docker build -f ./oracle/Dockerfile --tag $(YC_CONTAINER_REGISTRY)/oracle:stable . && docker push cr.yandex/crpf76jp63emqup99s4l/oracle:stable

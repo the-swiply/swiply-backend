@@ -27,7 +27,7 @@ mailer:
   after_send_pause_seconds: 1
 
 redis:
-  addr: "c-c9qgvgufjkosoif8cuca.rw.mdb.yandexcloud.net:6379"
+  addr: "c-s9assvgufasdfoif8cuda.rw.mdb.yandexcloud.net:6380"
   db:
     codes: 1
     tokens: 2

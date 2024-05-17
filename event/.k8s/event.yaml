@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event
+  labels:
+    app: event
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: event
+      version: v1
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: '/metrics'
+        prometheus.io/port: '5000'
+      labels:
+        app: event
+        version: v1
+    spec:
+      containers:
+        - name: event
+          image: cr.yandex/crpf76jp63emqup99s4l/event:stable
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 80
+            - name: grpc
+              containerPort: 84
+          envFrom:
+            - secretRef:
+                name: event-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: event
+  labels:
+    app: event
+    service: event
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+    - name: grpc
+      protocol: TCP
+      port: 84
+      targetPort: 84
+  selector:
+    app: event

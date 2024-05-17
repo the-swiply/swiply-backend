@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backoffice
+  labels:
+    app: backoffice
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backoffice
+      version: v1
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: '/metrics'
+        prometheus.io/port: '5000'
+      labels:
+        app: backoffice
+        version: v1
+    spec:
+      containers:
+        - name: backoffice
+          image: cr.yandex/crpf76jp63emqup99s4l/backoffice:stable
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 80
+            - name: grpc
+              containerPort: 84
+          envFrom:
+            - secretRef:
+                name: backoffice-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backoffice
+  labels:
+    app: backoffice
+    service: backoffice
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+    - name: grpc
+      protocol: TCP
+      port: 84
+      targetPort: 84
+  selector:
+    app: backoffice

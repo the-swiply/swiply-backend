@@ -78,17 +78,17 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`, prof
 
 func (p *ProfileRepository) UpdateProfile(ctx context.Context, profile dbmodel.Profile) error {
 	q := fmt.Sprintf(`UPDATE %s
-SET "name"        = $1
-	city		  = $2
-	"work" 		  = $3 
-	education	  = $4 
-    interests     = $5
-    birth_day     = $6
-    gender        = $7
-    info          = $8
-    subscription  = $9
-    location_lat  = $10
-	location_long = $11
+SET "name"        = $1,
+	city		  = $2,
+	"work" 		  = $3, 
+	education	  = $4, 
+    interests     = $5,
+    birth_day     = $6,
+    gender        = $7,
+    info          = $8,
+    subscription  = $9,
+    location_lat  = $10,
+	location_long = $11,
 	updated_at    = $12
 WHERE id = $13`, profileTable)
 

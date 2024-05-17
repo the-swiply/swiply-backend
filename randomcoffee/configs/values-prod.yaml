@@ -1,0 +1,28 @@
+app:
+  name: "randomcoffee"
+  graceful_shutdown_timeout_seconds: 10
+  random_coffee_trigger_cron: "@midnight" # Every day in midnight
+  meeting_min_interval: 1h
+
+jaeger:
+  addr: "opentelemetry-collector.otel-collector.svc.cluster.local:4317"
+
+grpc:
+  addr: ":84"
+
+http:
+  addr: ":80"
+
+swagger:
+  path: "third_party/swagger"
+
+postgres:
+  username: "randomcoffee-owner"
+  host: "c-basfqk6sdf4fb5nj9pu5r.rw.mdb.yandexcloud.net"
+  port: "6432"
+  db_name: "randomcoffee"
+  ssl_mode: "disable"
+  migrations_folder: "migrations"
+
+redis:
+  addr: "c-s9assvgufasdfoif8cuda.rw.mdb.yandexcloud.net:6380"

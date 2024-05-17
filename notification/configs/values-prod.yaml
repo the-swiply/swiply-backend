@@ -1,0 +1,27 @@
+app:
+  name: "notification"
+  graceful_shutdown_timeout_seconds: 10
+  topic: "com.notification.Alert"
+
+jaeger:
+  addr: "opentelemetry-collector.otel-collector.svc.cluster.local:4317"
+
+grpc:
+  addr: ":84"
+
+http:
+  addr: ":80"
+
+swagger:
+  path: "third_party/swagger"
+
+postgres:
+  username: "notification-owner"
+  host: "c-basfqk6sdf4fb5nj9pu5r.rw.mdb.yandexcloud.net"
+  port: "6432"
+  db_name: "notification"
+  ssl_mode: "disable"
+  migrations_folder: "migrations"
+
+apns:
+  signing_key_path: "secrets/token_signing_pk.p8"

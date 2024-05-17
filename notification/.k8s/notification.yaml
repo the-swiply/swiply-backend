@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification
+  labels:
+    app: notification
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: notification
+      version: v1
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: '/metrics'
+        prometheus.io/port: '5000'
+      labels:
+        app: notification
+        version: v1
+    spec:
+      containers:
+        - name: notification
+          image: cr.yandex/crpf76jp63emqup99s4l/notification:stable
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 80
+            - name: grpc
+              containerPort: 84
+          envFrom:
+            - secretRef:
+                name: notification-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification
+  labels:
+    app: notification
+    service: notification
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+    - name: grpc
+      protocol: TCP
+      port: 84
+      targetPort: 84
+  selector:
+    app: notification

@@ -1,0 +1,29 @@
+app:
+  name: "profile"
+  graceful_shutdown_timeout_seconds: 10
+
+jaeger:
+  addr: "opentelemetry-collector.otel-collector.svc.cluster.local:4317"
+
+grpc:
+  addr: ":84"
+
+http:
+  addr: ":80"
+
+swagger:
+  path: "third_party/swagger"
+
+postgres:
+  username: "profile-owner"
+  host: "c-basfqk6sdf4fb5nj9pu5r.rw.mdb.yandexcloud.net"
+  port: "6432"
+  db_name: "profile"
+  ssl_mode: "disable"
+  migrations_folder: "migrations"
+
+s3:
+  addr: "storage.yandexcloud.net"
+  bucket_name: "swiply"
+  access_key: YCAJED9kjBxxO8bHOrkON7TL1
+  secure: true
