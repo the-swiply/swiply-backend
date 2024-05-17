@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+option go_package = "github.com/the-swiply/notification/pkg/api/notification";
+
+import "google/api/annotations.proto";
+
+package swiply.notification;
+
+service Notification {
+  rpc Subscribe(SubscribeRequest) returns (SubscribeResponse) {
+    option (google.api.http) = {
+      post: "/v1/notification/subscribe"
+    };
+  }
+
+  rpc Unsubscribe(UnsubscribeRequest) returns (UnsubscribeResponse) {
+    option (google.api.http) = {
+      post: "/v1/notification/unsubscribe"
+    };
+  }
+
+  rpc Send(SendRequest) returns (SendResponse) {
+    option (google.api.http) = {
+      post: "/v1/notification/send"
+    };
+  }
+}
+
+message SubscribeRequest {
+  string device_token = 1;
+}
+message SubscribeResponse {}
+
+message UnsubscribeRequest {}
+message UnsubscribeResponse {}
+
+message SendRequest {
+  string id = 1;
+  string content = 2;
+}
+message SendResponse {}
