@@ -63,7 +63,7 @@ WHERE id = $1`, notificationTable)
 
 func (n *NotificationRepository) Delete(ctx context.Context, userID uuid.UUID) error {
 	q := fmt.Sprintf(`DELETE FROM %s
-WHERE id = $1`, userID)
+WHERE id = $1`, notificationTable)
 
 	_, err := n.executor(ctx).Exec(ctx, q, userID)
 	if err != nil {
