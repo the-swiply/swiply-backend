@@ -92,8 +92,8 @@ SET "name"        = $1,
 	updated_at    = $12
 WHERE id = $13`, profileTable)
 
-	_, err := p.db.Exec(ctx, q, profile.Name, profile.City, profile.Work, profile.Education, profile.BirthDay, profile.Gender, profile.Interests,
-		profile.Subscription, profile.Lat, profile.Long, profile.UpdatedAt, profile.ID)
+	_, err := p.db.Exec(ctx, q, profile.Name, profile.City, profile.Work, profile.Education, profile.Interests, profile.BirthDay, profile.Gender,
+		profile.Info, profile.Subscription, profile.Lat, profile.Long, profile.UpdatedAt, profile.ID)
 	return err
 }
 
